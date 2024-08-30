@@ -7,13 +7,13 @@ Here's the plan sketch:
 
 * Mostly eat what amazon puts on the plate, but use Constellation for a network and subnet.
 
-* (2) Use scalajs to build a web app
-* * (6) Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
-* (3) Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js 
-* (Find some other javascript API to see what tech is providing the location. If it's IP-based instead of GPS, for example)
-* (4) Send that to some URL, receive locations back from other users
+* Use scalajs to build a web app
+* *  Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
+* Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js 
+* * (Find some other javascript API to see what tech is providing the location. If it's IP-based instead of GPS, for example)
+* (1) Send that to some URL, receive locations back from other users
 
-* (1) Use a Constellation network of people willing to share with each other
+* Use a Constellation network of people willing to share with each other
 * * Create a subnet of people to share with each other right now
 * * Let "share location right now" be the protected, valued asset
 
@@ -30,4 +30,8 @@ The graph of users at any given time is likely bipartite, and very much disconne
 Implicit - if you agree to see someone's location then you are agreeing to share your own.
 
 
+---
 
+Dev Setup
+
+Follow https://docs.constellationnetwork.io/sdk/guides/quick-start/ 
