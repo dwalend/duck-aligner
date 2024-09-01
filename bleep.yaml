@@ -3,11 +3,27 @@ $version: 0.0.3
 jvm:
   name: graalvm-java17:22.3.1
 projects:
+  ShareLocationService:
+    extends: template-common
+    platform:
+      mainClass: net.walend.sharelocationservice.Main
+    dependencies:
+      - org.http4s::http4s-ember-server:0.23.27
+      - org.http4s::http4s-ember-client:0.23.27
+      - org.http4s::http4s-circe:0.23.27
+      - org.http4s::http4s-dsl:0.23.27
   FrontEnd:
     extends: template-js
     platform:
       mainClass: tutorial.webapp.Hello
 templates:
+  template-common:
+    platform:
+      name: jvm
+    scala:
+      options: -encoding utf8 -feature -unchecked -Wconf:cat=w-flag-value-discard:silent,cat=other-pure-statement:silent,cat=w-flag-numeric-widen:silent,any:warning-verbose
+      strict: true
+      version: 3.3.3
   template-js:
     platform:
       name: js
