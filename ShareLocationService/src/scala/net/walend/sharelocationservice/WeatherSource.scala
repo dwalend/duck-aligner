@@ -3,6 +3,7 @@ package net.walend.sharelocationservice
 //todo clean up these imports
 import cats.effect.Concurrent
 import cats.syntax.all.*
+import io.circe.{Decoder, DecodingFailure}
 //import io.circe.{Encoder, Decoder}
 import org.http4s.*
 import org.http4s.implicits.*
@@ -36,9 +37,11 @@ object WeatherSource:
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
 
-      val pointsResponse: F[String] = client.expect[String](pointsRequest).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
+      val pointsResponseStringF: F[String] = client.expect[String](pointsRequest).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
+      val pointResponseF: F[Either[Exception, PointResponse]] = pointsResponseStringF.map(PointResponse.fromJson)
+      
+      pointResponseF.map(v => println(v)).map { _ => Weather("toads", 42) }
 
-      pointsResponse.map { pr => println(pr) }.map { _ => Weather("toads", 42) }
       //Use the URL from the PointResponse to look up the forecast
       //And produce the weather
 
@@ -46,8 +49,14 @@ object WeatherSource:
     case class PointResponse(forecastUrl: Uri)
 
     object PointResponse:
-      def apply(jsonString: String): PointResponse =
-        ??? //receive a string of json to create a point response
+      def fromJson(jsonString: String): Either[Exception, PointResponse] =
+        import io.circe.parser.parse
+        import io.circe.Json
+        import cats.syntax.either._
+        
+        val cursor = parse(jsonString).getOrElse(Json.Null).hcursor
+        val uriString:Decoder.Result[String] = cursor.downField("properties").downField("forecast").as[String]
+        uriString.flatMap(Uri.fromString).map(PointResponse(_))
 
 case class Weather(shortForecast:String,temperature:Int):
   def temperatureWord =

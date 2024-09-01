@@ -14,6 +14,7 @@ projects:
       - org.http4s::http4s-dsl:0.23.27
       - ch.qos.logback:logback-classic:1.5.6
       - org.fusesource.jansi:jansi:2.4.1
+      - io.circe::circe-parser:0.14.1
   ShareLocationServiceTest:
     extends: template-common
     isTestProject: true
