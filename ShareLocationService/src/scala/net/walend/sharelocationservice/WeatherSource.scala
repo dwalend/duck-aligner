@@ -34,10 +34,13 @@ object WeatherSource:
 
     override def get(coordinates: Coordinates): F[Weather] =
       //For the coordinates look up the right PointResponse
-      val pointResponse: F[String] = client.expect[String](GET(uri"https://api.weather.gov/points/38.8894,-77.0352")).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
+      val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
+
+      val pointsResponse: F[String] = client.expect[String](pointsRequest).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
+
+      pointsResponse.map { pr => println(pr) }.map { _ => Weather("toads", 42) }
       //Use the URL from the PointResponse to look up the forecast
       //And produce the weather
-      pointResponse.map{ pr => println(pr)}.map{_ => Weather("toads",42)}
 
 
     case class PointResponse(forecastUrl: Uri)
@@ -54,6 +57,7 @@ object Weather:
   def apply(jsonString: String): Weather =
     ??? //receive a string of json to create a Weather
 
-case class Coordinates(lat:Double,lon:Double)
+case class Coordinates(lat:Double,lon:Double):
+  def forUrl:String = s"$lat,$lon"
 
-final case class WeatherError(coordinates: Coordinates,e: Throwable) extends RuntimeException
+case class WeatherError(coordinates: Coordinates,e: Throwable) extends RuntimeException
