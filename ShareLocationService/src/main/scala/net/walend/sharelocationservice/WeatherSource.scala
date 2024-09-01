@@ -2,14 +2,14 @@ package net.walend.sharelocationservice
 
 //todo clean up these imports
 import cats.effect.Concurrent
-//import cats.syntax.all.*
+import cats.syntax.all.*
 //import io.circe.{Encoder, Decoder}
 import org.http4s.*
 import org.http4s.implicits.*
 import org.http4s.client.Client
-//import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.dsl.Http4sClientDsl
 //import org.http4s.circe.*
-//import org.http4s.Method.*
+import org.http4s.Method.GET
 
 /**
  * Source of weather forecasts from The National Weather Service API Web Service https://www.weather.gov/documentation/services-web-api
@@ -28,11 +28,16 @@ trait WeatherSource[F[_]]:
 object WeatherSource:
   def apply[F[_]](using ev:WeatherSource[F]): WeatherSource[F] = ev
 
-  def weatherSource[F[_]: Concurrent](C: Client[F]):WeatherSource[F] = new WeatherSource[F]:
+  def weatherSource[F[_]: Concurrent](client: Client[F]):WeatherSource[F] = new WeatherSource[F]:
+    val dsl = new Http4sClientDsl[F]{}
+    import dsl.*
+
     override def get(coordinates: Coordinates): F[Weather] =
       //For the coordinates look up the right PointResponse
+      val pointResponse = client.expect[String](GET(uri"https://api.weather.gov/points/38.8894,-77.0352")).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
       //Use the URL from the PointResponse to look up the forecast
       //And produce the weather
+      println(pointResponse)
       ???
 
     case class PointResponse(forecastUrl: Uri)
@@ -49,5 +54,6 @@ object Weather:
   def apply(jsonString: String): Weather =
     ??? //receive a string of json to create a Weather
 
-
 case class Coordinates(lat:Double,lon:Double)
+
+final case class WeatherError(coordinates: Coordinates,e: Throwable) extends RuntimeException
