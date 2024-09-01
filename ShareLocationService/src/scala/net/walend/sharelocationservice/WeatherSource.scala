@@ -34,11 +34,11 @@ object WeatherSource:
 
     override def get(coordinates: Coordinates): F[Weather] =
       //For the coordinates look up the right PointResponse
-      val pointResponse = client.expect[String](GET(uri"https://api.weather.gov/points/38.8894,-77.0352")).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
+      val pointResponse: F[String] = client.expect[String](GET(uri"https://api.weather.gov/points/38.8894,-77.0352")).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
       //Use the URL from the PointResponse to look up the forecast
       //And produce the weather
-      println(pointResponse)
-      ???
+      pointResponse.map{ pr => println(pr)}.map{_ => Weather("toads",42)}
+
 
     case class PointResponse(forecastUrl: Uri)
 
