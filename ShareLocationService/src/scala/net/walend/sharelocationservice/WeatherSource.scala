@@ -34,29 +34,42 @@ object WeatherSource:
     import dsl.*
 
     override def get(coordinates: Coordinates): F[Weather] =
+      
+      
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
-
-      val pointsResponseStringF: F[String] = client.expect[String](pointsRequest).adaptError{ case t:Throwable => WeatherError(coordinates,t)} //todo move error handling to the end
-      val pointResponseF: F[Either[Exception, PointResponse]] = pointsResponseStringF.map(PointResponse.fromJson)
       
-      pointResponseF.map(v => println(v)).map { _ => Weather("toads", 42) }
-
+      for {
+        pointsResponseString: String <- client.expect[String](pointsRequest).adaptError{ case t => WeatherError(coordinates,t)}
+        pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
+        
+      } yield {
+        println(pointResponse)
+        
+        Weather("toads", 42)
+      }
+      
+ 
       //Use the URL from the PointResponse to look up the forecast
       //And produce the weather
 
 
-    case class PointResponse(forecastUrl: Uri)
+    case class PointResponse(forecastUri: Uri):
+      def forecastRequest:Request[F] = GET(forecastUri)
+      
 
     object PointResponse:
-      def fromJson(jsonString: String): Either[Exception, PointResponse] =
+
+      def fromJson(jsonString: String): PointResponse =
         import io.circe.parser.parse
         import io.circe.Json
         import cats.syntax.either._
-        
+
         val cursor = parse(jsonString).getOrElse(Json.Null).hcursor
         val uriString:Decoder.Result[String] = cursor.downField("properties").downField("forecast").as[String]
-        uriString.flatMap(Uri.fromString).map(PointResponse(_))
+        uriString.flatMap(Uri.fromString).map(PointResponse(_)).valueOr(t => throw t) 
+        
+      //todo tidy up with a custom EntityDecoder
 
 case class Weather(shortForecast:String,temperature:Int):
   def temperatureWord =
