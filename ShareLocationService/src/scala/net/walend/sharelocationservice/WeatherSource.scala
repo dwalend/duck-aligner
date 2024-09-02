@@ -4,9 +4,9 @@ package net.walend.sharelocationservice
 import cats.effect.Concurrent
 import cats.syntax.all.*
 import io.circe.{Decoder, DecodingFailure}
+import org.http4s.implicits.uri
+import org.http4s.{Request, Uri}
 //import io.circe.{Encoder, Decoder}
-import org.http4s.*
-import org.http4s.implicits.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 //import org.http4s.circe.*
@@ -34,29 +34,23 @@ object WeatherSource:
     import dsl.*
 
     override def get(coordinates: Coordinates): F[Weather] =
-      
-      
+
+
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
-      
+
       for {
         pointsResponseString: String <- client.expect[String](pointsRequest).adaptError{ case t => WeatherError(coordinates,t)}
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
-        
+        //Use the URL from the PointResponse to look up the forecast
+        forecastResponseString <- client.expect[String](pointResponse.forecastUri).adaptError{ case t => WeatherError(coordinates,t)}
       } yield {
-        println(pointResponse)
-        
-        Weather("toads", 42)
+        Weather.fromJson(forecastResponseString)
       }
-      
- 
-      //Use the URL from the PointResponse to look up the forecast
-      //And produce the weather
-
 
     case class PointResponse(forecastUri: Uri):
       def forecastRequest:Request[F] = GET(forecastUri)
-      
+
 
     object PointResponse:
 
@@ -65,10 +59,9 @@ object WeatherSource:
         import io.circe.Json
         import cats.syntax.either._
 
-        val cursor = parse(jsonString).getOrElse(Json.Null).hcursor
+        val cursor = parse(jsonString).getOrElse(Json.Null).hcursor //todo decide about error handling
         val uriString:Decoder.Result[String] = cursor.downField("properties").downField("forecast").as[String]
-        uriString.flatMap(Uri.fromString).map(PointResponse(_)).valueOr(t => throw t) 
-        
+        uriString.flatMap(Uri.fromString).map(PointResponse(_)).valueOr(t => throw t)
       //todo tidy up with a custom EntityDecoder
 
 case class Weather(shortForecast:String,temperature:Int):
@@ -76,8 +69,18 @@ case class Weather(shortForecast:String,temperature:Int):
     ??? //convert the given temperature value into a terse string
 
 object Weather:
-  def apply(jsonString: String): Weather =
-    ??? //receive a string of json to create a Weather
+  def fromJson(jsonString: String): Weather =
+    import io.circe.parser.parse
+    import io.circe.Json
+    import cats.syntax.either._
+
+    val cursor = parse(jsonString).getOrElse(Json.Null).hcursor //todo decide about error handling
+    
+    val firstPeriod = cursor.downField("properties").downField("periods").downArray
+    val temperature: Int = firstPeriod.downField("temperature").as[Int].valueOr(t => throw t)
+    val shortForecast: String = firstPeriod.downField("shortForecast").as[String].valueOr(t => throw t)
+    Weather(shortForecast, temperature)
+//todo tidy up with a custom EntityDecoder
 
 case class Coordinates(lat:Double,lon:Double):
   def forUrl:String = s"$lat,$lon"
