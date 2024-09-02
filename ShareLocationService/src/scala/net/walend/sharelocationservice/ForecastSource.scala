@@ -37,14 +37,12 @@ object ForecastSource:
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
 
-      val forecastF: F[Forecast] = for {
+      val forecastF: F[Forecast] = for 
         pointsResponseString: String <- client.expect[String](pointsRequest)
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
         //Use the URL from the PointResponse to look up the forecast
         forecastResponseString:String <- client.expect[String](pointResponse.forecastUri)
-      } yield {
-        Forecast.fromJson(forecastResponseString)
-      }
+      yield Forecast.fromJson(forecastResponseString)
       forecastF.adaptError { case t => ForecastSourceError(coordinates, t) }
 
     case class PointResponse(forecastUri: Uri):
