@@ -13,44 +13,41 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.Method.GET
 
 /**
- * Source of weather forecasts from The National Weather Service API Web Service https://www.weather.gov/documentation/services-web-api
+ * Source of weather forecasts from The National Forecast Service API Web Service https://www.weather.gov/documentation/services-web-api
  *
  * To get from lat,lon to a short forecast is two steps. First touch a url like https://api.weather.gov/points/38.8894,-77.0352 to get the URL for the forecast - which will look like https://api.weather.gov/gridpoints/LWX/97,71/forecast . Touch that to find the "shortForecast" and "temperature"
  *
  */
 
-trait WeatherSource[F[_]]:
+trait ForecastSource[F[_]]:
   /**
-   * @param coordinates
-   * @return the weather
+   * @param coordinates lat and lon to use for the forecast
+   * @return the weather forecast for those coordinates
    */
-  def get(coordinates:Coordinates):F[Weather]
+  def get(coordinates:Coordinates):F[Forecast]
 
-object WeatherSource:
-  def apply[F[_]](using ev:WeatherSource[F]): WeatherSource[F] = ev
+object ForecastSource:
+  def apply[F[_]](using ev:ForecastSource[F]): ForecastSource[F] = ev
 
-  def weatherSource[F[_]: Concurrent](client: Client[F]):WeatherSource[F] = new WeatherSource[F]:
-    val dsl = new Http4sClientDsl[F]{}
+  def forecastSource[F[_]: Concurrent](client: Client[F]):ForecastSource[F] = new ForecastSource[F]:
+    val dsl: Http4sClientDsl[F] = new Http4sClientDsl[F]{}
     import dsl.*
 
-    override def get(coordinates: Coordinates): F[Weather] =
-
-
+    override def get(coordinates: Coordinates): F[Forecast] =
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
 
       for {
-        pointsResponseString: String <- client.expect[String](pointsRequest).adaptError{ case t => WeatherError(coordinates,t)}
+        pointsResponseString: String <- client.expect[String](pointsRequest).adaptError{ case t => ForecastSourceError(coordinates,t)}
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
         //Use the URL from the PointResponse to look up the forecast
-        forecastResponseString <- client.expect[String](pointResponse.forecastUri).adaptError{ case t => WeatherError(coordinates,t)}
+        forecastResponseString <- client.expect[String](pointResponse.forecastUri).adaptError{ case t => ForecastSourceError(coordinates,t)}
       } yield {
-        Weather.fromJson(forecastResponseString)
+        Forecast.fromJson(forecastResponseString)
       }
 
     case class PointResponse(forecastUri: Uri):
       def forecastRequest:Request[F] = GET(forecastUri)
-
 
     object PointResponse:
 
@@ -60,16 +57,16 @@ object WeatherSource:
         import cats.syntax.either._
 
         val cursor = parse(jsonString).getOrElse(Json.Null).hcursor //todo decide about error handling
-        val uriString:Decoder.Result[String] = cursor.downField("properties").downField("forecast").as[String]
-        uriString.flatMap(Uri.fromString).map(PointResponse(_)).valueOr(t => throw t)
+        val uriString:String = cursor.downField("properties").downField("forecast").as[String].valueOr(t => throw t)
+        PointResponse(Uri.fromString(uriString).valueOr(t => throw t))
       //todo tidy up with a custom EntityDecoder
 
-case class Weather(shortForecast:String,temperature:Int):
-  def temperatureWord =
+case class Forecast(shortForecast:String, temperature:Int):
+  def temperatureWord:String =
     ??? //convert the given temperature value into a terse string
 
-object Weather:
-  def fromJson(jsonString: String): Weather =
+object Forecast:
+  def fromJson(jsonString: String): Forecast =
     import io.circe.parser.parse
     import io.circe.Json
     import cats.syntax.either._
@@ -79,10 +76,10 @@ object Weather:
     val firstPeriod = cursor.downField("properties").downField("periods").downArray
     val temperature: Int = firstPeriod.downField("temperature").as[Int].valueOr(t => throw t)
     val shortForecast: String = firstPeriod.downField("shortForecast").as[String].valueOr(t => throw t)
-    Weather(shortForecast, temperature)
+    Forecast(shortForecast, temperature)
 //todo tidy up with a custom EntityDecoder
 
 case class Coordinates(lat:Double,lon:Double):
   def forUrl:String = s"$lat,$lon"
 
-case class WeatherError(coordinates: Coordinates,e: Throwable) extends RuntimeException
+case class ForecastSourceError(coordinates: Coordinates, e: Throwable) extends RuntimeException
