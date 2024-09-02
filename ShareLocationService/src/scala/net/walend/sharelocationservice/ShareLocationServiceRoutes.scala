@@ -28,3 +28,15 @@ object ShareLocationServiceRoutes:
           resp <- Ok(greeting)
         } yield resp
     }
+
+  def forecastRoutes[F[_]: Sync](forecastSource: ForecastSource[F]): HttpRoutes[F] =
+    val dsl = new Http4sDsl[F]{}
+    import dsl.*
+
+    HttpRoutes.of[F] {
+      case GET -> Root / "forecast" / Coordinates(coordinates) =>
+        for {
+          forecast: Forecast <- forecastSource.get(coordinates)
+          response <- Ok(forecast.toResponseString)
+        } yield response
+    }

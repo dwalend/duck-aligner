@@ -1,15 +1,14 @@
 package net.walend.sharelocationservice
 
-//todo clean up these imports
 import cats.effect.Concurrent
 import cats.syntax.all.*
-import io.circe.{Decoder, DecodingFailure}
+import io.circe.Decoder
 import org.http4s.implicits.uri
 import org.http4s.{Request, Uri}
-//import io.circe.{Encoder, Decoder}
+
+import scala.util.Try
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-//import org.http4s.circe.*
 import org.http4s.Method.GET
 
 /**
@@ -36,8 +35,7 @@ object ForecastSource:
     override def get(coordinates: Coordinates): F[Forecast] =
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
-
-      val forecastF: F[Forecast] = for 
+      val forecastF: F[Forecast] = for
         pointsResponseString: String <- client.expect[String](pointsRequest)
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
         //Use the URL from the PointResponse to look up the forecast
@@ -61,8 +59,16 @@ object ForecastSource:
       //todo tidy up with a custom EntityDecoder
 
 case class Forecast(shortForecast:String, temperature:Int):
-  def temperatureWord:String =
-    ??? //convert the given temperature value into a terse string
+  private def temperatureWord:String =
+    val maxTempToWord:Seq[(Int,String)] = Seq (
+      45 -> "Cold",
+      80 -> "Moderate",
+    )
+    maxTempToWord.collectFirst{
+      case tempToWord if temperature <= tempToWord._1 => tempToWord._2
+    }.getOrElse("Hot")
+
+  def toResponseString = s"$temperatureWord and $shortForecast"
 
 object Forecast:
   def fromJson(jsonString: String): Forecast =
@@ -79,6 +85,20 @@ object Forecast:
 //todo tidy up with a custom EntityDecoder
 
 case class Coordinates(lat:Double,lon:Double):
-  def forUrl:String = s"$lat,$lon"
+  
+  /**
+   * Trims the lat and lon to match the national forecast service
+   * 
+   "status": 301,
+    "detail": "The precision of latitude/longitude points is limited to 4 decimal digits for efficiency. The location attribute contains your request mapped to the nearest supported point. If your client supports it, you will be redirected."
+   */
+  def forUrl:String = s"$lat,$lon" //todo trim it
 
-case class ForecastSourceError(coordinates: Coordinates, e: Throwable) extends RuntimeException
+object Coordinates:
+  def unapply(string: String): Option[Coordinates] =
+    val parts: Array[String] = string.split(',')
+    parts match
+      case Array(latString,lonString) => Try { Coordinates(latString.toDouble,lonString.toDouble) }.toOption
+      case _ => None
+
+case class ForecastSourceError(coordinates: Coordinates, e: Throwable) extends RuntimeException(s"with $coordinates",e)
