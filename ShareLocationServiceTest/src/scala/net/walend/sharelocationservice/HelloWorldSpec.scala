@@ -18,4 +18,4 @@ class HelloWorldSpec extends CatsEffectSuite:
   private[this] val retHelloWorld: IO[Response[IO]] = 
     val getHW = Request[IO](Method.GET, uri"/hello/world")
     val helloWorld = HelloWorld.impl[IO]
-    SharelocationserviceRoutes.helloWorldRoutes(helloWorld).orNotFound(getHW)
+    ShareLocationServiceRoutes.helloWorldRoutes(helloWorld).orNotFound(getHW)

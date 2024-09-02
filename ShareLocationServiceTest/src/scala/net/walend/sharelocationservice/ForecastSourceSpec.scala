@@ -14,12 +14,11 @@ class ForecastSourceSpec extends CatsEffectSuite:
     for
       client <- EmberClientBuilder.default[IO].build
     yield
-      ForecastSource.forecastSource(client)
+      ForecastSource.forecastSource(client)  //todo see if there's some interesting test client
 
   val coordinates: Coordinates = Coordinates(38.8894,-77.0352)
   val expectedForecast: Forecast = Forecast("cloudy",82)
 
-  //todo there's something hidden of interest here " missing argument list for value of type (=> Any) => Unit"
   test("Call the national weather service URL and get a response") {
     assertIO(forecastResource.use{ weatherSource =>
       weatherSource.get(coordinates).map(println(_))

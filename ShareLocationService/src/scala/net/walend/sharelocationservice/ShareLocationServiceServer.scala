@@ -9,7 +9,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits.*
 import org.http4s.server.middleware.Logger
 
-object SharelocationserviceServer:
+object ShareLocationServiceServer:
 
   def run[F[_]: Async: Network]: F[Nothing] = {
     for {
@@ -22,8 +22,8 @@ object SharelocationserviceServer:
       // want to extract segments not checked
       // in the underlying routes.
       httpApp = (
-        SharelocationserviceRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
-        SharelocationserviceRoutes.jokeRoutes[F](jokeAlg)
+        ShareLocationServiceRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
+        ShareLocationServiceRoutes.jokeRoutes[F](jokeAlg)
       ).orNotFound
 
       // With Middlewares in place
