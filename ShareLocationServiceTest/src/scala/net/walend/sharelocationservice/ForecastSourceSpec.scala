@@ -13,10 +13,12 @@ class ForecastSourceSpec extends CatsEffectSuite:
     for
       client <- EmberClientBuilder.default[IO].build
     yield
-      ForecastSource.forecastSource(client)  //todo see if there's some interesting test client
+      ForecastSource.forecastSource(client)
 
   val coordinates: Coordinates = Coordinates(38.8894,-77.0352)
-  val newtonCoordinates = Coordinates(42.338032,-71.211578) //todo 301 with more than 4 spots after the decimal
+  val newtonCoordinates: Coordinates = Coordinates(42.338032,-71.211578)
+  val fortyCoordinates: Coordinates = Coordinates(40,-71.211578)
+
   val expectedForecast: Forecast = Forecast("cloudy",82)
 
   test("Call the national weather service URL and get a response") {
@@ -25,7 +27,13 @@ class ForecastSourceSpec extends CatsEffectSuite:
     }, ())
   }
 
-  test("Convert a forecast to a fine string") {
+  test("Call the national weather service URL for coordinates that are not to the NWS spec and get a response") {
+    assertIO(forecastResource.use { weatherSource =>
+      weatherSource.get(newtonCoordinates).map(println(_))
+    }, ())
+  }
+
+  test("Convert a forecast to a string") {
     val forecast = Forecast("Toads",55)
     assertEquals(forecast.toResponseString,"Moderate and Toads")
   }

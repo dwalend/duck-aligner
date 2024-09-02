@@ -34,7 +34,8 @@ object ForecastSource:
 
     override def get(coordinates: Coordinates): F[Forecast] =
       //For the coordinates look up the right PointResponse
-      val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forUrl)
+      val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
+      println(pointsRequest)
       val forecastF: F[Forecast] = for
         pointsResponseString: String <- client.expect[String](pointsRequest)
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
@@ -85,14 +86,22 @@ object Forecast:
 //todo tidy up with a custom EntityDecoder
 
 case class Coordinates(lat:Double,lon:Double):
-  
+
   /**
    * Trims the lat and lon to match the national forecast service
-   * 
+   *
    "status": 301,
-    "detail": "The precision of latitude/longitude points is limited to 4 decimal digits for efficiency. The location attribute contains your request mapped to the nearest supported point. If your client supports it, you will be redirected."
+   "detail": "The precision of latitude/longitude points is limited to 4 decimal digits for efficiency. The location attribute contains your request mapped to the nearest supported point. If your client supports it, you will be redirected."
+  ...
+   "detail": "The coordinates cannot have trailing zeros in the decimal digit. The location attribute contains your request with the redundancy removed. If your client supports it, you will be redirected."
    */
-  def forUrl:String = s"$lat,$lon" //todo trim it
+  def forPointsUrl:String =
+    //there's no way to strip trailing zeros with a scala f-string
+    def formatForNWS(d:Double):String =
+      val fourDecimals = f"$d%1.4f"
+      fourDecimals.reverse.dropWhile(_ == '0').dropWhile(_ == '.').reverse
+
+    s"${formatForNWS(lat)},${formatForNWS(lon)}"
 
 object Coordinates:
   def unapply(string: String): Option[Coordinates] =
