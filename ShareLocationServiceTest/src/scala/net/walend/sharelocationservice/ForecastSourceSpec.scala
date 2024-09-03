@@ -1,9 +1,7 @@
 package net.walend.sharelocationservice
 
-//todo clean up imports
 import cats.effect.IO
 import cats.effect.kernel.Resource
-import org.http4s.*
 import munit.CatsEffectSuite
 
 class ForecastSourceSpec extends CatsEffectSuite:

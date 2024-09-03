@@ -14,8 +14,7 @@ import org.http4s.Method.GET
 /**
  * Source of weather forecasts from The National Forecast Service API Web Service https://www.weather.gov/documentation/services-web-api
  *
- * To get from lat,lon to a short forecast is two steps. First touch a url like https://api.weather.gov/points/38.8894,-77.0352 to get the URL for the forecast - which will look like https://api.weather.gov/gridpoints/LWX/97,71/forecast . Touch that to find the "shortForecast" and "temperature"
- *
+ * Gets from lat,lon to a short forecast in two steps. First uses some url like https://api.weather.gov/points/38.8894,-77.0352 to get the URL for the forecast - which will look like https://api.weather.gov/gridpoints/LWX/97,71/forecast then uses that url to find the "shortForecast" and "temperature"
  */
 
 trait ForecastSource[F[_]]:
@@ -51,13 +50,11 @@ object ForecastSource:
 
       def fromJson(jsonString: String): PointResponse =
         import io.circe.parser.parse
-        import io.circe.Json
         import cats.syntax.either._
 
-        val cursor = parse(jsonString).getOrElse(Json.Null).hcursor //todo decide about error handling
+        val cursor = parse(jsonString).getOrElse(throw ForecastSourceNotJsonError(jsonString)).hcursor
         val uriString:String = cursor.downField("properties").downField("forecast").as[String].valueOr(t => throw t)
         PointResponse(Uri.fromString(uriString).valueOr(t => throw t))
-      //todo tidy up with a custom EntityDecoder
 
 case class Forecast(shortForecast:String, temperature:Int):
   private def temperatureWord:String =
@@ -74,16 +71,14 @@ case class Forecast(shortForecast:String, temperature:Int):
 object Forecast:
   def fromJson(jsonString: String): Forecast =
     import io.circe.parser.parse
-    import io.circe.Json
     import cats.syntax.either._
 
-    val cursor = parse(jsonString).getOrElse(Json.Null).hcursor //todo decide about error handling
+    val cursor = parse(jsonString).getOrElse(throw ForecastSourceNotJsonError(jsonString)).hcursor
     
     val firstPeriod = cursor.downField("properties").downField("periods").downArray
     val temperature: Int = firstPeriod.downField("temperature").as[Int].valueOr(t => throw t)
     val shortForecast: String = firstPeriod.downField("shortForecast").as[String].valueOr(t => throw t)
     Forecast(shortForecast, temperature)
-//todo tidy up with a custom EntityDecoder
 
 case class Coordinates(lat:Double,lon:Double):
 
@@ -110,4 +105,6 @@ object Coordinates:
       case Array(latString,lonString) => Try { Coordinates(latString.toDouble,lonString.toDouble) }.toOption
       case _ => None
 
-case class ForecastSourceError(coordinates: Coordinates, e: Throwable) extends RuntimeException(s"with $coordinates",e)
+case class ForecastSourceError(coordinates: Coordinates, x: Throwable) extends RuntimeException(s"with $coordinates",x)
+
+case class ForecastSourceNotJsonError(notJson: String) extends RuntimeException(s"Circe could not parse $notJson")

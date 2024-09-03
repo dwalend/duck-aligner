@@ -1,12 +1,11 @@
 package net.walend.sharelocationservice
 
 import cats.effect.Async
-import cats.syntax.all.*
-import com.comcast.ip4s.*
+import cats.implicits.toSemigroupKOps
+import com.comcast.ip4s.{ipv4, port}
 import fs2.io.net.Network
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
-import org.http4s.implicits.*
 import org.http4s.server.middleware.Logger
 
 object ShareLocationServiceServer:
@@ -17,7 +16,7 @@ object ShareLocationServiceServer:
       jokeAlg = Jokes.impl[F](jokeClient)
       helloWorldAlg = HelloWorld.impl[F]
       //joke and forecast can't share a client!
-      forecastClient <- EmberClientBuilder.default[F].build  
+      forecastClient <- EmberClientBuilder.default[F].build
       forecastSource = ForecastSource.forecastSource[F](forecastClient)
 
       // Combine Service Routes into an HttpApp.
