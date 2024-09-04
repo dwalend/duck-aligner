@@ -34,7 +34,6 @@ object ForecastSource:
     override def get(coordinates: Coordinates): F[Forecast] =
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
-      println(pointsRequest)
       val forecastF: F[Forecast] = for
         pointsResponseString: String <- client.expect[String](pointsRequest)
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
