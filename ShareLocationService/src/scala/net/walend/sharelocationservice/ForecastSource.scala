@@ -1,10 +1,10 @@
 package net.walend.sharelocationservice
 
-import cats.effect.Concurrent
+import cats.effect.{Async, Sync}
 import cats.syntax.all.*
 import io.circe.Decoder
 import org.http4s.implicits.uri
-import org.http4s.{Request, Uri}
+import org.http4s.{Request, Response, Uri}
 
 import scala.util.Try
 import org.http4s.client.Client
@@ -27,7 +27,7 @@ trait ForecastSource[F[_]]:
 object ForecastSource:
   def apply[F[_]](using ev:ForecastSource[F]): ForecastSource[F] = ev
 
-  def forecastSource[F[_]: Concurrent](client: Client[F]):ForecastSource[F] = new ForecastSource[F]:
+  def forecastSource[F[_]: Async](client: Client[F]):ForecastSource[F] = new ForecastSource[F]:
     val dsl: Http4sClientDsl[F] = new Http4sClientDsl[F]{}
     import dsl.*
 
@@ -35,10 +35,14 @@ object ForecastSource:
       //For the coordinates look up the right PointResponse
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
       val forecastF: F[Forecast] = for
-        pointsResponseString: String <- client.expect[String](pointsRequest)
+        pointsResponseString: String <- client.expectOr[String](pointsRequest){response =>
+          ForecastSourceResponseError.fromResponse(response)
+        }
         pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
         //Use the URL from the PointResponse to look up the forecast
-        forecastResponseString:String <- client.expect[String](pointResponse.forecastUri)
+        forecastResponseString:String <- client.expectOr[String](pointResponse.forecastUri){response =>
+          ForecastSourceResponseError.fromResponse(response)
+        }
       yield Forecast.fromJson(forecastResponseString)
       forecastF.adaptError { case t => ForecastSourceError(coordinates, t) }
 
@@ -107,3 +111,13 @@ object Coordinates:
 case class ForecastSourceError(coordinates: Coordinates, x: Throwable) extends RuntimeException(s"with $coordinates",x)
 
 case class ForecastSourceNotJsonError(notJson: String) extends RuntimeException(s"Circe could not parse $notJson")
+
+//noinspection ScalaWeakerAccess
+case class ForecastSourceResponseError(responseAsString: String) extends RuntimeException(s"NWS responded $responseAsString")
+
+object ForecastSourceResponseError:
+  def fromResponse[F[_]: Sync](response:Response[F]): F[Throwable] =
+    import fs2.Stream
+    val messageStream: Stream[F, Byte] = Stream.emits[F,Byte](s"${response.status}".getBytes).append(response.body)
+    val stringF: F[String] = messageStream.through(fs2.text.utf8.decode).compile.string
+    stringF.map(ForecastSourceResponseError(_))
