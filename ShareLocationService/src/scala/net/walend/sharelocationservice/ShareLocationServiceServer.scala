@@ -4,9 +4,9 @@ import cats.effect.Async
 import cats.implicits.toSemigroupKOps
 import com.comcast.ip4s.{ipv4, port}
 import fs2.io.net.Network
+import net.walend.sharelocationservice.log.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
-import org.http4s.server.middleware.Logger
 
 object ShareLocationServiceServer:
 
@@ -24,8 +24,8 @@ object ShareLocationServiceServer:
       // want to extract segments not checked
       // in the underlying routes.
       httpApp = (
-        ShareLocationServiceRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
-        ShareLocationServiceRoutes.jokeRoutes[F](jokeAlg) <+>
+        ShareLocationServiceRoutes.helloWorldRoutes[F](helloWorldAlg) combineK 
+        ShareLocationServiceRoutes.jokeRoutes[F](jokeAlg) combineK 
         ShareLocationServiceRoutes.forecastRoutes[F](forecastSource)
       ).orNotFound
 
