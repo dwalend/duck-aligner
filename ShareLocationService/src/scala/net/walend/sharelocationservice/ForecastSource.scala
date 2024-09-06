@@ -44,7 +44,12 @@ object ForecastSource:
           ForecastSourceResponseError.fromResponse(response)
         }
       yield Forecast.fromJson(forecastResponseString)
-      forecastF.adaptError { case t => ForecastSourceError(coordinates, t) }
+      forecastF.adaptError { case t =>
+        t.fillInStackTrace()
+        val fse = ForecastSourceError(coordinates, t)
+        fse.fillInStackTrace()
+        fse
+      }
 
     case class PointResponse(forecastUri: Uri):
       def forecastRequest:Request[F] = GET(forecastUri)
@@ -117,7 +122,7 @@ case class ForecastSourceResponseError(responseAsString: String) extends Runtime
 
 object ForecastSourceResponseError:
   def fromResponse[F[_]: Sync](response:Response[F]): F[Throwable] =
-    import fs2.Stream
-    val messageStream: Stream[F, Byte] = Stream.emits[F,Byte](s"${response.status}".getBytes).append(response.body)
-    val stringF: F[String] = messageStream.through(fs2.text.utf8.decode).compile.string
-    stringF.map(ForecastSourceResponseError(_))
+    val stringF: F[String] = response.body.through(fs2.text.utf8.decode).compile.string
+    stringF.map{ body =>
+      ForecastSourceResponseError(s"${response.status} $body")
+    }
