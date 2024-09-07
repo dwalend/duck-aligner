@@ -2,7 +2,6 @@ package net.walend.sharelocationservice.log
 
 import cats.arrow.FunctionK
 import cats.data.OptionT
-import cats.effect.SyncIO
 import cats.effect.{Async, MonadCancelThrow}
 import cats.~>
 import org.http4s.{Headers, Http, HttpApp, HttpRoutes}
@@ -23,15 +22,15 @@ object Logger :
                          redactHeadersWhen: CIString => Boolean = defaultRedactHeadersWhen,
                          logAction: Option[String => F[Unit]] = None,
                        )(http: Http[G, F])(implicit G: MonadCancelThrow[G], F: Async[F]): Http[G, F] = {
-    val logger = log4cats.slf4j.Slf4jFactory.create[SyncIO].getLogger
+    val logger = log4cats.slf4j.Slf4jFactory.create[F].getLogger
     val log: String => F[Unit] = logAction.getOrElse { s =>
-      logger.info(s).to[F]
+      logger.info(s)
     }
     ResponseLogger(logHeaders, logBody, fk, redactHeadersWhen, log.pure[Option])(
       RequestLogger(logHeaders, logBody, fk, redactHeadersWhen, log.pure[Option])(http)
     )
   }
-  
+
   def httpApp[F[_]: Async](
                             logHeaders: Boolean,
                             logBody: Boolean,
@@ -39,7 +38,7 @@ object Logger :
                             logAction: Option[String => F[Unit]] = None,
                           )(httpApp: HttpApp[F]): HttpApp[F] =
     apply(logHeaders, logBody, FunctionK.id[F], redactHeadersWhen, logAction)(httpApp)
-  
+
   def httpRoutes[F[_]: Async](
                                logHeaders: Boolean,
                                logBody: Boolean,

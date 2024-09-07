@@ -2,7 +2,6 @@ package net.walend.sharelocationservice.log
 
 import cats.arrow.FunctionK
 import cats.data.{Kleisli, OptionT}
-import cats.effect.SyncIO
 import cats.effect.{Async, MonadCancelThrow, Outcome}
 import cats.~>
 import fs2.{Chunk, Pipe, Stream}
@@ -10,8 +9,8 @@ import org.http4s.{Headers, Response}
 import org.http4s.server.middleware.Logger
 import org.typelevel.ci.CIString
 import org.typelevel.log4cats
-import cats.effect.syntax.all._  
-import cats.syntax.all._
+import cats.effect.syntax.all.*
+import cats.syntax.all.*
 
 /**
  *
@@ -40,8 +39,8 @@ object ResponseLogger {
                                          )(
                                            http: Kleisli[G, A, Response[F]]
                                          )(implicit G: MonadCancelThrow[G], F: Async[F]): Kleisli[G, A, Response[F]] = {
-    val logger = log4cats.slf4j.Slf4jFactory.create[SyncIO].getLogger
-    val fallback: String => F[Unit] = s => logger.info(s).to[F]
+    val logger = log4cats.slf4j.Slf4jFactory.create[F].getLogger
+    val fallback: String => F[Unit] = s => logger.info(s)
     val log = logAction.fold(fallback)(identity)
 
     def logMessage(resp: Response[F]): F[Unit] =
