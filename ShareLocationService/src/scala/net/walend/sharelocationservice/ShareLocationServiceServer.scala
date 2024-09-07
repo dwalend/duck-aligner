@@ -4,7 +4,7 @@ import cats.effect.Async
 import cats.implicits.toSemigroupKOps
 import com.comcast.ip4s.{ipv4, port}
 import fs2.io.net.Network
-import net.walend.sharelocationservice.log.Logger
+import net.walend.sharelocationservice.log.HttpLogger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 
@@ -30,7 +30,7 @@ object ShareLocationServiceServer:
       ).orNotFound
 
       // With Middlewares in place
-      finalHttpApp = Logger.httpApp(true, true)(httpApp)
+      finalHttpApp = HttpLogger.httpApp(true, true)(httpApp)
 
       _ <- 
         EmberServerBuilder.default[F]

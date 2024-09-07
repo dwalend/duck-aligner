@@ -70,6 +70,7 @@ object ResponseLogger {
               .onFinalizeWeak(logMessage(response.withBodyStream(newBody)))
 
           /** Copied this private method from org.http4s.Message
+           * 
            * Applies the given pipe to the entity body (byte-stream) of this message.
            *
            * WARNING: this method does not modify the headers of the message, and as

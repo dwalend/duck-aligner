@@ -10,7 +10,10 @@ import org.typelevel.ci.CIString
 import org.typelevel.log4cats
 import cats.syntax.all.*
 
-object Logger :
+/**
+ * Http middleware for logging each request and response
+ */
+object HttpLogger :
 
   private def defaultRedactHeadersWhen(name: CIString): Boolean =
     Headers.SensitiveHeaders.contains(name) || name.toString.toLowerCase.contains("token")
