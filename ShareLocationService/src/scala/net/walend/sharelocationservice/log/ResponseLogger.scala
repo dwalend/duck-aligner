@@ -3,14 +3,14 @@ package net.walend.sharelocationservice.log
 import cats.arrow.FunctionK
 import cats.data.{Kleisli, OptionT}
 import cats.effect.SyncIO
-import cats.effect.kernel.{Async, MonadCancelThrow, Outcome}
+import cats.effect.{Async, MonadCancelThrow, Outcome}
 import cats.~>
 import fs2.{Chunk, Pipe, Stream}
-import org.http4s.{Headers, Platform, Response}
+import org.http4s.{Headers, Response}
 import org.http4s.server.middleware.Logger
 import org.typelevel.ci.CIString
 import org.typelevel.log4cats
-import cats.effect.syntax.all._  //todo maybe don't need
+import cats.effect.syntax.all._  
 import cats.syntax.all._
 
 /**
@@ -20,12 +20,6 @@ import cats.syntax.all._
  * @since v0.0.0
  */
 object ResponseLogger {
-  //todo can this be done without the SyncIO ? Probably needs to be done inside apply(), shared with the HTTP middleware logger
-  private[this] lazy val loggerFactory: log4cats.LoggerFactory[SyncIO] =
-    log4cats.slf4j.Slf4jFactory.create[SyncIO]
-
-  private[this] val logger = loggerFactory.getLogger
-
   def apply[G[_], F[_], A](
                             logHeaders: Boolean,
                             logBody: Boolean,
@@ -46,6 +40,7 @@ object ResponseLogger {
                                          )(
                                            http: Kleisli[G, A, Response[F]]
                                          )(implicit G: MonadCancelThrow[G], F: Async[F]): Kleisli[G, A, Response[F]] = {
+    val logger = log4cats.slf4j.Slf4jFactory.create[SyncIO].getLogger
     val fallback: String => F[Unit] = s => logger.info(s).to[F]
     val log = logAction.fold(fallback)(identity)
 
@@ -87,14 +82,15 @@ object ResponseLogger {
           pipeBodyThrough(response:Response[F])(logPipe)
         }
 
+    def unpackExceptionMessage(t:Throwable):String =
+      s"${t.getClass} ${t.getMessage}".appendedAll(Option(t.getCause).map{c =>
+        s"\n caused by ${unpackExceptionMessage(c)}"}.getOrElse(""))
+
     Kleisli[G, A, Response[F]] { req =>
       http(req)
         .flatMap((response: Response[F]) => fk(logResponse(response)))
         .guaranteeCase {
-          case Outcome.Errored(t) => t match {
-            case x:Throwable => fk(log(s"service threw ${t.getClass} ${t.getMessage}"))
-            case _ => fk(log(s"service raised an error: ${t.getClass}"))
-          }
+          case Outcome.Errored(t) => fk(log(s"service threw ${unpackExceptionMessage(t)}"))
           case Outcome.Canceled() => fk(log(s"service canceled response for request"))
           case Outcome.Succeeded(_) => G.unit
         }
