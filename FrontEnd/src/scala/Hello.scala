@@ -1,11 +1,17 @@
 package tutorial.webapp
 
+import org.scalajs.dom.document
+
 object Hello {
   def main(args: Array[String]): Unit = {
     println("Hello world!")
+    val parNode = document.createElement("p")
+    val textNode = document.createTextNode("Hello, world")
+    parNode.appendChild(textNode)
+    document.body.appendChild(parNode)
   }
 
-  def later[A,B](lazyList:LazyList[A], func:LazyList[A] => LazyList[B]) = {
+  def later[A,B](lazyList:LazyList[A], func:LazyList[A] => LazyList[B]): LazyList[A|B] = {
     lazyList.appendedAll(func(lazyList))
   }
 

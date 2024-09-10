@@ -26,6 +26,8 @@ projects:
     extends: template-js
     platform:
       mainClass: tutorial.webapp.Hello
+    dependencies:
+      - org.scala-js::scalajs-dom:2.8.0
 templates:
   template-common:
     platform:
@@ -40,7 +42,7 @@ templates:
       jsNodeVersion: 21.7.2
       jsVersion: 1.16.0
     scala:
-      options: -encoding utf8 -feature -unchecked -Wconf:cat=w-flag-value-discard:silent,cat=other-pure-statement:silent,cat=w-flag-numeric-widen:silent,any:warning-verbose
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
 
