@@ -25,7 +25,7 @@ projects:
   FrontEnd:
     extends: template-js
     platform:
-      mainClass: tutorial.webapp.Hello
+      mainClass: net.walend.duck.front.Hello
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
 templates:
@@ -33,7 +33,7 @@ templates:
     platform:
       name: jvm
     scala:
-      options: -encoding utf8 -feature -unchecked -Wconf:any:warning-verbose -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
   template-js:
