@@ -21,6 +21,6 @@ object Hello:
       println(s"latitude=${p.coords.latitude}") // Latitude
       println(s"longitude=${p.coords.longitude}") // Longitude
 
-    def onError(p: PositionError): Unit = println(s"Error $p")
+    def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
 
     geo.getCurrentPosition(onSuccess _,onError _)
