@@ -18,8 +18,14 @@ object Hello:
     val geo: Geolocation = nav.geolocation
 
     def onSuccess(p: Position): Unit =
-      println(s"latitude=${p.coords.latitude}") // Latitude
-      println(s"longitude=${p.coords.longitude}") // Longitude
+      println(s"latitude=${p.coords.latitude}")
+      println(s"longitude=${p.coords.longitude}")
+      println(s"altitude=${p.coords.altitude}")
+      println(s"speed=${p.coords.speed}")
+      println(s"heading=${p.coords.heading}")
+      println(s"accuracy=${p.coords.accuracy} m")
+      println(s"altitudeAccuracy=${p.coords.altitudeAccuracy}")
+      println(s"timestamp=${p.timestamp}")
 
     def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
 
