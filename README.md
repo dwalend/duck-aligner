@@ -6,7 +6,6 @@ Duck Aligner enables a small group of people to share their locations with each 
 What's here now:
 
 * A quick proof that I could build a scalajs project in bleep (not terribly interesting) in FrontEnd
-* Some starter infrastructure for Constellation networks (not yet checked in. I'm not sure if it makes sense to use that for this project.)
 * The http4s starter project from `sbt new http4s/http4s.g8 --branch 0.23-scala3` in ShareLocationService 
 * * Converted to a bleep build
 * * To get some practice handling geographic coordinates I added a service to check the weather
