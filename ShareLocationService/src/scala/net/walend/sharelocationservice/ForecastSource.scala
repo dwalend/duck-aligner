@@ -35,24 +35,11 @@ object ForecastSource:
     import dsl.*
 
     override def get(coordinates: Coordinates): F[Forecast] =
-      //For the coordinates look up the right PointResponse
-      import PointResponse.nwsDecoder
-      given pointResponseDecoder:EntityDecoder[F,PointResponse] = jsonOf[F,PointResponse] 
-
-      import Forecast.nwsDecoder
-      given forecastDecoder:EntityDecoder[F,Forecast] = jsonOf[F,Forecast]
-
-      val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
       val forecastF: F[Forecast] = for
-        pointsResponse: PointResponse <- client.expectOr[PointResponse](pointsRequest){response =>
-          ForecastSourceResponseError.fromResponse(response)
-        }
-        //Use the URL from the PointResponse to look up the forecast
-        forecast:Forecast <- client.expectOr[Forecast](pointsResponse.forecastUri){response =>
-          ForecastSourceResponseError.fromResponse(response)
-        }
+        pointResponse: ForecastSelector <- getPointsResponse(coordinates)
+        forecast:Forecast <- getForecast(pointResponse)
       yield forecast
-      
+
       forecastF.adaptError { case t =>
         t.fillInStackTrace()
         val fse = ForecastSourceError(coordinates, t)
@@ -60,12 +47,32 @@ object ForecastSource:
         fse
       }
 
-    case class PointResponse(forecastUri: Uri):
+    /**
+     * @return the right ForecastSelector for the coordinates
+     */
+    private def getPointsResponse(coordinates: Coordinates): F[ForecastSelector] =
+      import ForecastSelector.nwsDecoder
+      given pointResponseDecoder: EntityDecoder[F, ForecastSelector] = jsonOf[F, ForecastSelector]
+      val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
+
+      client.expectOr[ForecastSelector](pointsRequest)(ForecastSourceResponseError.fromResponse(_))
+
+    /**
+     * @return the Forecast for the pointResponse
+     */
+    private def getForecast(pointResponse:ForecastSelector): F[Forecast] =
+      import Forecast.nwsDecoder
+      given forecastDecoder: EntityDecoder[F, Forecast] = jsonOf[F, Forecast]
+
+      client.expectOr[Forecast](pointResponse.forecastUri)(ForecastSourceResponseError.fromResponse(_))
+
+
+    case class ForecastSelector(forecastUri: Uri):
       def forecastRequest:Request[F] = GET(forecastUri)
 
-    object PointResponse:
-      implicit val nwsDecoder:Decoder[PointResponse] = new Decoder[PointResponse]{
-        
+    object ForecastSelector:
+      implicit val nwsDecoder:Decoder[ForecastSelector] = new Decoder[ForecastSelector]{
+
         //noinspection ConvertExpressionToSAM
         val uriDecoder:Decoder[Uri] = new Decoder[Uri]{
           override def apply(c: HCursor): Result[Uri] =
@@ -74,8 +81,8 @@ object ForecastSource:
             }
         }
 
-        override def apply(c: HCursor): Result[PointResponse] =
-          c.downField("properties").get[Uri]("forecast")(uriDecoder).map(PointResponse.apply)
+        override def apply(c: HCursor): Result[ForecastSelector] =
+          c.downField("properties").get[Uri]("forecast")(uriDecoder).map(ForecastSelector.apply)
       }
 
 case class Forecast(shortForecast:String, temperature:Int):
@@ -96,7 +103,7 @@ object Forecast:
   implicit val nwsDecoder: Decoder[Forecast] = new Decoder[Forecast] {
     override def apply(c: HCursor): Result[Forecast] =
       val firstPeriod = c.downField("properties").downField("periods").downArray
-      
+
       for
         temperature <- firstPeriod.get[Int]("temperature")
         shortForecast <- firstPeriod.get[String]("shortForecast")
@@ -106,11 +113,12 @@ object Forecast:
 case class Coordinates(lat:Double,lon:Double):
 
   /**
-   * Trims the lat and lon to match the national forecast service, from this error message:
+   * Trims the lat and lon to match the national forecast service's requirements, from these redirect messages:
    *
    "status": 301,
    "detail": "The precision of latitude/longitude points is limited to 4 decimal digits for efficiency. The location attribute contains your request mapped to the nearest supported point. If your client supports it, you will be redirected."
   ...
+   "status": 301,
    "detail": "The coordinates cannot have trailing zeros in the decimal digit. The location attribute contains your request with the redundancy removed. If your client supports it, you will be redirected."
    */
   def forPointsUrl:String =
