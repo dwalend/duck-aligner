@@ -2,14 +2,17 @@ package net.walend.sharelocationservice
 
 import cats.effect.{Async, Sync}
 import cats.syntax.all.*
-import io.circe.Decoder
+import io.circe.Decoder.Result
+import io.circe.DecodingFailure.Reason.CustomReason
+import io.circe.{Decoder, DecodingFailure, HCursor}
 import org.http4s.implicits.uri
-import org.http4s.{Request, Response, Uri}
+import org.http4s.{EntityDecoder, ParseFailure, Request, Response, Uri}
 
 import scala.util.Try
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.Method.GET
+import org.http4s.circe.jsonOf
 
 /**
  * Source of weather forecasts from The National Forecast Service API Web Service https://www.weather.gov/documentation/services-web-api
@@ -33,17 +36,23 @@ object ForecastSource:
 
     override def get(coordinates: Coordinates): F[Forecast] =
       //For the coordinates look up the right PointResponse
+      import PointResponse.nwsDecoder
+      given pointResponseDecoder:EntityDecoder[F,PointResponse] = jsonOf[F,PointResponse] 
+
+      import Forecast.nwsDecoder
+      given forecastDecoder:EntityDecoder[F,Forecast] = jsonOf[F,Forecast]
+
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
       val forecastF: F[Forecast] = for
-        pointsResponseString: String <- client.expectOr[String](pointsRequest){response =>
+        pointsResponse: PointResponse <- client.expectOr[PointResponse](pointsRequest){response =>
           ForecastSourceResponseError.fromResponse(response)
         }
-        pointResponse:PointResponse = PointResponse.fromJson(pointsResponseString)
         //Use the URL from the PointResponse to look up the forecast
-        forecastResponseString:String <- client.expectOr[String](pointResponse.forecastUri){response =>
+        forecast:Forecast <- client.expectOr[Forecast](pointsResponse.forecastUri){response =>
           ForecastSourceResponseError.fromResponse(response)
         }
-      yield Forecast.fromJson(forecastResponseString)
+      yield forecast
+      
       forecastF.adaptError { case t =>
         t.fillInStackTrace()
         val fse = ForecastSourceError(coordinates, t)
@@ -55,14 +64,19 @@ object ForecastSource:
       def forecastRequest:Request[F] = GET(forecastUri)
 
     object PointResponse:
+      implicit val nwsDecoder:Decoder[PointResponse] = new Decoder[PointResponse]{
+        
+        //noinspection ConvertExpressionToSAM
+        val uriDecoder:Decoder[Uri] = new Decoder[Uri]{
+          override def apply(c: HCursor): Result[Uri] =
+            Uri.fromString(c.value.asString.get).leftMap { (parseFailure:ParseFailure) =>
+              DecodingFailure(CustomReason(parseFailure.message),c)
+            }
+        }
 
-      def fromJson(jsonString: String): PointResponse =
-        import io.circe.parser.parse
-        import cats.syntax.either._
-
-        val cursor = parse(jsonString).getOrElse(throw ForecastSourceNotJsonError(jsonString)).hcursor
-        val uriString:String = cursor.downField("properties").downField("forecast").as[String].valueOr(t => throw t)
-        PointResponse(Uri.fromString(uriString).valueOr(t => throw t))
+        override def apply(c: HCursor): Result[PointResponse] =
+          c.downField("properties").get[Uri]("forecast")(uriDecoder).map(PointResponse.apply)
+      }
 
 case class Forecast(shortForecast:String, temperature:Int):
   private def temperatureWord:String =
@@ -77,21 +91,22 @@ case class Forecast(shortForecast:String, temperature:Int):
   def toResponseString = s"$temperatureWord and $shortForecast"
 
 object Forecast:
-  def fromJson(jsonString: String): Forecast =
-    import io.circe.parser.parse
-    import cats.syntax.either._
 
-    val cursor = parse(jsonString).getOrElse(throw ForecastSourceNotJsonError(jsonString)).hcursor
-    
-    val firstPeriod = cursor.downField("properties").downField("periods").downArray
-    val temperature: Int = firstPeriod.downField("temperature").as[Int].valueOr(t => throw t)
-    val shortForecast: String = firstPeriod.downField("shortForecast").as[String].valueOr(t => throw t)
-    Forecast(shortForecast, temperature)
+  //noinspection ConvertExpressionToSAM
+  implicit val nwsDecoder: Decoder[Forecast] = new Decoder[Forecast] {
+    override def apply(c: HCursor): Result[Forecast] =
+      val firstPeriod = c.downField("properties").downField("periods").downArray
+      
+      for
+        temperature <- firstPeriod.get[Int]("temperature")
+        shortForecast <- firstPeriod.get[String]("shortForecast")
+      yield Forecast(shortForecast, temperature)
+    }
 
 case class Coordinates(lat:Double,lon:Double):
 
   /**
-   * Trims the lat and lon to match the national forecast service
+   * Trims the lat and lon to match the national forecast service, from this error message:
    *
    "status": 301,
    "detail": "The precision of latitude/longitude points is limited to 4 decimal digits for efficiency. The location attribute contains your request mapped to the nearest supported point. If your client supports it, you will be redirected."
@@ -115,7 +130,7 @@ object Coordinates:
 
 case class ForecastSourceError(coordinates: Coordinates, x: Throwable) extends RuntimeException(s"with $coordinates",x)
 
-case class ForecastSourceNotJsonError(notJson: String) extends RuntimeException(s"Circe could not parse $notJson")
+case class ForecastResponseNotJsonError(notJson: String) extends RuntimeException(s"Circe could not parse $notJson")
 
 //noinspection ScalaWeakerAccess
 case class ForecastSourceResponseError(responseAsString: String) extends RuntimeException(s"NWS responded $responseAsString")
