@@ -5,7 +5,6 @@ import cats.syntax.all.*
 import io.circe.Decoder.Result
 import io.circe.DecodingFailure.Reason.CustomReason
 import io.circe.{Decoder, DecodingFailure, HCursor}
-import org.http4s.implicits.uri
 import org.http4s.{EntityDecoder, ParseFailure, Request, Response, Uri}
 
 import scala.util.Try
@@ -51,17 +50,18 @@ object ForecastSource:
      * @return the right ForecastSelector for the coordinates
      */
     private def getPointsResponse(coordinates: Coordinates): F[ForecastSelector] =
-      import ForecastSelector.nwsDecoder
-      given pointResponseDecoder: EntityDecoder[F, ForecastSelector] = jsonOf[F, ForecastSelector]
+      import org.http4s.implicits.uri
       val pointsRequest: Request[F] = GET(uri"https://api.weather.gov/points" / coordinates.forPointsUrl)
 
+      given decoder:Decoder[ForecastSelector]  = ForecastSelector.nwsDecoder
+      given pointResponseDecoder: EntityDecoder[F, ForecastSelector] = jsonOf[F, ForecastSelector]
       client.expectOr[ForecastSelector](pointsRequest)(ForecastSourceResponseError.fromResponse(_))
 
     /**
      * @return the Forecast for the pointResponse
      */
     private def getForecast(pointResponse:ForecastSelector): F[Forecast] =
-      import Forecast.nwsDecoder
+      given decoder:Decoder[Forecast] = Forecast.nwsDecoder
       given forecastDecoder: EntityDecoder[F, Forecast] = jsonOf[F, Forecast]
 
       client.expectOr[Forecast](pointResponse.forecastUri)(ForecastSourceResponseError.fromResponse(_))
@@ -71,9 +71,8 @@ object ForecastSource:
       def forecastRequest:Request[F] = GET(forecastUri)
 
     object ForecastSelector:
-      implicit val nwsDecoder:Decoder[ForecastSelector] = new Decoder[ForecastSelector]{
-
-        //noinspection ConvertExpressionToSAM
+      //noinspection ConvertExpressionToSAM
+      val nwsDecoder:Decoder[ForecastSelector] = new Decoder[ForecastSelector]{
         val uriDecoder:Decoder[Uri] = new Decoder[Uri]{
           override def apply(c: HCursor): Result[Uri] =
             Uri.fromString(c.value.asString.get).leftMap { (parseFailure:ParseFailure) =>
@@ -100,7 +99,7 @@ case class Forecast(shortForecast:String, temperature:Int):
 object Forecast:
 
   //noinspection ConvertExpressionToSAM
-  implicit val nwsDecoder: Decoder[Forecast] = new Decoder[Forecast] {
+  val nwsDecoder: Decoder[Forecast] = new Decoder[Forecast] {
     override def apply(c: HCursor): Result[Forecast] =
       val firstPeriod = c.downField("properties").downField("periods").downArray
 
