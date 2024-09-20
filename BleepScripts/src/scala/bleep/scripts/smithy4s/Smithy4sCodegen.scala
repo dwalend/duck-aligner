@@ -1,10 +1,7 @@
 package bleep.scripts.smithy4s
 
-import bleep._
-import bleep.model.Dep
-import bleep.model.Project
-import bleep.model.Repository
-import bleep.model.VersionCombo
+import bleep.{FileSync, PathOps, Started, commands}
+import bleep.model.{CrossProjectName, Dep, Project, Repository, VersionCombo}
 import bleep.packaging.CoordinatesFor
 import bleep.packaging.IvyLayout
 import bleep.packaging.MapLayout
@@ -20,7 +17,7 @@ import scala.collection.immutable.SortedSet
 
 class Smithy4sCodegen(
                        started: Started,
-                       crossProjectName: model.CrossProjectName,
+                       crossProjectName: CrossProjectName,
                        sourcesOutputDir: Option[Path],
                        resourcesOutputDir: Option[Path]
                      ) {
@@ -113,7 +110,7 @@ class Smithy4sCodegen(
       compilation.isRight,
       s"Compilation of modules required for code generation failed ${crossProjectName.value}."
     )
-    val packagedLibraries: SortedMap[model.CrossProjectName, PackagedLibrary] =
+    val packagedLibraries: SortedMap[CrossProjectName, PackagedLibrary] =
       packageLibraries(
         started,
         coordinatesFor = CoordinatesFor.Default(groupId, version),
@@ -145,8 +142,8 @@ class Smithy4sCodegen(
   private val smithy4sModelTransformers: List[String] = List.empty
 
   private def getJars(
-                       versionCombo: model.VersionCombo,
-                       deps: List[model.Dep]
+                       versionCombo: VersionCombo,
+                       deps: List[Dep]
                      ): List[Path] =
     started.resolver.force(deps.toSet, versionCombo, SortedSet.empty, "").jars
 
