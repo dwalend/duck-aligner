@@ -29,13 +29,15 @@ Here's the sketch of a plan:
 * * It'll only serve about 2 requests per minute per user ~ 240 requests an hour for most uses
 * * That might mean compiling it to scala native to fit on the tiny server
 
-* (2) Use scalajs to build a web app
+* (3) Use scalajs to build a web app
 * *  Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
-* (3) Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js 
+* (2) Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js 
 * * (Find some other javascript API to see what tech is providing the location. If it's IP-based instead of GPS, for example)
 * * Add an optional stealth zone - maybe the first quarter of the trip - to hide origin
 * (4) Send that to some URL, receive locations (stored in memory) back from other users
-* (6) Use the scala js AWS API to get map sections from location data https://docs.aws.amazon.com/location/latest/APIReference/welcome.html https://github.com/exoego/aws-sdk-scalajs-facade/blob/master/aws-sdk-v2/services/location/src/main/scala/facade/amazonaws/services/Location.scala https://docs.aws.amazon.com/location/latest/developerguide/samples.html#example-draw-markers .
+* Use smithy4s' AWS API to get map sections from location data https://docs.aws.amazon.com/location/latest/APIReference/welcome.html https://github.com/exoego/aws-sdk-scalajs-facade/blob/master/aws-sdk-v2/services/location/src/main/scala/facade/amazonaws/services/Location.scala https://docs.aws.amazon.com/location/latest/developerguide/samples.html#example-draw-markers .
+* * Build the smithy4s aws code using Bleep instead of mill
+* * Wait for the location service form smithy4s to get fixed (or figure out how to do it). Broken in the 2023 version
 * * Possibly offset the location or enter some false locations to put off AWS tracking if they are storing too much data. Amazon is pretty open about which information they keep from AWS API calls.        
 * Set up an ephemeral service (S3 and AWS lambda ?) behind an AWS Gateway endpoint to 
 * * serve the static bits - javascript, html, images, etc
@@ -45,6 +47,7 @@ Here's the sketch of a plan:
 * * (7) send SMS text messages to invite other people to the location sharing service
 * * handle user login and authentication 
 * * Figure out if Constellation is a good fit for keeping "ability to see my location" private except for direct connections in a social network. The more I ponder it the less I think I need it - just access to a contacts list seems like enough
+              
 
 I probably won't:
 
