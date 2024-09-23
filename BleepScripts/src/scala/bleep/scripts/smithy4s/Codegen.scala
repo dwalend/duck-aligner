@@ -1,9 +1,12 @@
 package bleep.scripts.smithy4s
 
 import bleep.{BleepScript, Commands, Started}
+import smithy4s.codegen.AwsSpecs
 
 object Codegen extends BleepScript("Smithy4sCodegen") {
-  override def run(
+  val AWS: AwsSpecs.type = smithy4s.codegen.AwsSpecs
+  
+  override def run(          
                     started: Started,
                     commands: Commands,
                     args: List[String]

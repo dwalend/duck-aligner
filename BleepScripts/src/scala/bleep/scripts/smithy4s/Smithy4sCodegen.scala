@@ -8,6 +8,7 @@ import bleep.packaging.MapLayout
 import bleep.packaging.PackagedLibrary
 import bleep.packaging.PublishLayout
 import bleep.packaging.packageLibraries
+import bloop.config.PlatformFiles
 import smithy4s.codegen.CodegenArgs
 
 import java.io.File
@@ -29,12 +30,71 @@ class Smithy4sCodegen(
       case Repository.Ivy(_, uri)   => uri.getRawPath
     }
 
-    val localJars = smithy4sNormalExternalDependencies
-      .map(os.Path(_))
-    val smithy4sInputs = smithy4sInputDirs
+    val AWS = smithy4s.codegen.AwsSpecs
+
+    def smithy4sAwsSpecs: Seq[String] = {
+      Seq("location") //todo get this from somewhere better to lookup aws-location-spec name
+    }
+    val ivyName = "com.disneystreaming.smithy:aws-location-spec:2023.09.22"
+
+    val classpath: Seq[PlatformFiles.Path] = started.bloopProject(crossProjectName).classpath
+
+    //todo figure out how to use bleep's repository and dependency resolution
+    val awsSpecJarPathStrings = List(
+      "/Users/dwalend/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/disneystreaming/smithy/aws-location-spec/2023.09.22/aws-location-spec-2023.09.22.jar",
+      "/Users/dwalend/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/disneystreaming/smithy/smithytranslate-proto_2.13/0.5.3/smithytranslate-proto_2.13-0.5.3.jar",
+      "/Users/dwalend/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/disneystreaming/smithy/smithytranslate-traits/0.5.3/smithytranslate-traits-0.5.3.jar",
+      "/Users/dwalend/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/disneystreaming/smithy/smithytranslate-transitive_2.13/0.5.3/smithytranslate-transitive_2.13-0.5.3.jar",
+    )
+
+    val awsSpecJarPaths: List[os.Path] = awsSpecJarPathStrings.map(os.Path(_))
+    //def smithy4sAwsSpecDependencies = s"${AWS.org}:aws-location-spec:${AWS.knownVersion}"
+
+    /*  todo start here when you decide to trim the hair on the Yak
+    //mill smith4s plugin code
+
+        def smithy4sAwsSpecDependencies: T[Agg[Dep]] = T {
+      val org = AWS.org
+      val version = smithy4sAwsSpecsVersion()
+      smithy4sAwsSpecs().map { artifactName => ivy"$org:$artifactName:$version" }
+    }
+        def smithy4sAllExternalDependencies: T[Agg[BoundDep]] = T {
+      val bind = bindDependency()
+      transitiveIvyDeps() ++
+        smithy4sTransitiveIvyDeps().map(bind) ++
+        smithy4sExternallyTrackedIvyDeps().map(bind) ++
+        smithy4sAwsSpecDependencies().map(bind)
+    }
+        def smithy4sResolvedAllExternalDependencies: T[Agg[PathRef]] = T {
+      resolveDeps(T.task {
+        smithy4sAllExternalDependencies()
+      })()
+    }
+
+    def smithy4sAllDependenciesAsJars: T[Agg[PathRef]] = T {
+      smithy4sInternalDependenciesAsJars() ++
+        smithy4sResolvedAllExternalDependencies()
+    }
+
+       val allLocalJars =
+        smithy4sAllDependenciesAsJars()
+          .map(_.path)
+          .iterator
+          .to(List)
+       */
+
+    //val localJars = smithy4sNormalExternalDependencies
+      //.map(os.Path(_))
+   /*
+    val localJars = awsSpecJarPaths
+
+    val smithy4sInputs: List[os.Path] = smithy4sInputDirs
       .map(os.Path(_))
       .filter(os.exists)
       .toList
+   */
+    val smithy4sInputs = List.empty
+    val localJars = List.empty
 
     val args = CodegenArgs(
       specs = smithy4sInputs,
@@ -47,7 +107,7 @@ class Smithy4sCodegen(
       repositories = resolvers,
       dependencies = List.empty,
       transformers = smithy4sModelTransformers,
-      localJars = localJars,
+      localJars = localJars, //allLocalJars <- smithy4sAllDependenciesAsJars <-
       smithyBuild = None,
     )
 
@@ -90,8 +150,8 @@ class Smithy4sCodegen(
     val all = project.dependencies.values.toList ++ transitiveDeps
 
     val packageLibrariesJars = localTemporaryJars(
-      "my.org",
-      "0.1.0-SNAPSHOT"
+      "walend.net",
+      "0.0.0-SNAPSHOT"
     )
 
     getJars(versionCombo, all) ++ packageLibrariesJars
