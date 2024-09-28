@@ -42,7 +42,7 @@ Here's the sketch of a plan:
 * * start the service - see https://www.youtube.com/watch?v=SBJNAf-OGQw - smithy4s - maybe - not sure it's the right critter.
 * * * compile to scala native again
 * * handle the https cert work (which the geolocation javascript API requires)
-* * (7) send SMS text messages to invite other people to the location sharing service
+* * (7) send SMS text messages to invite other people to the location sharing service (Uisng the AWS SNS (not SMS) service - see https://docs.aws.amazon.com/sns/latest/dg/sms_sending-overview.html#sms_publish_sdk )
 * * handle user login and authentication 
 * * Figure out if Constellation is a good fit for keeping "ability to see my location" private except for direct connections in a social network. The more I ponder it the less I think I need it - just access to a contacts list seems like enough
 

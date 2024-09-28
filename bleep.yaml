@@ -9,6 +9,20 @@ projects:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.24 #not scala3
+  StartShareService:
+    extends: template-common
+    platform:
+      mainClass: net.walend.startshare.Main
+    dependencies:
+      - org.http4s::http4s-ember-server:0.23.27
+      - org.http4s::http4s-ember-client:0.23.27
+      - org.http4s::http4s-circe:0.23.27
+      - org.http4s::http4s-dsl:0.23.27
+      - ch.qos.logback:logback-classic:1.5.6
+      - org.fusesource.jansi:jansi:2.4.1
+      - io.circe::circe-parser:0.14.1
+      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
+      - net.walend:Smithy4sAwsClient_2.13:0.0.0
   ShareLocationService:
     extends: template-common
     platform:
@@ -21,7 +35,8 @@ projects:
       - ch.qos.logback:logback-classic:1.5.6
       - org.fusesource.jansi:jansi:2.4.1
       - io.circe::circe-parser:0.14.1
-#      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
+      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
+      - net.walend:Smithy4sAwsClient_2.13:0.0.0
   ShareLocationServiceTest:
     extends: template-common
     isTestProject: true

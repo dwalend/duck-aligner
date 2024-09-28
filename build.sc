@@ -7,15 +7,14 @@ object Smithy4sAwsClient extends ScalaModule with Smithy4sModule with PublishMod
 
   def scalaVersion = "2.13.8"
   override def ivyDeps = Agg(
- //   ivy"com.disneystreaming.smithy4s::smithy4s-core:${smithy4sVersion()}",
- //   ivy"com.disneystreaming.smithy4s::smithy4s-http4s:${smithy4sVersion()}",
- //   ivy"com.disneystreaming.smithy4s::smithy4s-aws-http4s:${smithy4sVersion()}",
- //   ivy"org.http4s::http4s-ember-client:0.23.26"
     ivy"com.disneystreaming.smithy4s::smithy4s-aws-kernel:${smithy4sVersion()}",
   )
 
-  override def smithy4sAwsSpecs = Seq(AwsSpecs.sms)//Seq(AwsSpecs.location)
-//  override def smithy4sAwsSpecs = Seq(AwsSpecs.translate)
+  /*
+ec2, sms, and translate all work (sms is for bulk texting)
+sns, and location have compile problems (sns is for sending just a few texts)
+ */
+  override def smithy4sAwsSpecs = Seq(AwsSpecs.sns)
 
   def publishVersion = "0.0.0"
 
