@@ -4,6 +4,7 @@ import cats.effect.Async
 import cats.implicits.toSemigroupKOps
 import com.comcast.ip4s.{ipv4, port}
 import fs2.io.net.Network
+import net.walend.sharelocationservice
 import net.walend.sharelocationservice.log.HttpLogger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
@@ -26,7 +27,8 @@ object ShareLocationServiceServer:
       httpApp = (
         ShareLocationServiceRoutes.helloWorldRoutes[F](helloWorldAlg) combineK 
         ShareLocationServiceRoutes.jokeRoutes[F](jokeAlg) combineK 
-        ShareLocationServiceRoutes.forecastRoutes[F](forecastSource)
+        ShareLocationServiceRoutes.forecastRoutes[F](forecastSource) combineK 
+        ShareLocationServiceRoutes.staticFiles[F]
       ).orNotFound
 
       // With Middlewares in place
