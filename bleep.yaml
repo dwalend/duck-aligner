@@ -49,7 +49,7 @@ templates:
     platform:
       name: js
       jsNodeVersion: 21.7.2
-      jsVersion: 1.16.0  #todo 1.17.0
+      jsVersion: 1.17.0
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
       strict: true
