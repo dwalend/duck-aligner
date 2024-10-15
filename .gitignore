@@ -8,3 +8,5 @@ hs_err_pid*
 **/target/**
 .bleep/**
 github.token
+
+out/**

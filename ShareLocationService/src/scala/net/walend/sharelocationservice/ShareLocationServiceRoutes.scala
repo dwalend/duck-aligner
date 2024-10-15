@@ -6,6 +6,7 @@ import cats.syntax.all.*
 import fs2.io.file.Files
 import org.http4s.{HttpRoutes, StaticFile}
 import org.http4s.dsl.Http4sDsl
+import net.walend.sharelocationservice.store.{TrackStore, Tracks, UpdatePosition}
 
 object ShareLocationServiceRoutes:
 
@@ -43,6 +44,18 @@ object ShareLocationServiceRoutes:
         } yield response
     }
 
+  def trackRoutes[F[_] : Sync](trackStore: TrackStore[F]): HttpRoutes[F] =
+    val dsl = new Http4sDsl[F] {}
+    import dsl.*
+
+    HttpRoutes.of[F] {
+      case PUT -> Root / "updatePosition" / UpdatePosition(updatePosition) =>
+        for {
+          tracks: Tracks <- trackStore.updated(updatePosition)
+          response <- Ok(tracks)
+        } yield response
+    }
+
   def staticFiles[F[_]: MonadThrow : Files]:HttpRoutes[F] =
     import fs2.io.file.Path
     val dsl = new Http4sDsl[F]{}
@@ -52,6 +65,6 @@ object ShareLocationServiceRoutes:
         StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/FrontEnd/hello.html"), Some(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
       case request@GET -> Root / "static" / "FrontEnd.js" =>
-        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/FrontEnd/FrontEnd.js"), Some(request))
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/FrontEnd/FrontEnd.js"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
     }
