@@ -1,4 +1,4 @@
-import $ivy.`com.disneystreaming.smithy4s::smithy4s-mill-codegen-plugin::0.18.24`
+import $ivy.`com.disneystreaming.smithy4s::smithy4s-mill-codegen-plugin::0.18.25`
 import smithy4s.codegen.mill._
 
 import mill._, mill.scalalib._, publish._
@@ -7,14 +7,14 @@ object Smithy4sAwsClient extends ScalaModule with Smithy4sModule with PublishMod
 
   def scalaVersion = "2.13.8"
   override def ivyDeps = Agg(
-    ivy"com.disneystreaming.smithy4s::smithy4s-aws-kernel:dev-SNAPSHOT"//todo use a real ${smithy4sVersion()}",
+    ivy"com.disneystreaming.smithy4s::smithy4s-aws-kernel:${smithy4sVersion()}",
   )
 
   /*
 ec2, sms, lambda, and translate all work (sms is for bulk texting)
 sns, and location have compile problems (sns is for sending just a few texts)
  */
-  override def smithy4sAwsSpecs = Seq(AwsSpecs.lambda)
+  override def smithy4sAwsSpecs = Seq(AwsSpecs.location)
 
   def publishVersion = "0.0.0"
 
