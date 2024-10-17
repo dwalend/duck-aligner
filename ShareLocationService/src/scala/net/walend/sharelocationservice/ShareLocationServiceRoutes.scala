@@ -52,7 +52,7 @@ object ShareLocationServiceRoutes:
       case PUT -> Root / "updatePosition" / UpdatePosition(updatePosition) =>
         for {
           tracks: Tracks <- trackStore.updated(updatePosition)
-          response <- Ok(tracks)
+          response <- Ok(tracks.toString) //todo send back a structure
         } yield response
     }
 
