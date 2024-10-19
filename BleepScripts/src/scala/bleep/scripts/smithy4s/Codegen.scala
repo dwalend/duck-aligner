@@ -21,6 +21,8 @@ object Codegen extends BleepScript("Smithy4sCodegen") {
 
     val sourceDirs = theProject.sourcesDirs
     val fallbackSrcDir = theProject.dir.resolve("src/scala")
+
+    //todo better generated source directory - maybe a smithy template
     val outputDir = sourceDirs.all
       .find(_.toString.endsWith("/shared/src/scala"))
       .orElse(sourceDirs.all.find(_.toString.endsWith("/jvm/src/scala")))

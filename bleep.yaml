@@ -8,7 +8,7 @@ projects:
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.24 #not scala3
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.25 #not scala3
   ShareLocationService:
     extends: template-common
     platform:
@@ -35,8 +35,13 @@ projects:
       mainClass: net.walend.duck.front.Hello
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
+  LocationSmithy:
+    extends: template-common
+    dependencies:
+      - com.disneystreaming.smithy4s:smithy4s-http4s_2.13:0.18.25
+      - com.disneystreaming.alloy:alloy-core:0.3.14
 scripts:
-  genAwsCode: BleepScripts/bleep.scripts.smithy4s.Codegen
+  genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:
   template-common:
     platform:
