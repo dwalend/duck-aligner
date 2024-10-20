@@ -30,12 +30,7 @@ object DucksStateStore: //todo What's the minimum F to get flatMap on the Atomic
 object DucksStateStore extends DuckUpdateService[IO]:
   private val ducksStateCell: IO[AtomicCell[IO, DucksState]] = AtomicCell[IO].of(DucksState.start)
 
-  //todo why is positionUpdate optional? How do I make smithy require the body?
-  override def updatePosition(positionUpdate: Option[DuckUpdate]): IO[UpdatePositionOutput] =
-    def sitRepForPosition(duckUpdate:DuckUpdate): IO[DuckSitRepUpdate] =
-      val updatePosition = UpdatePosition(duckUpdate)
-      ducksStateCell.flatMap(_.updateAndGet{ t => t.updated(updatePosition) }).map(_.toDuckSitRepUpdate)
-      
-    positionUpdate.map(sitRepForPosition(_)).
-      map(ios => ios.map(s => UpdatePositionOutput(Option(s)))).
-      getOrElse(IO(UpdatePositionOutput(None)))
+  override def updatePosition(positionUpdate: DuckUpdate): IO[UpdatePositionOutput] =
+    val updatePosition = UpdatePosition(positionUpdate)
+    ducksStateCell.flatMap(_.updateAndGet { t => t.updated(updatePosition) }).
+      map(ducksState => UpdatePositionOutput(ducksState.toDuckSitRepUpdate))

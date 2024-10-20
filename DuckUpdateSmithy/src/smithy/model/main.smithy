@@ -15,6 +15,12 @@ service DuckUpdateService {
 
 @http(method: "POST", uri: "/update", code: 200)
 operation UpdatePosition {
-    input := {positionUpdate:DuckUpdate}
-    output := {tracks:DuckSitRepUpdate}
+    input := {
+        @required
+        positionUpdate:DuckUpdate
+    }
+    output := {
+        @required
+        tracks:DuckSitRepUpdate
+    }
 }
