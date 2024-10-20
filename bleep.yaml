@@ -53,6 +53,8 @@ projects:
       - org.fusesource.jansi:jansi:2.4.1
       - io.circe::circe-parser:0.14.1
       - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
+    platform:
+      mainClass: net.walend.duckaligner.duckupdateservice.Main
 scripts:
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:

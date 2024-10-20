@@ -2,7 +2,8 @@ package net.walend.duckaligner.duckupdateservice.store
 
 import scala.collection.immutable.Map
 
-import net.walend.duckaligner.duckupdates.v0.{DuckUpdate,GeoPoint => DuckPoint}
+//todo who gets the Duck prefix? (Change DuckI)
+import net.walend.duckaligner.duckupdates.v0.{DuckUpdate,GeoPoint => DuckPoint,DuckSitRepUpdate,Track => DuckTrack,DuckId => DuckI}
 /**
  * Shared structures between the ShareLocationService and the front end.
  *
@@ -16,6 +17,13 @@ final case class DucksState(snapshot:Int, tracks: Map[DuckId,Track]):
         .updated(updatePosition.geoPoint))
     }
     this.copy(snapshot = this.snapshot + 1,tracks = updatedTracks)
+    
+  def toDuckSitRepUpdate:DuckSitRepUpdate =
+    DuckSitRepUpdate(
+      snapshot = snapshot, 
+      tracks = tracks.map((d,t) => d.toSmithyMapKey -> t.toDuckTrack), 
+    )
+    
 
 object DucksState:
   def start: DucksState = DucksState(snapshot = 0, tracks = Map.empty)
@@ -29,8 +37,13 @@ object UpdatePosition:
 final case class Track(id:DuckId,positions:Seq[GeoPoint]):
   def updated(geoPoint: GeoPoint): Track =
     this.copy(positions = positions.prepended(geoPoint))
-
-final class DuckId(val v:Long) extends AnyVal
+    
+  def toDuckTrack:DuckTrack = DuckTrack(id.toDuckI,positions.map(_.toDuckPoint).toList)
+ 
+final class DuckId(val v:Long) extends AnyVal:
+  def toSmithyMapKey: String = v.toString
+  
+  def toDuckI: DuckI = DuckI(v)
 
 /**
  * Mostly from org.scalajs.dom.{Geolocation, Position, PositionError, document}'s idea of coordinates
@@ -44,7 +57,8 @@ final case class GeoPoint(
 //                     accuracy:Double,
 //                     altitudeAccuracy:Double,
                      timestamp:Long
-                   )
+                   ):
+  def toDuckPoint:DuckPoint = DuckPoint(latitude,longitude, timestamp)
 
 object GeoPoint:
   def apply(dp:DuckPoint):GeoPoint = new GeoPoint(dp.latitude,dp.longitude,dp.timestamp)
