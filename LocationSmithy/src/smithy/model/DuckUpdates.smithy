@@ -1,6 +1,6 @@
 $version: "2.0"
 
-namespace net.walend.duckaligner
+namespace net.walend.duckaligner.duckupdates.v0
 
 use smithy.api#required
 
@@ -32,26 +32,35 @@ structure Track {
     positions: Positions
 }
 
-map TrackMap {
+map DuckLineMap {
     key: String //really a DuckId
     value: Track
 }
 
-structure Tracks {
+//All the data needed to show all the duck tracks
+structure DuckSitRepUpdate {
+    @required
+    protocol: Integer = 0
+
     //Incremented every update
     @required
-    snapshotVersion: Integer
+    snapshot: Integer
 
     @required
-    tracks: TrackMap
+    tracks: DuckLineMap
 }
 
-structure PositionUpdate {
+//all the info needed to update the track of a single duck
+structure DuckUpdate {
+    @required
+    protocol: Integer = 0
+
     @required
     id:DuckId
 
-    @required
-    snapshotVersion: Integer
+    //Incremented every update
+    @required  //I might back off requiring the snapshot version if not needed for recovering tracks
+    snapshot: Integer
 
     @required
     position:GeoPoint

@@ -6,7 +6,7 @@ import cats.syntax.all.*
 import fs2.io.file.Files
 import org.http4s.{HttpRoutes, StaticFile}
 import org.http4s.dsl.Http4sDsl
-import net.walend.sharelocationservice.store.{TrackStore, Tracks, UpdatePosition}
+import net.walend.sharelocationservice.store.{TrackStore, DucksState, UpdatePosition}
 
 object ShareLocationServiceRoutes:
 
@@ -43,19 +43,7 @@ object ShareLocationServiceRoutes:
           response <- Ok(forecast.toResponseString)
         } yield response
     }
-
-  def trackRoutes[F[_] : Sync](trackStore: TrackStore[F]): HttpRoutes[F] =
-    val dsl = new Http4sDsl[F] {}
-    import dsl.*
-
-    HttpRoutes.of[F] {
-      case PUT -> Root / "updatePosition" / UpdatePosition(updatePosition) =>
-        for {
-          tracks: Tracks <- trackStore.updated(updatePosition)
-          response <- Ok(tracks.toString) //todo send back a structure
-        } yield response
-    }
-
+  
   def staticFiles[F[_]: MonadThrow : Files]:HttpRoutes[F] =
     import fs2.io.file.Path
     val dsl = new Http4sDsl[F]{}
