@@ -1,4 +1,4 @@
-package net.walend.sharelocationservice.store
+package net.walend.duckaligner.duckupdateservice.store
 
 import cats.effect.Async
 import cats.effect.std.AtomicCell
@@ -24,7 +24,6 @@ object TrackStore:
     val dsl: Http4sClientDsl[F] = new Http4sClientDsl[F]{}
     import dsl.*
 
-    //todo single-threaded access (in IO)
     private val tracksCell: F[AtomicCell[F, DucksState]] = AtomicCell[F].of(DucksState.start)
 
     def updated(updatePosition: UpdatePosition):F[DucksState] =

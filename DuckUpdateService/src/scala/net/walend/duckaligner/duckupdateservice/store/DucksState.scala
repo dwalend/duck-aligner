@@ -1,4 +1,4 @@
-package net.walend.sharelocationservice.store
+package net.walend.duckaligner.duckupdateservice.store
 
 import scala.collection.immutable.Map
 

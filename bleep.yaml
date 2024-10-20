@@ -22,7 +22,6 @@ projects:
       - ch.qos.logback:logback-classic:1.5.6
       - org.fusesource.jansi:jansi:2.4.1
       - io.circe::circe-parser:0.14.1
-      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
 #      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
   ShareLocationServiceTest:
     extends: template-common
@@ -42,6 +41,18 @@ projects:
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
       - com.disneystreaming.alloy:alloy-core:0.3.14
+  DuckUpdateService:
+    extends: template-common
+    dependsOn: DuckUpdateSmithy
+    dependencies:
+      - org.http4s::http4s-ember-server:0.23.27
+      - org.http4s::http4s-ember-client:0.23.27
+      - org.http4s::http4s-circe:0.23.27
+      - org.http4s::http4s-dsl:0.23.27
+      - ch.qos.logback:logback-classic:1.5.6
+      - org.fusesource.jansi:jansi:2.4.1
+      - io.circe::circe-parser:0.14.1
+      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
 scripts:
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:
@@ -49,7 +60,7 @@ templates:
     platform:
       name: jvm
     scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
   template-js:
@@ -58,7 +69,7 @@ templates:
       jsNodeVersion: 21.7.2
       jsVersion: 1.17.0
     scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
 

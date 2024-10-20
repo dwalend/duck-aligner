@@ -1,5 +1,4 @@
-package net.walend.sharelocationservice
-
+package net.walend.duckaligner.duckupdateservice
 /**
  * Source of tracks and locations for the share location service
  *

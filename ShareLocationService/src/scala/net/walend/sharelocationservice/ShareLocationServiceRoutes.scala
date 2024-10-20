@@ -6,7 +6,6 @@ import cats.syntax.all.*
 import fs2.io.file.Files
 import org.http4s.{HttpRoutes, StaticFile}
 import org.http4s.dsl.Http4sDsl
-import net.walend.sharelocationservice.store.{TrackStore, DucksState, UpdatePosition}
 
 object ShareLocationServiceRoutes:
 
