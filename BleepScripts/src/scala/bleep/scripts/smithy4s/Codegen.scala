@@ -23,6 +23,8 @@ object Codegen extends BleepScript("Smithy4sCodegen") {
     val fallbackSrcDir = theProject.dir.resolve("src/scala")
 
     //todo better generated source directory - maybe a smithy template
+    //todo is it possible to add a smithy working dir to sourceDirs - via yaml or template or default? - that will be cleaned up with each new build?
+    
     val outputDir = sourceDirs.all
       .find(_.toString.endsWith("/shared/src/scala"))
       .orElse(sourceDirs.all.find(_.toString.endsWith("/jvm/src/scala")))

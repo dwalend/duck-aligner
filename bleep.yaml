@@ -13,7 +13,7 @@ projects:
     extends: template-common
     platform:
       mainClass: net.walend.sharelocationservice.Main
-    dependsOn: LocationSmithy
+    dependsOn: DuckUpdateSmithy
     dependencies:
       - org.http4s::http4s-ember-server:0.23.27
       - org.http4s::http4s-ember-client:0.23.27
@@ -22,7 +22,7 @@ projects:
       - ch.qos.logback:logback-classic:1.5.6
       - org.fusesource.jansi:jansi:2.4.1
       - io.circe::circe-parser:0.14.1
-      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25 #not scala3
+      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
 #      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
   ShareLocationServiceTest:
     extends: template-common
@@ -37,7 +37,7 @@ projects:
       mainClass: net.walend.duck.front.Hello
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
-  LocationSmithy:
+  DuckUpdateSmithy:
     extends: template-common
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
