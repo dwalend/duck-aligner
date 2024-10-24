@@ -55,6 +55,13 @@ projects:
       - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
     platform:
       mainClass: net.walend.duckaligner.duckupdateservice.Main
+  DuckUpdateServiceTest:
+    extends: template-common
+    isTestProject: true
+    dependsOn: DuckUpdateService
+    dependencies:
+      - org.scalameta::munit:1.0.0
+      - org.typelevel::munit-cats-effect:2.0.0
 scripts:
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:
