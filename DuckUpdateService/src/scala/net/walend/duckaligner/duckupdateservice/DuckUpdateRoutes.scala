@@ -8,6 +8,7 @@ package net.walend.duckaligner.duckupdateservice
  */
 import net.walend.duckaligner.duckupdates.v0.DuckUpdateServiceGen
 import cats.effect.*
+import cats.implicits.toFunctorOps
 import org.http4s.implicits.*
 import org.http4s.ember.server.*
 import org.http4s.*
@@ -18,7 +19,7 @@ import smithy4s.http4s.SimpleRestJsonBuilder
 
 object Routes {
 
-  private val duckStoreRoutesIO: IO[Resource[IO, HttpRoutes[IO]]] = DucksStateStore.makeDuckStateStore[IO].map{ ducksStateStore =>
+  private def duckStoreRoutesF[F[_]: Concurrent]: F[Resource[F, HttpRoutes[F]]] = DucksStateStore.makeDuckStateStore[F].map { ducksStateStore =>
     SimpleRestJsonBuilder.routes(ducksStateStore).resource
   }
 
@@ -27,7 +28,7 @@ object Routes {
 */
 //  private val docs = smithy4s.http4s.swagger.docs[IO](DucksStateStore)
 
-  val allIO: IO[Resource[IO, HttpRoutes[IO]]] = duckStoreRoutesIO
+  def allF[F[_]: Concurrent]: F[Resource[F, HttpRoutes[F]]] = duckStoreRoutesF[F]
 
 /*  
   private val example: Resource[IO, HttpRoutes[IO]] =
@@ -43,7 +44,7 @@ object Routes {
 
 object Main extends IOApp.Simple:
 
-  val run: IO[Nothing] = Routes.allIO
+  val run: IO[Nothing] = Routes.allF[IO]
     .flatMap { routes =>
       routes.flatMap { r =>
         EmberServerBuilder
