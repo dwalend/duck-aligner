@@ -1,36 +1,28 @@
 package net.walend.duckaligner.duckupdateservice.store
 
-import cats.effect.{Async, IO}
+import cats.effect.Concurrent
 import cats.effect.std.AtomicCell
-import org.http4s.client.dsl.Http4sClientDsl
 import cats.syntax.all.*
-import net.walend.duckaligner.duckupdates.v0.{DuckSitRepUpdate, DuckUpdate, DuckUpdateService, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, UpdatePositionOutput}
 
 /**
  * @author David Walend
  * @since v0.0.0
  */
-/* todo tagless final - but not on the airplane
-trait DucksStateStore[F[_]]:
-  / **
-   * @param updatePosition updated position from a duck
-   * @return the tracks for the rest of the ducks
-   * /
-  def updated(updatePosition: UpdatePosition):F[DucksState]
+trait DucksStateStore[F[_]] extends DuckUpdateService[F]
 
-object DucksStateStore: //todo What's the minimum F to get flatMap on the Atomic cell?
-  def apply[F[_]: Async](using ev:DucksStateStore[F]): DucksStateStore[F] = ev
 
-  def ducksStateStore[F[_]: Async]:DucksStateStore[F] = new DucksStateStore[F]:
-    private val ducksStateCell: F[AtomicCell[F, DucksState]] = AtomicCell[F].of(DucksState.start)
+object DucksStateStore:
+  def ducksStateStore[F[_]](using ducksStateStore:DucksStateStore[F]):DucksStateStore[F] = ducksStateStore
 
-    def updated(updatePosition: UpdatePosition):F[DucksState] =
-      ducksStateCell.flatMap(_.updateAndGet{ t => t.updated(updatePosition) })
-*/
-object DucksStateStore extends DuckUpdateService[IO]:
-  private val ducksStateCell: IO[AtomicCell[IO, DucksState]] = AtomicCell[IO].of(DucksState.start)
-
-  override def updatePosition(positionUpdate: DuckUpdate): IO[UpdatePositionOutput] =
-    val updatePosition = UpdatePosition(positionUpdate)
-    ducksStateCell.flatMap(_.updateAndGet { t => t.updated(updatePosition) }).
-      map(ducksState => UpdatePositionOutput(ducksState.toDuckSitRepUpdate))
+  def makeDuckStateStore[F[_]: Concurrent]:F[DucksStateStore[F]] =
+    AtomicCell[F].of(DucksState.start).map{ducksStateCell =>
+      new DucksStateStore[F]:
+        override def updatePosition(positionUpdate: DuckUpdate): F[UpdatePositionOutput] =
+          val updatePosition = UpdatePosition(positionUpdate)
+          ducksStateCell.updateAndGet { ducksState =>
+              ducksState.updated(updatePosition)
+            }.map { ducksState =>
+              UpdatePositionOutput(ducksState.toDuckSitRepUpdate)
+            }
+    }

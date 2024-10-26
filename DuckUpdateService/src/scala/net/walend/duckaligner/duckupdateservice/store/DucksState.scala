@@ -13,17 +13,19 @@ import net.walend.duckaligner.duckupdates.v0.{DuckUpdate,GeoPoint => DuckPoint,D
 final case class DucksState(snapshot:Int, tracks: Map[DuckId,Track]):
   def updated(updatePosition: UpdatePosition):DucksState =
     val updatedTracks = tracks.updatedWith(updatePosition.id){maybeTrack =>
-      Option(maybeTrack.getOrElse(Track(updatePosition.id,Seq.empty))
-        .updated(updatePosition.geoPoint))
+      Option(
+        maybeTrack.getOrElse(Track(updatePosition.id,Seq.empty))
+        .updated(updatePosition.geoPoint)
+      )
     }
     this.copy(snapshot = this.snapshot + 1,tracks = updatedTracks)
-    
+
   def toDuckSitRepUpdate:DuckSitRepUpdate =
     DuckSitRepUpdate(
-      snapshot = snapshot, 
-      tracks = tracks.map((d,t) => d.toSmithyMapKey -> t.toDuckTrack), 
+      snapshot = snapshot,
+      tracks = tracks.map((d,t) => d.toSmithyMapKey -> t.toDuckTrack),
     )
-    
+
 
 object DucksState:
   def start: DucksState = DucksState(snapshot = 0, tracks = Map.empty)
@@ -37,12 +39,12 @@ object UpdatePosition:
 final case class Track(id:DuckId,positions:Seq[GeoPoint]):
   def updated(geoPoint: GeoPoint): Track =
     this.copy(positions = positions.prepended(geoPoint))
-    
+
   def toDuckTrack:DuckTrack = DuckTrack(id.toDuckI,positions.map(_.toDuckPoint).toList)
- 
+
 final class DuckId(val v:Long) extends AnyVal:
   def toSmithyMapKey: String = v.toString
-  
+
   def toDuckI: DuckI = DuckI(v)
 
 /**
