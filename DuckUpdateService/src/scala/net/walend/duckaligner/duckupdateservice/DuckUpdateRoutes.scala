@@ -30,16 +30,6 @@ object Routes {
 
   def allF[F[_]: Concurrent]: F[Resource[F, HttpRoutes[F]]] = duckStoreRoutesF[F]
 
-/*  
-  private val example: Resource[IO, HttpRoutes[IO]] =
-    SimpleRestJsonBuilder.routes(DucksStateStore.duckStateStore[IO]).resource
-
-  private val docs: HttpRoutes[IO] =
-    smithy4s.http4s.swagger.docs[IO](HelloWorldService)
-
-  val all: Resource[IO, HttpRoutes[IO]] = example.map(_ <+> docs)
-  
- */
 }
 
 object Main extends IOApp.Simple:

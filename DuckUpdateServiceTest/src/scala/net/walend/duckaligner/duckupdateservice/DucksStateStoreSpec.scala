@@ -14,7 +14,7 @@ class DucksStateStoreSpec extends CatsEffectSuite:
 
   private val expected1 = UpdatePositionOutput(DuckSitRepUpdate(
     snapshot = 1,
-    tracks = Map[String, Track](DuckId(1).v.toString -> Track(DuckId(1), List(GeoPoint(0.0, 1.1, 0L))))
+    tracks = List(Track(DuckId(1), List(GeoPoint(0.0, 1.1, 0L))))
   ))
 
 
@@ -35,7 +35,7 @@ class DucksStateStoreSpec extends CatsEffectSuite:
 
   private val expected2 = UpdatePositionOutput(DuckSitRepUpdate(
     snapshot = 2,
-    tracks = Map[String, Track](DuckId(1).v.toString -> Track(DuckId(1), List(
+    tracks = List(Track(DuckId(1), List(
       GeoPoint(1.0, 2.1, 10000L),
       GeoPoint(0.0, 1.1, 0L),
     )))
@@ -49,4 +49,37 @@ class DucksStateStoreSpec extends CatsEffectSuite:
        },
        expected2
      )
+  }
+
+  private val duckUpdate3 = DuckUpdate(
+    id = DuckId(2),
+    snapshot = 1,
+    position = GeoPoint(10.0, 2.1, 6000L)
+  )
+
+  private val expected3 = UpdatePositionOutput(DuckSitRepUpdate(
+    snapshot = 3,
+    tracks = List(
+      Track(DuckId(2), List(
+        GeoPoint(10.0, 2.1, 6000L)
+      )),
+      Track(DuckId(1), List(
+        GeoPoint(1.0, 2.1, 10000L),
+        GeoPoint(0.0, 1.1, 0L),
+      )),
+    )
+  ))
+
+  test("Second duck starts a second track") {
+    assertIO(
+      for{
+        duckStateStore <- DucksStateStore.makeDuckStateStore[IO]
+        _ <- duckStateStore.updatePosition(duckUpdate1)
+        _ <- duckStateStore.updatePosition(duckUpdate2)
+        duckState <- duckStateStore.updatePosition(duckUpdate3)
+      } yield {
+        duckState
+      },
+      expected3
+    )
   }

@@ -23,7 +23,7 @@ final case class DucksState(snapshot:Int, tracks: Map[DuckId,Track]):
   def toDuckSitRepUpdate:DuckSitRepUpdate =
     DuckSitRepUpdate(
       snapshot = snapshot,
-      tracks = tracks.map((d,t) => d.toSmithyMapKey -> t.toDuckTrack),
+      tracks = tracks.values.map(_.toDuckTrack).toList.sortBy(_.positions.head.timestamp)
     )
 
 

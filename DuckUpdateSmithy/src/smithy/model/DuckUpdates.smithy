@@ -32,9 +32,8 @@ structure Track {
     positions: Positions
 }
 
-map DuckLineMap {
-    key: String //really a DuckId
-    value: Track
+list DuckTracks {
+    member: Track
 }
 
 //All the data needed to show all the duck tracks
@@ -47,7 +46,7 @@ structure DuckSitRepUpdate {
     snapshot: Integer
 
     @required
-    tracks: DuckLineMap
+    tracks: DuckTracks
 }
 
 //all the info needed to update the track of a single duck
