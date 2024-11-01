@@ -1,18 +1,10 @@
 package net.walend.duck.front
 
-import org.scalajs.dom.{Geolocation, Position, PositionError, document}
+import org.scalajs.dom.html.Document
+import org.scalajs.dom.{Geolocation, Position, PositionError}
 
-object Hello:
-  def main(args: Array[String]): Unit =
-    println("Hello ducks!")
-    val parNode = document.createElement("p")
-    val textNode = document.createTextNode("Hello, world")
-    parNode.appendChild(textNode)
-    document.body.appendChild(parNode)
-    geolocate()
-
-
-  def geolocate(): Unit =
+object DuckUpdateClient:
+  def geolocate(document: Document): Unit =
     val window = document.defaultView
     val nav = window.navigator
     val geo: Geolocation = nav.geolocation

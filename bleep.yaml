@@ -30,17 +30,18 @@ projects:
     dependencies:
       - org.scalameta::munit:1.0.0
       - org.typelevel::munit-cats-effect:2.0.0
-  FrontEnd:
-    extends: template-js
-    platform:
-      mainClass: net.walend.duck.front.Hello
-    dependencies:
-      - org.scala-js::scalajs-dom:2.8.0
   DuckUpdateSmithy:
     extends: template-common
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
       - com.disneystreaming.alloy:alloy-core:0.3.14
+  FrontEnd:   #todo rename
+    extends: template-js
+    dependsOn: DuckUpdateSmithy
+    platform:
+      mainClass: net.walend.duck.front.Main
+    dependencies:
+      - org.scala-js::scalajs-dom:2.8.0
   DuckUpdateService:
     extends: template-common
     dependsOn: DuckUpdateSmithy
