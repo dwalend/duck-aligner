@@ -43,6 +43,7 @@ projects:
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
       - org.http4s::http4s-ember-client:0.23.27
+#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html
   DuckUpdateService:
     extends: template-common
     dependsOn:

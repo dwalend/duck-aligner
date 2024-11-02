@@ -23,6 +23,7 @@ object DucksStateStore:
           ducksStateCell.updateAndGet { ducksState =>
               ducksState.updated(updatePosition)
             }.map { ducksState =>
+              println(ducksState)
               UpdatePositionOutput(ducksState.toDuckSitRepUpdate)
             }
     }

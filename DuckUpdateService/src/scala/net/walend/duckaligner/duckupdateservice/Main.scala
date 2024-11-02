@@ -16,7 +16,10 @@ import org.http4s.*
 object Main extends IOApp.Simple:
 
   val run: IO[Nothing] = 
-    val routes = DuckUpdateRoutes.allF[IO].map(_.map(_.combineK(StaticRoutes.staticFiles)))
+    val routes = DuckUpdateRoutes.allF[IO].map(_.map(
+      _.combineK(StaticRoutes.staticFiles)
+        .combineK(PingRoutes.pingRoutes)
+    ))
     
     routes.flatMap { routes =>
       routes.flatMap { r =>
