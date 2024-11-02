@@ -22,3 +22,25 @@ object DuckUpdateClient:
     def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
 
     geo.getCurrentPosition(onSuccess _,onError _)
+/*
+import org.http4s.ember.client.EmberClientBuilder
+
+
+object ClientImpl extends IOApp.Simple {
+
+  val helloWorldClient: Resource[IO, HelloWorldService[IO]] = for {
+    client <- EmberClientBuilder.default[IO].build
+    helloClient <- SimpleRestJsonBuilder(HelloWorldService)
+      .client(client)
+      .uri(Uri.unsafeFromString("http://localhost:9000"))
+      .resource
+  } yield helloClient
+
+  val run = helloWorldClient.use(c =>
+    c.hello("Sam", Some("New York City"))
+      .flatMap(greeting => IO.println(greeting.message))
+  )
+
+}
+    
+*/

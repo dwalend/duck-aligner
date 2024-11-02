@@ -19,10 +19,10 @@ object StaticRoutes {
     HttpRoutes.of[F] {
       //todo so wrong. Needs a rework via bleep
       case request@GET -> Root / "static" / "hello.html" =>
-        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/FrontEnd/hello.html"), Some(request))
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/DuckUpdateBrowser/hello.html"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
-      case request@GET -> Root / "static" / "FrontEnd.js" =>
-        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/FrontEnd/FrontEnd.js"), Option(request))
+      case request@GET -> Root / "static" / "DuckUpdateBrowser.js" =>
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser.js"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
     }
 }

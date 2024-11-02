@@ -35,19 +35,21 @@ projects:
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
       - com.disneystreaming.alloy:alloy-core:0.3.14
-  FrontEnd:   #todo rename
+  DuckUpdateBrowser:
     extends: template-js
     dependsOn: DuckUpdateSmithy
     platform:
       mainClass: net.walend.duck.front.Main
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
+      - org.http4s::http4s-ember-client:0.23.27
   DuckUpdateService:
     extends: template-common
-    dependsOn: DuckUpdateSmithy
+    dependsOn:
+     - DuckUpdateSmithy
+#     - DuckUpdateBrowser
     dependencies:
       - org.http4s::http4s-ember-server:0.23.27
-      - org.http4s::http4s-ember-client:0.23.27
       - org.http4s::http4s-circe:0.23.27
       - org.http4s::http4s-dsl:0.23.27
       - ch.qos.logback:logback-classic:1.5.6
@@ -64,6 +66,8 @@ projects:
       - org.scalameta::munit:1.0.0
       - org.typelevel::munit-cats-effect:2.0.0
 scripts:
+  # todo why?
+  # noinspection YAMLSchemaValidation
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:
   template-common:
