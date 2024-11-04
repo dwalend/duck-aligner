@@ -1,12 +1,13 @@
 package net.walend.duck.front
 
-import cats.effect.{IO, IOApp, Resource}
+import cats.effect.{IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
 import org.http4s.Uri
-import org.http4s.ember.client.EmberClientBuilder
 import org.scalajs.dom.html.Document
 import org.scalajs.dom.{Geolocation, Position, PositionError}
+import org.http4s.dom.FetchClientBuilder
 import smithy4s.http4s.SimpleRestJsonBuilder
+
 
 object DuckUpdateClient:
 
@@ -34,10 +35,10 @@ object DuckUpdateClient:
       import cats.effect.unsafe.implicits.global
 
       IO.println("test IO.println again").unsafeRunAsync{
-        case Right(v) => println(s"still working")
+        case Right(_) => println(s"still working")
         case Left(t) => println(s"errored with ${t.getMessage}")
       }
-    /*
+
       val geoPoint: GeoPoint = GeoPoint(
         latitude = p.coords.latitude,
         longitude = p.coords.longitude,
@@ -54,7 +55,7 @@ object DuckUpdateClient:
 
       println(s"before duckUpdateClient")
       val duckUpdateClient: Resource[IO, DuckUpdateService[IO]] = for {
-        client <- EmberClientBuilder.default[IO].build
+        client <- FetchClientBuilder[IO].resource
         duckUpdateClient <- SimpleRestJsonBuilder(DuckUpdateService)
           .client(client)
           .uri(Uri.unsafeFromString("http://localhost:9000"))
@@ -74,7 +75,7 @@ object DuckUpdateClient:
       }
 
       println("after duckLine")
-      */
+
     def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
 
     geo.getCurrentPosition(onSuccess _,onError _)

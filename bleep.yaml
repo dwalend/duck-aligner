@@ -31,7 +31,7 @@ projects:
       - org.scalameta::munit:1.0.0
       - org.typelevel::munit-cats-effect:2.0.0
   DuckUpdateSmithy:
-    extends: template-common
+    extends: template-cross
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
       - com.disneystreaming.alloy:alloy-core:0.3.14
@@ -42,7 +42,7 @@ projects:
       mainClass: net.walend.duck.front.Main
     dependencies:
       - org.scala-js::scalajs-dom:2.8.0
-      - org.http4s::http4s-ember-client:0.23.27
+      - org.http4s::http4s-dom:0.2.11
 #      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html
   DuckUpdateService:
     extends: template-common
@@ -87,5 +87,11 @@ templates:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
+  template-cross:
+    cross:
+      js:
+        extends: template-js
+      jvm:
+        extends: template-common
 
     

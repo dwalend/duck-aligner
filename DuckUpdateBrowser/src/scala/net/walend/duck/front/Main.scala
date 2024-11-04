@@ -4,7 +4,6 @@ import cats.effect.{IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint}
 import org.http4s.Uri
 import org.http4s.client.Client
-import org.http4s.ember.client.EmberClientBuilder
 import org.scalajs.dom.document
 import smithy4s.http4s.SimpleRestJsonBuilder
 
