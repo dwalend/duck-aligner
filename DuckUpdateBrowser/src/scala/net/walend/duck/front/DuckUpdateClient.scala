@@ -34,11 +34,6 @@ object DuckUpdateClient:
 
       import cats.effect.unsafe.implicits.global
 
-      IO.println("test IO.println again").unsafeRunAsync{
-        case Right(_) => println(s"still working")
-        case Left(t) => println(s"errored with ${t.getMessage}")
-      }
-
       val geoPoint: GeoPoint = GeoPoint(
         latitude = p.coords.latitude,
         longitude = p.coords.longitude,
@@ -50,10 +45,7 @@ object DuckUpdateClient:
         snapshot = 0,
         position = geoPoint
       )
-      println(s"before duckUpdateClient with $duckUpdate")
 
-
-      println(s"before duckUpdateClient")
       val duckUpdateClient: Resource[IO, DuckUpdateService[IO]] = for {
         client <- FetchClientBuilder[IO].resource
         duckUpdateClient <- SimpleRestJsonBuilder(DuckUpdateService)
@@ -61,20 +53,15 @@ object DuckUpdateClient:
           .uri(Uri.unsafeFromString("http://localhost:9000"))
           .resource
       } yield duckUpdateClient
-      println(s"duckUpdateClient is $duckUpdateClient")
 
       duckUpdateClient.use(c =>
-        println(s"started use with $c")
         c.updatePosition(duckUpdate).flatMap{duckLine =>
-          println(s"got duckLine in IO $duckLine")
           IO(duckLine)
         }
       ).unsafeRunAsync{
         case Right(v) => println(s"got duckLine $v")
         case Left(t) => println(s"duckLine errored with ${t.getMessage}")
       }
-
-      println("after duckLine")
 
     def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
 
