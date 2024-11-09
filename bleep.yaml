@@ -41,9 +41,10 @@ projects:
     platform:
       mainClass: net.walend.duck.front.Main
     dependencies:
+      - com.armanbilge::calico:0.2.2
       - org.scala-js::scalajs-dom:2.8.0
       - org.http4s::http4s-dom:0.2.11
-#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html
+#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
   DuckUpdateService:
     extends: template-common
     dependsOn:

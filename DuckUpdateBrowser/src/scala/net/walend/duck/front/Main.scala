@@ -1,18 +1,21 @@
 package net.walend.duck.front
 
-import cats.effect.{ExitCode, IO, IOApp, Resource}
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint}
-import org.http4s.Uri
-import org.http4s.client.Client
+import calico.IOWebApp
+import calico.html.io.label
+import cats.effect.{IO, Resource}
 import org.scalajs.dom.document
-import smithy4s.http4s.SimpleRestJsonBuilder
+import fs2.dom.HtmlElement
+import calico.html.io.forString
 
-object Main extends IOApp:
-  override def run(args: List[String]): IO[ExitCode] =
-    println("DuckUpdateClient ducks!")
-    val parNode = document.createElement("p")
-    val textNode = document.createTextNode("DuckUpdateClient, world")
-    parNode.appendChild(textNode)
-    document.body.appendChild(parNode)
+object Main extends IOWebApp:
+  def render: Resource[IO, HtmlElement[cats.effect.IO]] =
+    for {
+      client <- DuckUpdateClient.duckUpdateClient
+      hi <- label("Hello!")
+      geoLocator = GeoLocator.geolocator(document,client)
+    } yield {
+      println("DuckUpdateClient ducks!")
+      geoLocator.geoLocate()
 
-    IO(DuckUpdateClient.geolocate(document)).map(_ => ExitCode.Success)    
+      hi
+    }
