@@ -5,7 +5,7 @@ import mill._, mill.scalalib._, publish._
 object Smithy4sAwsClient extends ScalaModule with Smithy4sModule with PublishModule {
   import smithy4s.codegen.AwsSpecs
 
-  def scalaVersion = "2.13.8"
+  def scalaVersion = "2.13.15"
   override def ivyDeps = Agg(
     ivy"com.disneystreaming.smithy4s::smithy4s-aws-kernel:${smithy4sVersion()}",
   )
