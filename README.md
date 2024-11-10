@@ -12,7 +12,7 @@ What's here now:
 * * To run the server use 
 
 ```shell
-bleep run ShareLocationService
+bleep run DuckupdateService
 ```
 And curl it with   
 
@@ -24,34 +24,32 @@ Here's the sketch of a plan:
 
 * Mostly eat what amazon puts on the plate, build the system up by getting things going, then take on the biggest risks - least familiarity for me - first. Numbers indicate order I plan to chip away at the project.
           
-* (1) Get a server up and running, and sharing location data
+* - [x] (1) Get a server up and running, and sharing location data
 * Get it running on some tiny machine on AWS (t4 I think is the current generation)
 * * It'll only serve about 2 requests per minute per user ~ 240 requests an hour for most uses
 * * That might mean compiling it to scala native to fit on the tiny server
+* * - [ ] (4.2) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
+* * - [ ] (4.4) share about smithy in bleep
 
-* (2) Use scalajs to build a web app
+* - [ ] (3) Use scalajs to build a web app
 * *  Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
-* (3) Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js 
+* - [x] Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js
 * * (Find some other javascript API to see what tech is providing the location. If it's IP-based instead of GPS, for example)
+* * - [ ] (4.6) Bleep copy static javascript and html to a (bleep-managed) resource directory
+* * - [ ] (4.8) Test javascript in bleep - how to access dom (or not use dom)
 * * Add an optional stealth zone - maybe the first quarter of the trip - to hide origin
-* (4) Send that to some URL, receive locations (stored in memory) back from other users
-* (6) Use the scala js AWS API to get map sections from location data https://docs.aws.amazon.com/location/latest/APIReference/welcome.html https://github.com/exoego/aws-sdk-scalajs-facade/blob/master/aws-sdk-v2/services/location/src/main/scala/facade/amazonaws/services/Location.scala https://docs.aws.amazon.com/location/latest/developerguide/samples.html#example-draw-markers .
+* - [ ] (4) Send that to some URL, receive locations (stored in memory) back from other users (blocked bleep vs scalajs)
+* - [ ] (5) Use smithy4s' AWS API to get map sections from location data https://docs.aws.amazon.com/location/latest/APIReference/welcome.html https://github.com/exoego/aws-sdk-scalajs-facade/blob/master/aws-sdk-v2/services/location/src/main/scala/facade/amazonaws/services/Location.scala https://docs.aws.amazon.com/location/latest/developerguide/samples.html#example-draw-markers .
+* * - [ ] (6) Build the smithy4s aws code using Bleep instead of mill
+* * - [ ] (7) Wait for the location service form smithy4s to get fixed (or figure out how to do it). Broken in the 2023 version
 * * Possibly offset the location or enter some false locations to put off AWS tracking if they are storing too much data. Amazon is pretty open about which information they keep from AWS API calls.        
 * Set up an ephemeral service (S3 and AWS lambda ?) behind an AWS Gateway endpoint to 
 * * serve the static bits - javascript, html, images, etc
 * * start the service - see https://www.youtube.com/watch?v=SBJNAf-OGQw - smithy4s - maybe - not sure it's the right critter.
 * * * compile to scala native again
 * * handle the https cert work (which the geolocation javascript API requires)
-* * (7) send SMS text messages to invite other people to the location sharing service (Uisng the AWS SNS (not SMS) service - see https://docs.aws.amazon.com/sns/latest/dg/sms_sending-overview.html#sms_publish_sdk )
+* * - [ ] (8) send SMS text messages to invite other people to the location sharing service
 * * handle user login and authentication 
-* * Figure out if Constellation is a good fit for keeping "ability to see my location" private except for direct connections in a social network. The more I ponder it the less I think I need it - just access to a contacts list seems like enough
-
-I probably won't:
-
-* Use a Constellation network of people willing to share with each other
-* * Create a subnet of people to share with each other right now
-* * Let "share location right now" be the protected, valued asset
-
 
 ---
 

@@ -64,7 +64,7 @@ class Smithy4sCodegen(
     .getOrElse(throw new Exception("No version combo found"))
 
   private val smithy4sInputDirs: Seq[Path] = Seq(
-    started.buildPaths.project(crossProjectName, project).dir.resolve("smithy")
+    started.buildPaths.project(crossProjectName, project).dir.resolve("src/smithy")
   )
 
   private val smithy4sOutputDir: Path =

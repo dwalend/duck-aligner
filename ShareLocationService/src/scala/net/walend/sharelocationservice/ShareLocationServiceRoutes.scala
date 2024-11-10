@@ -1,8 +1,10 @@
 package net.walend.sharelocationservice
 
+import cats.{Monad, MonadThrow}
 import cats.effect.Sync
 import cats.syntax.all.*
-import org.http4s.HttpRoutes
+import fs2.io.file.Files
+import org.http4s.{HttpRoutes, StaticFile}
 import org.http4s.dsl.Http4sDsl
 
 object ShareLocationServiceRoutes:
@@ -39,4 +41,17 @@ object ShareLocationServiceRoutes:
           forecast: Forecast <- forecastSource.get(coordinates)
           response <- Ok(forecast.toResponseString)
         } yield response
+    }
+  
+  def staticFiles[F[_]: MonadThrow : Files]:HttpRoutes[F] =
+    import fs2.io.file.Path
+    val dsl = new Http4sDsl[F]{}
+    import dsl.*
+    HttpRoutes.of[F] {
+      case request@GET -> Root / "static" / "hello.html" =>
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/FrontEnd/hello.html"), Some(request))
+          .getOrElseF(NotFound()) // In case the file doesn't exist
+      case request@GET -> Root / "static" / "FrontEnd.js" =>
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/FrontEnd/FrontEnd.js"), Option(request))
+          .getOrElseF(NotFound()) // In case the file doesn't exist
     }

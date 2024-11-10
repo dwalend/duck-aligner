@@ -8,25 +8,12 @@ projects:
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.24 #not scala3
-  StartShareService:
-    extends: template-common
-    platform:
-      mainClass: net.walend.startshare.Main
-    dependencies:
-      - org.http4s::http4s-ember-server:0.23.27
-      - org.http4s::http4s-ember-client:0.23.27
-      - org.http4s::http4s-circe:0.23.27
-      - org.http4s::http4s-dsl:0.23.27
-      - ch.qos.logback:logback-classic:1.5.6
-      - org.fusesource.jansi:jansi:2.4.1
-      - io.circe::circe-parser:0.14.1
-      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
-      - net.walend:Smithy4sAwsClient_2.13:0.0.0
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.25 #not scala3
   ShareLocationService:
     extends: template-common
     platform:
       mainClass: net.walend.sharelocationservice.Main
+    dependsOn: DuckUpdateSmithy
     dependencies:
       - org.http4s::http4s-ember-server:0.23.27
       - org.http4s::http4s-ember-client:0.23.27
@@ -44,30 +31,69 @@ projects:
     dependencies:
       - org.scalameta::munit:1.0.0
       - org.typelevel::munit-cats-effect:2.0.0
-  FrontEnd:
-    extends: template-js
-    platform:
-      mainClass: net.walend.duck.front.Hello
+  DuckUpdateSmithy:
+    extends: template-cross
     dependencies:
+      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
+      - com.disneystreaming.alloy:alloy-core:0.3.14
+  DuckUpdateBrowser:
+    extends: template-js
+    dependsOn: DuckUpdateSmithy
+    platform:
+      mainClass: net.walend.duck.front.Main
+    dependencies:
+      - com.armanbilge::calico:0.2.2
       - org.scala-js::scalajs-dom:2.8.0
+      - org.http4s::http4s-dom:0.2.11
+#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
+  DuckUpdateService:
+    extends: template-common
+    dependsOn:
+     - DuckUpdateSmithy
+#     - DuckUpdateBrowser
+    dependencies:
+      - org.http4s::http4s-ember-server:0.23.27
+      - org.http4s::http4s-circe:0.23.27
+      - org.http4s::http4s-dsl:0.23.27
+      - ch.qos.logback:logback-classic:1.5.6
+      - org.fusesource.jansi:jansi:2.4.1
+      - io.circe::circe-parser:0.14.1
+      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
+    platform:
+      mainClass: net.walend.duckaligner.duckupdateservice.Main
+  DuckUpdateServiceTest:
+    extends: template-common
+    isTestProject: true
+    dependsOn: DuckUpdateService
+    dependencies:
+      - org.scalameta::munit:1.0.0
+      - org.typelevel::munit-cats-effect:2.0.0
 scripts:
-  genAwsCode: BleepScripts/bleep.scripts.smithy4s.Codegen
+  # todo why?
+  # noinspection YAMLSchemaValidation
+  genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
 templates:
   template-common:
     platform:
       name: jvm
     scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
   template-js:
     platform:
       name: js
       jsNodeVersion: 21.7.2
-      jsVersion: 1.16.0
+      jsVersion: 1.17.0
     scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates -Wconf:any:warning-verbose
+      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
       version: 3.3.3
+  template-cross:
+    cross:
+      js:
+        extends: template-js
+      jvm:
+        extends: template-common
 
     
