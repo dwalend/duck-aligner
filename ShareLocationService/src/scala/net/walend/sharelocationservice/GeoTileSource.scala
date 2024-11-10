@@ -27,7 +27,7 @@ object GeoTileSource:
   def apply[F[_]](using ev:GeoTileSource[F]): GeoTileSource[F] = ev
 
   def geoTileSource[F[_]: Async](client: Client[F]):GeoTileSource[F] = new GeoTileSource[F]:
-    AwsEnvironment.default(client,AwsRegion.US_EAST_1).use { env: AwsEnvironment[F] =>
+    AwsEnvironment.default(client,AwsRegion.US_EAST_1).use { (env: AwsEnvironment[F]) =>
       ???
       
     }
