@@ -2,7 +2,7 @@ package net.walend.duckaligner.duckupdateservice.store
 
 import scala.collection.immutable.Map
 
-//todo who gets the Duck prefix? (Change DuckI)
+//todo who gets the Duck prefix? (Change DuckI) - asked on Discord 11-10
 import net.walend.duckaligner.duckupdates.v0.{DuckUpdate,GeoPoint => DuckPoint,DuckSitRepUpdate,Track => DuckTrack,DuckId => DuckI}
 /**
  * Shared structures between the ShareLocationService and the front end.

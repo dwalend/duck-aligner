@@ -21,7 +21,7 @@ object GeoLocator:
           case Right(_) => println(s"Worked!")
           case Left(t) => println(s"errored with ${t.getMessage}")
         }
-
+/*
         println(s"latitude=${p.coords.latitude}")
         println(s"longitude=${p.coords.longitude}")
         println(s"altitude=${p.coords.altitude}")
@@ -30,7 +30,7 @@ object GeoLocator:
         println(s"accuracy=${p.coords.accuracy} m")
         println(s"altitudeAccuracy=${p.coords.altitudeAccuracy}")
         println(s"timestamp=${p.timestamp}")
-        
+*/
         val geoPoint: GeoPoint = GeoPoint(
           latitude = p.coords.latitude,
           longitude = p.coords.longitude,
@@ -47,5 +47,10 @@ object GeoLocator:
           case Right(v) => println(s"got duckLine $v")
           case Left(t) => println(s"duckLine error ${t.getMessage}")
         }
+        
+        /* the duckUpdate looks like 
+        UpdatePositionOutput(DuckSitRepUpdate(3,List(Track(DuckId(0),List(GeoPoint(42.33588581370238,-71.20792615771647,1731266038546), GeoPoint(42.33590111186763,-71.20790998133523,1731266024542), GeoPoint(42.33590111186763,-71.20790998133523,1731266015453)))),0))
+        
+         */
 
       def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
