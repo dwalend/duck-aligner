@@ -1,4 +1,4 @@
-import $ivy.`com.disneystreaming.smithy4s::smithy4s-mill-codegen-plugin::0.18.25`
+import $ivy.`com.disneystreaming.smithy4s::smithy4s-mill-codegen-plugin::0.18.27`
 import smithy4s.codegen.mill._
 
 import mill._, mill.scalalib._, publish._
