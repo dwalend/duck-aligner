@@ -1,6 +1,7 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
 import software.amazon.awssdk.services.geomaps.GeoMapsAsyncClient
+import software.amazon.awssdk.services.geomaps.model.GetTileRequest
 
 /**
  *
@@ -12,8 +13,14 @@ object AwsLocationClient {
 
   val builder = GeoMapsAsyncClient.builder()
 
-  val client = builder.build()
+  val client: GeoMapsAsyncClient = builder.build()
   
-  client.getTile()
+  def getTile() =
+
+    val tileRequest: GetTileRequest = GetTileRequest.builder()
+                                      
+                                      .build()
+    
+    client.getTile(tileRequest)
 
 }
