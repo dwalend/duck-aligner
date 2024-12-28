@@ -15,3 +15,5 @@ out/**
 
 #smithy bits
 LocationSmithy/src/scala/**
+DuckUpdateSmithy/src/scala/**
+DuckUpdateSmithy/src/resources/**
