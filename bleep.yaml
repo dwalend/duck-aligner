@@ -52,6 +52,7 @@ projects:
 #     - DuckUpdateBrowser
     dependencies:
       - org.http4s::http4s-ember-server:0.23.27
+      - org.http4s::http4s-ember-client:0.23.27
       - org.http4s::http4s-circe:0.23.27
       - org.http4s::http4s-dsl:0.23.27
       - ch.qos.logback:logback-classic:1.5.6

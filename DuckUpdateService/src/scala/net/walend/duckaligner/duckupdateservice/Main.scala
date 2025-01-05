@@ -5,6 +5,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import com.comcast.ip4s.{host, port}
 import cats.effect.*
 import cats.implicits.toSemigroupKOps
+import net.walend.duckaligner.duckupdateservice.awssdklocation.{AwsLocationRoutes, MapLibreGLRoutes}
 import org.http4s.*
 
 /**
@@ -19,6 +20,7 @@ object Main extends IOApp.Simple:
     val routes = DuckUpdateRoutes.allF[IO].map(_.map(
       _.combineK(StaticRoutes.staticFiles)
         .combineK(PingRoutes.pingRoutes)
+        .combineK(MapLibreGLRoutes.mapLibreGLProxy)
     ))
     
     routes.flatMap { routes =>

@@ -2,7 +2,7 @@ package net.walend.duckaligner.duckupdateservice.awssdklocation
 
 import cats.effect.{Async, IO}
 import software.amazon.awssdk.services.geomaps.GeoMapsAsyncClient
-import software.amazon.awssdk.services.geomaps.model.{GetStaticMapRequest, GetStaticMapResponse, GetTileRequest, ScaleBarUnit, StaticMapStyle}
+import software.amazon.awssdk.services.geomaps.model.{GetStaticMapRequest, GetStaticMapResponse, GetStyleDescriptorRequest, GetTileRequest, MapStyle, ScaleBarUnit, StaticMapStyle}
 
 import java.util.concurrent.CompletableFuture
 
@@ -18,7 +18,15 @@ object AwsLocationClient:
 
   val client: GeoMapsAsyncClient = builder
     .build()
-  
+
+  def requestDynamicMap =
+    val request = GetStyleDescriptorRequest.builder()
+      .key(AwsSecrets.apiKey)
+      .style(MapStyle.STANDARD)
+      .build()
+
+    IO.blocking(client.getStyleDescriptor(request).get())
+
   def getTile[F[_] <: Async[F]]() =
 
 
