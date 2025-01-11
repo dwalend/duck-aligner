@@ -80,12 +80,12 @@ templates:
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
-      version: 3.3.3
+      version: 3.3.4
   template-js:
     platform:
       name: js
       jsNodeVersion: 21.7.2
-      jsVersion: 1.17.0
+      jsVersion: 1.18.0
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params -Wunused:privates //-Wconf:any:warning-verbose
       strict: true
