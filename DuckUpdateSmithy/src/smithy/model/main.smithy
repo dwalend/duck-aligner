@@ -9,7 +9,8 @@ use alloy#simpleRestJson
 service DuckUpdateService {
     version: "0.0.0"  //todo link to the build system
     operations: [
-        UpdatePosition
+        UpdatePosition,
+        MapLibreGlKey
     ]
 }
 
@@ -22,5 +23,13 @@ operation UpdatePosition {
     output := {
         @required
         tracks:DuckSitRepUpdate
+    }
+}
+
+@http(method: "GET", uri: "/mapKey", code: 200)
+operation MapLibreGlKey {
+    output := {
+        @required
+        key:String
     }
 }

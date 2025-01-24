@@ -1,5 +1,6 @@
 package bleep.scripts.smithy4s
 
+import bleep.model.CrossProjectName
 import bleep.{BleepScript, Commands, Started}
 
 object Codegen extends BleepScript("Smithy4sCodegen") {
@@ -10,9 +11,12 @@ object Codegen extends BleepScript("Smithy4sCodegen") {
                   ): Unit = {
 
     val projectNameMap = started.globs.exactProjectMap
-    val cpn =
+    val cpn: String =
       args.headOption.getOrElse(sys.error("Must provide a crossProjectName"))
-    val crossProjectName = projectNameMap.getOrElse(cpn, sys.error(s"'$cpn' is not a valid crossProjectName"))
+    println(projectNameMap.keySet.mkString(", "))
+    val crossProjectName: CrossProjectName = projectNameMap.getOrElse(cpn,
+      projectNameMap.getOrElse(s"$cpn@jvm", sys.error(s"'$cpn' is not a valid crossProjectName"))
+    )
     val theProject = started.buildPaths
       .project(
         crossProjectName,
@@ -23,6 +27,7 @@ object Codegen extends BleepScript("Smithy4sCodegen") {
     val fallbackSrcDir = theProject.dir.resolve("src/scala")
     val resourceDir = theProject.dir.resolve("src/resources")
 
+    //todo change this to just part of the compile
     //todo better generated source directory - maybe a smithy template
     //todo is it possible to add a smithy working dir to sourceDirs - via yaml or template or default? - that will be cleaned up with each new build?
     

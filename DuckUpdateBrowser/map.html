@@ -14,12 +14,14 @@
 <!-- Map container -->
 <div id="map"></div>
 <script>
-   const apiKey = "copy from aws secrets if you need it";
+  
+  //todo convert to scala, then use the mapKey endpoint
+  const apiKey = "copy from aws secrets if you need it";
 
   const mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
   const awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 <!--  const styleUrl = `https://maps.geo.${awsRegion}.amazonaws.com/v2/styles/${mapStyle}/descriptor?key=${apiKey}`; -->
-  
+
   const styleUrl = `../mapLibreGL/styles/${mapStyle}/descriptor`;
 
   const map = new maplibregl.Map({

@@ -42,7 +42,7 @@ Here's the sketch of a plan:
 * - [ ] (5) Get map sections from location data from AWS' location service
 ** - [ ] Use smithy4s' AWS API to get map sections from location data https://docs.aws.amazon.com/location/latest/APIReference/welcome.html https://github.com/exoego/aws-sdk-scalajs-facade/blob/master/aws-sdk-v2/services/location/src/main/scala/facade/amazonaws/services/Location.scala https://docs.aws.amazon.com/location/latest/developerguide/samples.html#example-draw-markers . (blocked smithy4s compile error building AWS location)
 * * - [ ] (6) Build the smithy4s aws code using Bleep instead of mill
-* * - [ ] (7) Wait for the location service form smithy4s to get fixed (or figure out how to do it). Broken in the 2023 version
+* * - [ ] (7) Wait for the location service form smithy4s to get fixed (or figure out how to do it). Broken in the 2023 version - maybe don't need it after all - just the key
 * * Possibly offset the location or enter some false locations to put off AWS tracking if they are storing too much data. Amazon is pretty open about which information they keep from AWS API calls.        
 * Set up an ephemeral service (S3 and AWS lambda ?) behind an AWS Gateway endpoint to 
 * * serve the static bits - javascript, html, images, etc

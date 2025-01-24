@@ -1,6 +1,6 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
-import cats.effect.{IO, Resource}
+import cats.effect.{Async, Resource}
 import org.http4s.{Headers, HttpRoutes, Method, Request, Response, Uri}
 import org.http4s.client.Client
 import org.http4s.dsl.Http4sDsl
@@ -32,20 +32,19 @@ object MapLibreGLRoutes:
     .withAllowCredentials(false)
     .withMaxAge(1.day)
 
-  def mapLibreGLProxy: HttpRoutes[IO] = corsMethodSvc(mapLibreGLRoutes)
+  def mapLibreGLProxy[F[_]:Async]: HttpRoutes[F] = corsMethodSvc(mapLibreGLRoutes)
 
-  //todo tagless final
-  private def mapLibreGLRoutes:HttpRoutes[IO] =
-    val dsl = new Http4sDsl[IO]{}
+  private def mapLibreGLRoutes[F[_]:Async]:HttpRoutes[F] =
+    val dsl = new Http4sDsl[F]{}
     import dsl.*
-    HttpRoutes.of[IO] {
+    HttpRoutes.of[F] {
       case req@GET -> "mapLibreGL" /: rest =>
         if (allowRequest(req))
-          val responseResource:Resource[IO,Response[IO]] = for
-            client: Client[IO] <- EmberClientBuilder.default[IO].build
+          val responseResource:Resource[F,Response[F]] = for
+            client: Client[F] <- EmberClientBuilder.default[F].build
             uri: Uri = mapsLibreBaseUri.addPath(rest.renderString).withQueryParam("key",AwsSecrets.apiKey)
             proxiedReq = req.withUri(uri).withHeaders(Headers("Origin" -> s"https://maps.geo.$awsRegion.amazonaws.com"))
-            response:Response[IO] <- client.run(proxiedReq)
+            response:Response[F] <- client.run(proxiedReq)
           yield
             response
 
@@ -55,5 +54,5 @@ object MapLibreGLRoutes:
         else Forbidden("No mapLibreGL for you")
     }
 
-  private def allowRequest(req:Request[IO]):Boolean = true
+  private def allowRequest[F[_]](req:Request[F]):Boolean = true
 

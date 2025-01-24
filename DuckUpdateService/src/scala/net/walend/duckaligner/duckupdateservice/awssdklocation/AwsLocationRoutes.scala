@@ -12,7 +12,7 @@ import org.http4s.dsl.Http4sDsl
  * @since v0.0.0
  */
 object AwsLocationRoutes {
-  //todo tagless final
+  //todo tagless final - puzzle in requestStaticMap - which might go away and take this class with it 
   def awsLocationRoutes:HttpRoutes[IO] =
 //    def awsLocationRoutes[F[_] : MonadThrow]: HttpRoutes[F] =
 

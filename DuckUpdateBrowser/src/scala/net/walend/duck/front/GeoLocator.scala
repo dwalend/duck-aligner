@@ -42,6 +42,17 @@ object GeoLocator:
           snapshot = 0,
           position = geoPoint
         )
+        /*
+                duckUpdateClient
+          .updatePosition(duckUpdate)
+          .flatTap(dl => IO.println(s"got duckLine $dl Do something with that."))
+          .unsafeRunAsync {
+            case Right(_) =>
+            case Left(t) => println(s"duckLine error ${t.getMessage}")
+          }
+
+         */
+
 
         duckUpdateClient.updatePosition(duckUpdate).unsafeRunAsync {
           case Right(v) => println(s"got duckLine $v")

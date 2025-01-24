@@ -1,6 +1,6 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
-import cats.effect.{Async, IO}
+import cats.effect.{Async, IO, Sync}
 import software.amazon.awssdk.services.geomaps.GeoMapsAsyncClient
 import software.amazon.awssdk.services.geomaps.model.{GetStaticMapRequest, GetStaticMapResponse, GetStyleDescriptorRequest, GetTileRequest, MapStyle, ScaleBarUnit, StaticMapStyle}
 
@@ -26,20 +26,7 @@ object AwsLocationClient:
       .build()
 
     IO.blocking(client.getStyleDescriptor(request).get())
-
-  def getTile[F[_] <: Async[F]]() =
-
-
-    val tileRequest: GetTileRequest = GetTileRequest.builder()
-                                      .key(AwsSecrets.apiKey)
-                                      .x("1") //0 to 3
-                                      .y("1") //0 to 3
-                                      .z("2")
-                                      .tileset("vector.basemap")
-                                      .build()
-    //todo Use tagless final F[_]
-    IO.blocking(client.getTile(tileRequest).get())
-
+  
   val lat1 = 42.33588581370238
   val lon1 = -71.20792615771647
 
@@ -86,10 +73,11 @@ object AwsLocationClient:
        |  ]
        |}""".stripMargin
 
+//todo remove if no longer used - should all this happen on the client to keep life simple?
   def requestStaticMap: IO[GetStaticMapResponse] =
     val mapRequest = GetStaticMapRequest.builder()
       .key(AwsSecrets.apiKey)
-      .boundedPositions(newton.mkString(","))
+      .boundedPositions(newton.mkString(",")) //from duck updates
       .padding(50)
       .style(StaticMapStyle.SATELLITE)
       .height(1000)
@@ -99,5 +87,6 @@ object AwsLocationClient:
       .fileName("map")
       .build()
 
+    //todo how to call F.blocking for tagless final? It should be in Sync??
     IO.blocking(client.getStaticMap(mapRequest).get)
 

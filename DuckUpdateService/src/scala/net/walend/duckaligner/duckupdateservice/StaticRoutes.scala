@@ -17,7 +17,7 @@ object StaticRoutes {
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {
-      //todo so wrong. Needs a rework via bleep
+      //todo so wrong. Needs a rework via bleep. Where should static files be served? jar resources? Same for scala-js
       case request@GET -> Root / "static" / "hello.html" =>
         StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/DuckUpdateBrowser/hello.html"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist

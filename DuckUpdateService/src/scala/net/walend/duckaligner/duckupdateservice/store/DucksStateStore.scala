@@ -3,7 +3,8 @@ package net.walend.duckaligner.duckupdateservice.store
 import cats.effect.Concurrent
 import cats.effect.std.AtomicCell
 import cats.syntax.all.*
-import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, MapLibreGlKeyOutput, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdateservice.awssdklocation.AwsSecrets
 
 /**
  * @author David Walend
@@ -26,4 +27,6 @@ object DucksStateStore:
               println(ducksState)
               UpdatePositionOutput(ducksState.toDuckSitRepUpdate)
             }
+
+        override def mapLibreGlKey(): F[MapLibreGlKeyOutput] = ???// todo solve this puzzle F.pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
     }
