@@ -9,14 +9,13 @@ import calico.html.io.forString
 
 object Main extends IOWebApp:
   def render: Resource[IO, HtmlElement[IO]] =
-    for {
+    for 
       client <- DuckUpdateClient.duckUpdateClient
       hi <- label("Hello!")
       geoLocator = GeoLocator.geolocator(document,client)
-      //mapDiv <- MapLibreGL.mapDiv(client)
-    } yield {
+      mapDiv <- MapLibreGL.mapDiv(client)
+    yield
       println("DuckUpdateClient ducks!")
       geoLocator.geoLocate()
 
-      hi
-    }
+      mapDiv
