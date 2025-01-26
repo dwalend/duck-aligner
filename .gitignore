@@ -11,7 +11,7 @@ hs_err_pid*
 github.token
 
 #mill bits
-out/**
+**/out/**
 
 #smithy bits
 LocationSmithy/src/scala/**
