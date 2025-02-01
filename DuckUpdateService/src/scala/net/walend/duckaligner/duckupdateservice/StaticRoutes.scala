@@ -21,6 +21,10 @@ object StaticRoutes {
       case request@GET -> Root / "static" / "hello.html" =>
         StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/DuckUpdateBrowser/hello.html"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
+      case request@GET -> Root / "static" / "main.js" =>
+        //./.bleep/builds/normal/.bloop/DuckUpdateBrowser/
+        StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js/main.js"), Option(request))
+          .getOrElseF(NotFound()) // In case the file doesn't exist
       case request@GET -> Root / "static" / "DuckUpdateBrowser.js" =>
         StaticFile.fromPath(Path("/Users/dwalend/projects/duck-aligner/.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser.js"), Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist

@@ -1,3 +1,4 @@
+/*
 package net.walend.duck.front
 import calico.html.io.div
 import calico.html.io.forString
@@ -21,3 +22,4 @@ object MapLibreGL:
     }
     //todo return a thing that has both a div and a thing that can take a duckUpdate to update the map. That thing might need to go into the callback. Chicken-vs-egg problem
     div("map")
+ */
