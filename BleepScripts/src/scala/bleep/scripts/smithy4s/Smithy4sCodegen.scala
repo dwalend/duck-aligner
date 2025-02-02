@@ -131,7 +131,7 @@ class Smithy4sCodegen(
           )
         results.log(
           started.logger
-            .withContext(projectName)
+            .withContext("projectName",projectName._1.value)
             .withContext("version", version),
           "Published temporary version locally"
         )
