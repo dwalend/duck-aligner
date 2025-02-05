@@ -7,8 +7,8 @@ import fs2.dom.{HtmlDocument, HtmlElement}
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-//import typings.maplibreGl.global.maplibregl.Map
-//import typings.maplibreGl.mod.MapOptions
+import typings.maplibreGl.global.maplibregl.Map
+import typings.maplibreGl.mod.MapOptions
 
 @JSExportTopLevel("Main")
 object Main extends IOWebApp:
@@ -19,27 +19,38 @@ object Main extends IOWebApp:
     main(Array.empty)
   
   def render: Resource[IO, HtmlElement[IO]] =
-    println("console works")
+
+
 
     import calico.html.io.{*, given}
+    val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
+    val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 
     for
-      client <- DuckUpdateClient.duckUpdateClient
-//todo ??      doc: HtmlDocument[IO] = window.document
-      geoLocator = GeoLocator.geolocator(document,client)
       hi <- label("Hello!")
-      _ = println("console in for")
+//      mapDiv <- div("map")
+//      client <- DuckUpdateClient.duckUpdateClient
+      apiKey = ???
+      styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
+
+//todo ??      doc: HtmlDocument[IO] = window.document
+//      geoLocator = GeoLocator.geolocator(document,client)
     yield
-      geoLocator.geoLocate()
-      
+//      geoLocator.geoLocate()
+
+      //todo make this a resource
+      val map = new Map(new MapOptions {
+        style = styleUrl
+        var container = "map"
+        center = (25.24, 36.31)
+        zoom = 2
+      })
+
       println("DuckUpdateClient ducks!")
       hi
 
 /*
 
-    val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
-    val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
-    val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
 
     println("console")
     label("Hello!")
