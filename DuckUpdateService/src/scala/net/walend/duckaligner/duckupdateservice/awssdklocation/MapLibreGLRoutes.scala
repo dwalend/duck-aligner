@@ -38,6 +38,11 @@ object MapLibreGLRoutes:
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {
+      case GET -> Root / "apiKey" =>
+        Ok(AwsSecrets.apiKey)
+
+      //todo not used
+        
       case req@GET -> "mapLibreGL" /: rest =>
         if (allowRequest(req))
           val responseResource:Resource[F,Response[F]] = for
@@ -52,6 +57,8 @@ object MapLibreGLRoutes:
             response.toStrict(None) //buffer the whole response
           }
         else Forbidden("No mapLibreGL for you")
+
+
     }
 
   private def allowRequest[F[_]](req:Request[F]):Boolean = true

@@ -19,35 +19,34 @@ object Main extends IOWebApp:
     main(Array.empty)
   
   def render: Resource[IO, HtmlElement[IO]] =
-
-
-
     import calico.html.io.{*, given}
     val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
     val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 
     for
       hi <- label("Hello!")
-//      mapDiv <- div("map")
-//      client <- DuckUpdateClient.duckUpdateClient
+      mapDiv <- div("map1")
+      client <- DuckUpdateClient.duckUpdateClient
       apiKey = ???
-      styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
 
 //todo ??      doc: HtmlDocument[IO] = window.document
-//      geoLocator = GeoLocator.geolocator(document,client)
+      geoLocator = GeoLocator.geolocator(document,client)
     yield
-//      geoLocator.geoLocate()
+      geoLocator.geoLocate()
 
       //todo make this a resource
+
+      val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
       val map = new Map(new MapOptions {
         style = styleUrl
         var container = "map"
-        center = (25.24, 36.31)
+        center = (-70.0, 42.0)
         zoom = 2
       })
 
       println("DuckUpdateClient ducks!")
       hi
+//      mapDiv
 
 /*
 
