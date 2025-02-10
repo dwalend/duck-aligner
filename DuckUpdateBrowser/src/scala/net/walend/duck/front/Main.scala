@@ -29,13 +29,12 @@ object Main extends IOWebApp:
       client <- DuckUpdateClient.duckUpdateClient
       apiKey: String <- client.mapLibreGlKey().map(_.key).toResource
 
-      //todo ??      doc: HtmlDocument[IO] = window.document
+      doc: HtmlDocument[IO] = window.document
       geoLocator = GeoLocator.geolocator(document,client)
     yield
       geoLocator.geoLocate()
 
       //todo make this a resource
-
       val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
       val map = new Map(new MapOptions {
         style = styleUrl

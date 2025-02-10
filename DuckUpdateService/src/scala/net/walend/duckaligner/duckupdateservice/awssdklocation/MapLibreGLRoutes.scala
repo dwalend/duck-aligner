@@ -38,27 +38,10 @@ object MapLibreGLRoutes:
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {
-      case GET -> Root / "apiKey" =>
-        Ok(AwsSecrets.apiKey)
-
-      //todo not used
-        
-      case req@GET -> "mapLibreGL" /: rest =>
+      case req@GET -> Root / "apiKey" =>
         if (allowRequest(req))
-          val responseResource:Resource[F,Response[F]] = for
-            client: Client[F] <- EmberClientBuilder.default[F].build
-            uri: Uri = mapsLibreBaseUri.addPath(rest.renderString).withQueryParam("key",AwsSecrets.apiKey)
-            proxiedReq = req.withUri(uri).withHeaders(Headers("Origin" -> s"https://maps.geo.$awsRegion.amazonaws.com"))
-            response:Response[F] <- client.run(proxiedReq)
-          yield
-            response
-
-          responseResource.use{response =>
-            response.toStrict(None) //buffer the whole response
-          }
+          Ok(AwsSecrets.apiKey)
         else Forbidden("No mapLibreGL for you")
-
-
     }
 
   private def allowRequest[F[_]](req:Request[F]):Boolean = true
