@@ -17,3 +17,10 @@ github.token
 LocationSmithy/src/scala/**
 DuckUpdateSmithy/src/scala/**
 DuckUpdateSmithy/src/resources/**
+
+# node bits
+MapLibreGlScalablyTyped/node_modules/**
+MapLibreGlScalablyTyped/package-lock.json
+
+#mac bits
+.DS_Store
