@@ -15,7 +15,7 @@ import smithy4s.http4s.SimpleRestJsonBuilder
 
 object DuckUpdateRoutes {
 
-  private def duckStoreRoutesF[F[_]: Concurrent]: F[Resource[F, HttpRoutes[F]]] = DucksStateStore.makeDuckStateStore[F].map { ducksStateStore =>
+  private def duckStoreRoutesF[F[_]: Async]: F[Resource[F, HttpRoutes[F]]] = DucksStateStore.makeDuckStateStore[F].map { ducksStateStore =>
     SimpleRestJsonBuilder.routes(ducksStateStore).resource
   }
 

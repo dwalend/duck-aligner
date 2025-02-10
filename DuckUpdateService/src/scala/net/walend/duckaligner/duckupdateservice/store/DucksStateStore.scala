@@ -1,6 +1,6 @@
 package net.walend.duckaligner.duckupdateservice.store
 
-import cats.effect.Concurrent
+import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.syntax.all.*
 import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, MapLibreGlKeyOutput, UpdatePositionOutput}
@@ -16,7 +16,7 @@ trait DucksStateStore[F[_]] extends DuckUpdateService[F]
 object DucksStateStore:
   def ducksStateStore[F[_]](using ducksStateStore:DucksStateStore[F]):DucksStateStore[F] = ducksStateStore
 
-  def makeDuckStateStore[F[_]: Concurrent]:F[DucksStateStore[F]] =
+  def makeDuckStateStore[F[_]: Async]:F[DucksStateStore[F]] =
     AtomicCell[F].of(DucksState.start).map{ducksStateCell =>
       new DucksStateStore[F]:
         override def updatePosition(positionUpdate: DuckUpdate): F[UpdatePositionOutput] =
@@ -28,5 +28,5 @@ object DucksStateStore:
               UpdatePositionOutput(ducksState.toDuckSitRepUpdate)
             }
 
-        override def mapLibreGlKey(): F[MapLibreGlKeyOutput] = ???// todo solve this puzzle F.pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
+        override def mapLibreGlKey(): F[MapLibreGlKeyOutput] = Async[F].pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
     }

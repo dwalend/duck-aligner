@@ -6,6 +6,17 @@ import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckSitRepUpdate, DuckUpda
 import net.walend.duckaligner.duckupdateservice.store.DucksStateStore
 
 class DucksStateStoreSpec extends CatsEffectSuite:
+
+  test("mapKey is available") {
+    assertIO(
+      DucksStateStore.makeDuckStateStore[IO].flatMap{
+        duckStateStore =>
+          duckStateStore.mapLibreGlKey().map(_.key).map(_ => true)
+      },
+      true
+    )
+  }
+
   private val duckUpdate1 = DuckUpdate(
     id = DuckId(1),
     snapshot = 1,

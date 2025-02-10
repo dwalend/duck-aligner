@@ -4,6 +4,7 @@ import calico.IOWebApp
 import cats.effect.{IO, Resource}
 import org.scalajs.dom.document
 import fs2.dom.{HtmlDocument, HtmlElement}
+import net.walend.duckaligner.duckupdates.v0.MapLibreGlKeyOutput
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -25,11 +26,10 @@ object Main extends IOWebApp:
 
     for
       hi <- label("Hello!")
-      mapDiv <- div("map1")
       client <- DuckUpdateClient.duckUpdateClient
-      apiKey = ???
+      apiKey: String <- client.mapLibreGlKey().map(_.key).toResource
 
-//todo ??      doc: HtmlDocument[IO] = window.document
+      //todo ??      doc: HtmlDocument[IO] = window.document
       geoLocator = GeoLocator.geolocator(document,client)
     yield
       geoLocator.geoLocate()
@@ -40,8 +40,8 @@ object Main extends IOWebApp:
       val map = new Map(new MapOptions {
         style = styleUrl
         var container = "map"
-        center = (-70.0, 42.0)
-        zoom = 2
+        center = (-71.20792615771647, 42.33588581370238)
+        zoom = 14
       })
 
       println("DuckUpdateClient ducks!")
