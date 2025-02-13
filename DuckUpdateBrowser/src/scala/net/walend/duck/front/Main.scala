@@ -25,15 +25,17 @@ object Main extends IOWebApp:
     val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 
     for
-      hi <- label("Hello!")
       client <- DuckUpdateClient.duckUpdateClient
       apiKey: String <- client.mapLibreGlKey().map(_.key).toResource
 
       doc: HtmlDocument[IO] = window.document
-      geoLocator = GeoLocator.geolocator(document,client)
+//      geoLocator: GeoLocator = GeoLocator.geolocator(document,client)
+      geoIO = GeoIO(document)
+      position <- geoIO.positionResource()
+      _ <- IO.println(s"Hello ${position.coords.latitude},${position.coords.longitude}!").toResource
+      hi <- label(s"Hello ${position.coords.latitude},${position.coords.longitude}!")
     yield
-      geoLocator.geoLocate()
-
+       /*
       //todo make this a resource
       val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
       val map = new Map(new MapOptions {
@@ -41,7 +43,7 @@ object Main extends IOWebApp:
         var container = "map"
         center = (-71.20792615771647, 42.33588581370238)
         zoom = 14
-      })
+      })  */
 
       println("DuckUpdateClient ducks!")
       hi

@@ -1,10 +1,8 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
-import cats.effect.{Async, Resource}
-import org.http4s.{Headers, HttpRoutes, Method, Request, Response, Uri}
-import org.http4s.client.Client
+import cats.effect.Async
+import org.http4s.{HttpRoutes, Method, Request, Response, Uri}
 import org.http4s.dsl.Http4sDsl
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Origin
 import org.http4s.server.middleware.{CORS, CORSPolicy}
 
@@ -18,9 +16,9 @@ import scala.concurrent.duration.DurationInt
  */
 object MapLibreGLRoutes:
 
+  //todo clean out this cors foolishness, too
   private val awsRegion = "us-east-1"
   private val mapsLibreUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2"
-  private val mapsLibreBaseUri: Uri = Uri.unsafeFromString(mapsLibreUrl)
 
   private val mapsLibreHostName = s"maps.geo.$awsRegion.amazonaws.com"
 
