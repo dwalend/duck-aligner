@@ -2,7 +2,7 @@ package net.walend.duck.front
 
 import calico.IOWebApp
 import cats.effect.{IO, Resource}
-import org.scalajs.dom.document
+import org.scalajs.dom.{Position, document}
 import fs2.dom.{HtmlDocument, HtmlElement}
 import net.walend.duckaligner.duckupdates.v0.MapLibreGlKeyOutput
 
@@ -21,19 +21,20 @@ object Main extends IOWebApp:
   
   def render: Resource[IO, HtmlElement[IO]] =
     import calico.html.io.{*, given}
-    val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
-    val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 
     for
       client <- DuckUpdateClient.duckUpdateClient
       apiKey: String <- client.mapLibreGlKey().map(_.key).toResource
 
       doc: HtmlDocument[IO] = window.document
-//      geoLocator: GeoLocator = GeoLocator.geolocator(document,client)
+      //      geoLocator: GeoLocator = GeoLocator.geolocator(document,client)
       geoIO = GeoIO(document)
-      position <- geoIO.positionResource()
+      position: Position <- geoIO.positionResource()
+
       _ <- IO.println(s"Hello ${position.coords.latitude},${position.coords.longitude}!").toResource
       hi <- label(s"Hello ${position.coords.latitude},${position.coords.longitude}!")
+      mapDiv <- div("map")
+      mapLibre <- mapLibreResoruce(apiKey,position)
     yield
        /*
       //todo make this a resource
@@ -46,8 +47,22 @@ object Main extends IOWebApp:
       })  */
 
       println("DuckUpdateClient ducks!")
-      hi
-//      mapDiv
+//      hi
+      mapDiv
+
+
+  def mapLibreResoruce(apiKey:String,position: Position): Resource[IO, Map] =
+    val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
+    val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
+
+    val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
+    IO{new Map(new MapOptions {
+      style = styleUrl
+      var container = "map"
+      center = (position.coords.longitude,position.coords.latitude)
+      zoom = 14
+    })}.toResource
+
 
 /*
 
