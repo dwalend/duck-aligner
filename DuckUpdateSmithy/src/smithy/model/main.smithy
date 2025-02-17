@@ -22,7 +22,7 @@ operation UpdatePosition {
     }
     output := {
         @required
-        tracks:DuckSitRepUpdate
+        sitRep:DuckSitRepUpdate
     }
 }
 

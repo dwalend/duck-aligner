@@ -32,8 +32,8 @@ object Main extends IOWebApp:
       position: Position <- geoIO.positionResource()
       update: UpdatePositionOutput <- updatePosition(position,client)
       _ <- IO.println(s"Hello ${position.coords.latitude},${position.coords.longitude}!").toResource
-      appDiv <- div("I wish this were the map")
       mapLibre <- mapLibreResource(apiKey,update)
+      appDiv <- div("I wish this were the map")
     yield
       println("DuckUpdateClient ducks!")
       appDiv
@@ -49,15 +49,15 @@ object Main extends IOWebApp:
       snapshot = 0,
       position = geoPoint
     )
-    client.updatePosition(duckUpdate).toResource  
-  
-  
+    client.updatePosition(duckUpdate).toResource
+
+
   private def mapLibreResource(apiKey:String, update: UpdatePositionOutput): Resource[IO, Map] =
     val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
     val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
 
-    val p: GeoPoint = update.tracks.tracks.head.positions.head
-    
+    val p: GeoPoint = update.sitRep.tracks.head.positions.head
+
     val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
     IO{new Map(new MapOptions {
       style = styleUrl
