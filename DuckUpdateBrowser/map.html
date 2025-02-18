@@ -20,9 +20,9 @@
 
   const mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
   const awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
-<!--  const styleUrl = `https://maps.geo.${awsRegion}.amazonaws.com/v2/styles/${mapStyle}/descriptor?key=${apiKey}`; -->
+  const styleUrl = `https://maps.geo.${awsRegion}.amazonaws.com/v2/styles/${mapStyle}/descriptor?key=${apiKey}`; 
 
-  const styleUrl = `../mapLibreGL/styles/${mapStyle}/descriptor`;
+<!--  const styleUrl = `../mapLibreGL/styles/${mapStyle}/descriptor`; -->
 
   const map = new maplibregl.Map({
       container: 'map', // container id
