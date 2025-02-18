@@ -50,8 +50,7 @@ object Main extends IOWebApp:
       position = geoPoint
     )
     client.updatePosition(duckUpdate).toResource
-
-
+  
   private def mapLibreResource(apiKey:String, update: UpdatePositionOutput): Resource[IO, Map] =
     val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
     val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
@@ -65,30 +64,3 @@ object Main extends IOWebApp:
       center = (p.longitude,p.latitude)
       zoom = 14
     })}.toResource
-
-
-/*
-
-
-    println("console")
-    label("Hello!")
-
-    for
-//      client <- DuckUpdateClient.duckUpdateClient
-      hi <- label("Hello!")
-      _ = println("console")
-//      geoLocator = GeoLocator.geolocator(document,client)
-//      mapDiv <- div("map")//MapLibreGL.mapDiv(client)
-    yield
-      println("DuckUpdateClient ducks!")
-      hi
-*/
-//      geoLocator.geoLocate()
-      /*
-      val map = new Map(new MapOptions {
-        style = styleUrl
-        var container = "map1"
-        center = (25.24, 36.31)
-        zoom = 2
-      })
-      */

@@ -5,6 +5,7 @@ import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateServ
 import org.scalajs.dom.html.Document
 import org.scalajs.dom.{Position, PositionError}
 
+//todo almost ready to delete this one
 trait GeoLocator:
   def geoLocate():Unit
 
