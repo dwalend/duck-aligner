@@ -56,6 +56,7 @@ object Main extends IOWebApp:
       position: Position <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.coords.latitude},${position.coords.longitude}!")
       update: UpdatePositionOutput <- updatePosition(position,client)
+      _ <- IO.println(update.sitRep)
       _ <- updateMapLibre(mapLibre,update)
     yield
       update

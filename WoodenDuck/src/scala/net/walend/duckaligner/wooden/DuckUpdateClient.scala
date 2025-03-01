@@ -1,8 +1,6 @@
 package net.walend.duckaligner.wooden
 
-import cats.effect.syntax.all.effectResourceOps
-import cats.effect.{Async, IO, Resource}
-import cats.syntax.all.{catsSyntaxEither, toFlatMapOps}
+import cats.effect.{IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
 import org.http4s.Uri
 import org.http4s.client.Client
