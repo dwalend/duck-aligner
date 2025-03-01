@@ -5,13 +5,14 @@ import cats.effect.{FiberIO, IO, Resource}
 import org.scalajs.dom.{HTMLImageElement, Position}
 import fs2.dom.HtmlElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
-import typings.geojson.mod.{Feature, FeatureCollection, Point}
+import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
 import fs2.Stream
 import cats.implicits.*
+import org.scalablytyped.runtime.StringDictionary
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import typings.maplibreGl.global.maplibregl.Map as MapLibreMap
+import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Map as MapLibreMap}
 import typings.maplibreGl.mod.{GetResourceResponse, MapOptions}
 import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
 import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
@@ -38,16 +39,16 @@ object Main extends IOWebApp:
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       position: Position <- geoIO.positionResource()
+      appDiv <- div("") //todo eventually make this a control overlay
       mapLibre: MapLibreMap <- mapLibreResource(apiKey,position.toGeoPoint)
-      appDiv <- div("") //todo eventually make this the control overlay
       _ <- startPinger(geoIO,client,mapLibre)
     yield
       println("See ducks!")
       appDiv
 
-  //todo next call this every ~20 seconds
   private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): Resource[IO, FiberIO[Unit]] =
-    Stream.repeatEval(ping(geoIO,client,mapLibre)).meteredStartImmediately(20.seconds)
+  //todo change to every 30 seconds
+    Stream.repeatEval(ping(geoIO,client,mapLibre)).meteredStartImmediately(10.seconds).debounce(5.seconds)
       .compile.drain.start.toResource
 
   private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): IO[UpdatePositionOutput]  =
@@ -77,7 +78,7 @@ object Main extends IOWebApp:
       style = styleUrl
       var container = "map"
       center = (c.longitude,c.latitude)
-      zoom = 7 //about a 3-hour drive from the center
+      zoom = 7 //7 is about a 3-hour drive from the center
     })}.toResource
 
   private def updateMapLibre(mapLibre:MapLibreMap,update: UpdatePositionOutput) =
@@ -110,21 +111,19 @@ object Main extends IOWebApp:
         mapLibre.addLayer(layerSpec)
       }
     }.sequence
-    addNewDucks
-    /*
-    //todo for each duck get the layer spec, move the feature spec
-    addNewDucks.map { _ =>
+    //for each duck get the layer spec, move the feature spec
+    val positionDucks = addNewDucks.map { _ =>
       duckTracks.map{ track =>
         val p: GeoPoint = track.positions.head
-        val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
-          js.Array(Feature(Point(js.Array(p.longitude, p.latitude)), ""))
-        ))
+        val data:GeoJSON[Geometry, GeoJsonProperties] = Feature(
+          geometry = Point(js.Array(p.longitude, p.latitude)),
+          properties = StringDictionary.empty)
         mapLibre.getSource(track.id.sourceName).map {
-          case geo: GeoJSONSource => geo.setData("some json")
+          (geo: GeoJSONSource) => geo.setData(data)
         }
       }
     }
-    */
+    positionDucks
 
 extension (position:Position)
   def toGeoPoint: GeoPoint =
