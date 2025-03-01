@@ -39,7 +39,7 @@ projects:
     extends: template-js
     dependsOn: DuckUpdateSmithy
     platform:
-      mainClass: net.walend.duck.front.Main
+      mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
     dependencies:
       - com.armanbilge::calico:0.2.2
       - org.scala-js::scalajs-dom:2.8.0
@@ -70,6 +70,13 @@ projects:
     dependencies:
       - org.scalameta::munit:1.0.0
       - org.typelevel::munit-cats-effect:2.0.0
+  WoodenDuck:
+    extends: template-common
+    dependsOn: DuckUpdateSmithy
+    platform:
+      mainClass: net.walend.duckaligner.wooden.Main
+    dependencies:
+      - org.http4s::http4s-ember-client:0.23.27
 scripts:
   # todo why?
   # noinspection YAMLSchemaValidation

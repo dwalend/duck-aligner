@@ -62,8 +62,8 @@ object Main extends IOWebApp:
 
   private def updatePosition(position: Position,client: DuckUpdateService[IO]): IO[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
-      id = DuckId(0),
-      snapshot = 0,
+      id = DuckId(0),  //todo get from start property
+      snapshot = 0,  //todo update a counter
       position = position.toGeoPoint
     )
     client.updatePosition(duckUpdate)
