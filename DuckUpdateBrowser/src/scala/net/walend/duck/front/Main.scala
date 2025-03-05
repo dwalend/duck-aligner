@@ -34,22 +34,24 @@ object Main extends IOWebApp:
 
     for
       client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient
-      apiKey: String <- client.mapLibreGlKey().map(_.key).toResource
-
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
-      position: Position <- geoIO.positionResource()
       appDiv <- div("") //todo eventually make this a control overlay
-      mapLibre: MapLibreMap <- mapLibreResource(apiKey,position.toGeoPoint)
-      _ <- startPinger(geoIO,client,mapLibre)
+      _ <- startPinger(geoIO,client)
     yield
       println("See ducks!")
       appDiv
 
-  private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): Resource[IO, FiberIO[Unit]] =
-  //todo change to every 30 seconds
-    Stream.repeatEval(ping(geoIO,client,mapLibre)).meteredStartImmediately(10.seconds).debounce(5.seconds)
-      .compile.drain.start.toResource
+  private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO]): Resource[IO, FiberIO[Unit]] =
+    client.mapLibreGlKey().map(_.key).toResource.use { apiKey =>
+      geoIO.positionResource().use { position =>
+        mapLibreResource(apiKey, position.toGeoPoint).use { mapLibre =>
+          //todo change to every 30 seconds
+          Stream.repeatEval(ping(geoIO, client, mapLibre)).meteredStartImmediately(10.seconds).debounce(5.seconds)
+            .compile.drain.start
+        }
+      }
+    }.toResource
 
   private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): IO[UpdatePositionOutput]  =
     for
