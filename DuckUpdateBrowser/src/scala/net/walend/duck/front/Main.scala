@@ -43,14 +43,10 @@ object Main extends IOWebApp:
       appDiv
 
   private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO]): Resource[IO, FiberIO[Unit]] =
-    client.mapLibreGlKey().map(_.key).toResource.use { apiKey =>
-      geoIO.positionResource().use { position =>
-        mapLibreResource(apiKey, position.toGeoPoint).use { mapLibre =>
-          //todo change to every 30 seconds
-          Stream.repeatEval(ping(geoIO, client, mapLibre)).meteredStartImmediately(10.seconds).debounce(5.seconds)
-            .compile.drain.start
-        }
-      }
+    mapLibreResource(geoIO, client).use { mapLibre =>
+      Stream.repeatEval(ping(geoIO, client, mapLibre))
+        .meteredStartImmediately(10.seconds).debounce(5.seconds) //todo change to every 30 seconds
+        .compile.drain.start
     }.toResource
 
   private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): IO[UpdatePositionOutput]  =
@@ -72,17 +68,29 @@ object Main extends IOWebApp:
     client.updatePosition(duckUpdate)
 
   //todo move out the mapLibre pieces
-  private def mapLibreResource(apiKey:String, c:GeoPoint): Resource[IO, MapLibreMap] =
-    val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
-    val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
+  private def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO]): Resource[IO, MapLibreMap] =
 
-    val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
-    IO.blocking{new MapLibreMap(new MapOptions {
-      style = styleUrl
-      var container = "map"
-      center = (c.longitude,c.latitude)
-      zoom = 7 //7 is about a 3-hour drive from the center
-    })}.toResource
+    def mapLibreResource(apiKey: String, c: GeoPoint): Resource[IO, MapLibreMap] =
+      val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
+      val awsRegion = "us-east-1"; // e.g., us-east-2, us-east-1, us-west-2, etc.
+
+      val styleUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2/styles/$mapStyle/descriptor?key=$apiKey"
+      IO.blocking {
+        new MapLibreMap(new MapOptions {
+          style = styleUrl
+          var container = "map"
+          center = (c.longitude, c.latitude)
+          zoom = 7 //7 is about a 3-hour drive from the center
+        })
+      }.toResource
+
+    for {
+      apiKey <- client.mapLibreGlKey().map(_.key).toResource
+      c <- geoIO.positionResource()
+      mapLibre <- mapLibreResource(apiKey,c.toGeoPoint)
+    } yield {
+      mapLibre
+    }
 
   private def updateMapLibre(mapLibre:MapLibreMap,update: UpdatePositionOutput) =
     //todo add enough data to UpdatePositionOutput to figure out the image
