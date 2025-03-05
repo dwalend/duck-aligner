@@ -2,7 +2,7 @@ package net.walend.duck.front
 
 import calico.IOWebApp
 import cats.effect.{FiberIO, IO, Resource}
-import org.scalajs.dom.{HTMLImageElement, Position}
+import org.scalajs.dom.HTMLImageElement
 import fs2.dom.HtmlElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
 import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
@@ -51,19 +51,19 @@ object Main extends IOWebApp:
 
   private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): IO[UpdatePositionOutput]  =
     for
-      position: Position <- geoIO.position()
-      _ <- IO.println(s"Ping from ${position.coords.latitude},${position.coords.longitude}!")
+      position: GeoPoint <- geoIO.position()
+      _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
       update: UpdatePositionOutput <- updatePosition(position,client)
       _ <- IO.println(update.sitRep)
       _ <- updateMapLibre(mapLibre,update)
     yield
       update
 
-  private def updatePosition(position: Position,client: DuckUpdateService[IO]): IO[UpdatePositionOutput] =
+  private def updatePosition(position: GeoPoint,client: DuckUpdateService[IO]): IO[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
       id = DuckId(0),  //todo get from start property
       snapshot = 0,  //todo update a counter
-      position = position.toGeoPoint
+      position = position
     )
     client.updatePosition(duckUpdate)
 
@@ -87,7 +87,7 @@ object Main extends IOWebApp:
     for {
       apiKey <- client.mapLibreGlKey().map(_.key).toResource
       c <- geoIO.positionResource()
-      mapLibre <- mapLibreResource(apiKey,c.toGeoPoint)
+      mapLibre <- mapLibreResource(apiKey,c)
     } yield {
       mapLibre
     }
@@ -135,14 +135,6 @@ object Main extends IOWebApp:
       }
     }
     positionDucks
-
-extension (position:Position)
-  def toGeoPoint: GeoPoint =
-    GeoPoint(
-      latitude = position.coords.latitude,
-      longitude = position.coords.longitude,
-      timestamp = position.timestamp.toLong
-    )
 
 extension (duckId:DuckId)
   def imageName = s"image${duckId.v}"
