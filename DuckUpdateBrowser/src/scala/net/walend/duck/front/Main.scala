@@ -26,7 +26,7 @@ object Main extends IOWebApp:
     import calico.html.io.{*, given}
 
     for
-      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient
+      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       appDiv <- div("") //todo eventually make this a control overlay
@@ -46,13 +46,13 @@ object Main extends IOWebApp:
     for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
-      update: UpdatePositionOutput <- updatePosition(position,client)
+      update: UpdatePositionOutput <- updatePosition[IO](position,client)
       _ <- IO.println(update.sitRep)
-      _ <- MapLibreGL.updateMapLibre(mapLibre,update)
+      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,update)
     yield
       update
 
-  private def updatePosition(position: GeoPoint,client: DuckUpdateService[IO]): IO[UpdatePositionOutput] =
+  private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F]): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
       id = DuckId(0),  //todo get from start property
       snapshot = 0,  //todo update a counter

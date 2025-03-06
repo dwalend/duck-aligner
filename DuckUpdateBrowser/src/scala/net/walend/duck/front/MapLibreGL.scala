@@ -1,12 +1,11 @@
 package net.walend.duck.front
 
-import cats.effect.{IO, Resource}
+import cats.effect.{Async, IO, Resource}
 import org.scalajs.dom.HTMLImageElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
 import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary
-
 import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Map as MapLibreMap}
 import typings.maplibreGl.mod.{GetResourceResponse, MapOptions}
 import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
@@ -16,6 +15,7 @@ import typings.std.ImageBitmap
 import scala.scalajs.js
 
 object MapLibreGL:
+  //todo make tagless final after GeoIO is unstuck from IO
   def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO]): Resource[IO, MapLibreMap] =
 
     def mapLibreResource(apiKey: String, c: GeoPoint): Resource[IO, MapLibreMap] =
@@ -40,7 +40,7 @@ object MapLibreGL:
       mapLibre
     }
 
-  def updateMapLibre(mapLibre:MapLibreMap,update: UpdatePositionOutput): IO[Unit] =
+  def updateMapLibre[F[_]: Async](mapLibre:MapLibreMap,update: UpdatePositionOutput): F[Unit] =
     //todo add enough data to UpdatePositionOutput to figure out the image
     val duckTracks: Seq[Track] = update.sitRep.tracks
 
@@ -50,9 +50,9 @@ object MapLibreGL:
     val addNewDucks = newDucks.map{ d =>
       //add an image for each of those ducks
       val imageName = d.id.imageName
-      val loadImage = IO.fromFuture(IO.blocking(mapLibre.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
+      val loadImage = Async[F].fromFuture(Async[F].blocking(mapLibre.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
         .toFuture))
-      val addImage: IO[mapLibre.type] = loadImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
+      val addImage: F[mapLibre.type] = loadImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
         case element: HTMLImageElement => mapLibre.addImage(imageName, element)
         case bitmap => mapLibre.addImage(imageName, bitmap.asInstanceOf[typings.std.global.ImageBitmap])
       })
@@ -82,7 +82,7 @@ object MapLibreGL:
         }
       }
     }
-    positionDucks.void
+    positionDucks.void//.map(_ => ())
 
   extension (duckId:DuckId)
     private def imageName = s"image${duckId.v}"
