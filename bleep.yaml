@@ -9,6 +9,8 @@ projects:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.25 #not scala3
+      - org.apache.ant:ant-jsch:1.10.13
+      - com.github.mwiede:jsch:0.2.9
   ShareLocationService:
     extends: template-common
     platform:
@@ -63,6 +65,8 @@ projects:
       - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available
     platform:
       mainClass: net.walend.duckaligner.duckupdateservice.Main
+    resources:
+      - ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
   DuckUpdateServiceTest:
     extends: template-common
     isTestProject: true
@@ -81,6 +85,7 @@ scripts:
   # todo why?
   # noinspection YAMLSchemaValidation
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
+#  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
 templates:
   template-common:
     platform:
