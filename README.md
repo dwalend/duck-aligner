@@ -29,7 +29,7 @@ Here's the sketch of a plan:
           
 * - [x] Get a server up and running, and sharing location data
 * - [ ] (2) Get it running on some tiny machine on AWS (t4 I think is the current generation)
-* * - [ ] (1) Package up all the bits for the server in a jar using a new bleep plugin
+* * - [x] (1) Package up all the bits for the server in a jar using a new bleep plugin
 * * - [ ] (3) Run the server from the jar via bleep plugin
 * * - [ ] (4) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
 * * - [ ] (5) Bleep smithy AWS plugin - and update it to generate the code using the new facilities

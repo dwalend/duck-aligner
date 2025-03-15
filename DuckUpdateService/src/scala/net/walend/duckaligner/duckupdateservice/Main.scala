@@ -27,8 +27,6 @@ object Main extends IOApp.Simple:
       routes.flatMap { r =>
         EmberServerBuilder
           .default[IO]
-          .withPort(port"9000")
-          .withHost(host"localhost")
           .withHttpApp(r.orNotFound)
           .build
       }.use(_ => IO.never)
