@@ -11,6 +11,12 @@ projects:
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.25 #not scala3
       - org.apache.ant:ant-jsch:1.10.13
       - com.github.mwiede:jsch:0.2.9
+  TestFatJar:
+    extends: template-common
+    platform:
+      mainClass: net.walend.fatjar.Main
+    dependencies:
+      - org.typelevel::cats-effect:3.5.7
   ShareLocationService:
     extends: template-common
     platform:
@@ -85,7 +91,7 @@ scripts:
   # todo why?
   # noinspection YAMLSchemaValidation
   genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
-#  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
+  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
 templates:
   template-common:
     platform:
