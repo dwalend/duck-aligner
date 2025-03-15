@@ -8,9 +8,9 @@ projects:
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.25 #not scala3
-      - org.apache.ant:ant-jsch:1.10.13
-      - com.github.mwiede:jsch:0.2.9
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.30
+      - org.apache.ant:ant-jsch:1.10.15
+      - com.github.mwiede:jsch:0.2.24
   TestFatJar:
     extends: template-common
     platform:
@@ -23,13 +23,13 @@ projects:
       mainClass: net.walend.sharelocationservice.Main
     dependsOn: DuckUpdateSmithy
     dependencies:
-      - org.http4s::http4s-ember-server:0.23.27
-      - org.http4s::http4s-ember-client:0.23.27
-      - org.http4s::http4s-circe:0.23.27
-      - org.http4s::http4s-dsl:0.23.27
-      - ch.qos.logback:logback-classic:1.5.6
+      - org.http4s::http4s-ember-server:0.23.30
+      - org.http4s::http4s-ember-client:0.23.30
+      - org.http4s::http4s-circe:0.23.30
+      - org.http4s::http4s-dsl:0.23.30
+      - ch.qos.logback:logback-classic:1.5.17
       - org.fusesource.jansi:jansi:2.4.1
-      - io.circe::circe-parser:0.14.1
+      - io.circe::circe-parser:0.14.10
 #      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
   ShareLocationServiceTest:
     extends: template-common
@@ -41,7 +41,7 @@ projects:
   DuckUpdateSmithy:
     extends: template-cross
     dependencies:
-      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.25
+      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.30
       - com.disneystreaming.alloy:alloy-core:0.3.14
   DuckUpdateBrowser:
     extends: template-js
@@ -49,7 +49,7 @@ projects:
     platform:
       mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
     dependencies:
-      - com.armanbilge::calico:0.2.2
+      - com.armanbilge::calico:0.2.3
       - org.scala-js::scalajs-dom:2.8.0
       - org.http4s::http4s-dom:0.2.11
       - org.scalablytyped:maplibre-gl_sjs1_3:4.7.1-3c0a45
@@ -60,13 +60,10 @@ projects:
      - DuckUpdateSmithy
 #     - DuckUpdateBrowser
     dependencies:
-      - org.http4s::http4s-ember-server:0.23.27
-      - org.http4s::http4s-ember-client:0.23.27
-      - org.http4s::http4s-circe:0.23.27
-      - org.http4s::http4s-dsl:0.23.27
-      - ch.qos.logback:logback-classic:1.5.6
-      - org.fusesource.jansi:jansi:2.4.1
-      - io.circe::circe-parser:0.14.1
+      - org.http4s::http4s-ember-server:0.23.30
+      - org.http4s::http4s-ember-client:0.23.30
+      - org.http4s::http4s-circe:0.23.30
+      - org.http4s::http4s-dsl:0.23.30
       - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
       - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available
     platform:
@@ -78,7 +75,7 @@ projects:
     isTestProject: true
     dependsOn: DuckUpdateService
     dependencies:
-      - org.scalameta::munit:1.0.0
+      - org.scalameta::munit:1.1.0
       - org.typelevel::munit-cats-effect:2.0.0
   WoodenDuck:
     extends: template-common
@@ -86,11 +83,11 @@ projects:
     platform:
       mainClass: net.walend.duckaligner.wooden.Main
     dependencies:
-      - org.http4s::http4s-ember-client:0.23.27
+      - org.http4s::http4s-ember-client:0.23.30
 scripts:
   # todo why?
   # noinspection YAMLSchemaValidation
-  genSmithyCode: BleepScripts/bleep.scripts.smithy4s.Codegen
+  gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
 templates:
   template-common:

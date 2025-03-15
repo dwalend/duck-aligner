@@ -10,7 +10,7 @@ import smithy4s.http4s.SimpleRestJsonBuilder
 
 
 object DuckUpdateClient:
-  val origin = uri"http://localhost:9000"
+  val origin = uri"http://localhost:8080"
 
   def duckUpdateClient: Resource[IO, DuckUpdateService[IO]] = for {
     httpClient: Client[IO] <- EmberClientBuilder.default[IO].build
