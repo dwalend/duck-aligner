@@ -70,7 +70,7 @@ object FatJar extends BleepScript("FatJar") :
 
     println(s"Wrote fat jar $destFile with main class $mainClassName")
 
-  private def jarPath(started: Started, projectName: ProjectName): Path =
+  def jarPath(started: Started, projectName: ProjectName): Path =
     jarDirectory(started, projectName).resolve(s"${projectName.value}.jar")
 
   private def jarDirectory(started: Started, projectName: ProjectName): Path =

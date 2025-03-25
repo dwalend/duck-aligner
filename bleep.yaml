@@ -11,6 +11,10 @@ projects:
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.30
       - org.apache.ant:ant-jsch:1.10.15
       - com.github.mwiede:jsch:0.2.24
+      - software.amazon.awssdk:ec2:2.31.2 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:imagebuilder:2.31.2 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:s3:2.31.2 #todo maybe replace with a smithy4s http4s library when available
+      - org.slf4j:slf4j-simple:2.0.17
   TestFatJar:
     extends: template-common
     platform:
@@ -65,7 +69,7 @@ projects:
       - org.http4s::http4s-circe:0.23.30
       - org.http4s::http4s-dsl:0.23.30
       - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
-      - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available 
     platform:
       mainClass: net.walend.duckaligner.duckupdateservice.Main
     resources:
@@ -89,6 +93,7 @@ scripts:
   # noinspection YAMLSchemaValidation
   gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
+  create-ami: BleepScripts/bleep.scripts.ami.CreateEc2Ami
 templates:
   template-common:
     platform:
