@@ -37,8 +37,8 @@ object Main extends IOWebApp:
 
   private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO]): Resource[IO, FiberIO[Unit]] =
     MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
-      Stream.repeatEval(ping(geoIO, client, mapLibre))
-        .meteredStartImmediately(10.seconds).debounce(5.seconds) //todo change to every 30 seconds
+      Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
+        .evalMap(_ => ping(geoIO, client, mapLibre))
         .compile.drain.start
     }.toResource
 

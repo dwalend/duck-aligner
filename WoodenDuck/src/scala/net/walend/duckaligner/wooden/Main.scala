@@ -15,7 +15,7 @@ object Main extends IOApp:
   private def startPinger(client: DuckUpdateService[IO]): IO[Unit] =
   //todo change to every 30 seconds
     Stream.emits(positions).evalTap(IO.println(_)).evalMap(ping(_,client))
-      .meteredStartImmediately[IO](10.seconds).debounce(5.seconds)
+      .meteredStartImmediately[IO](10.seconds)
       .compile.drain
 
   private def ping(position:(Double,Double),client: DuckUpdateService[IO]): IO[UpdatePositionOutput]  =
