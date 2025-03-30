@@ -93,7 +93,9 @@ scripts:
   # noinspection YAMLSchemaValidation
   gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
-  create-ami: BleepScripts/bleep.scripts.ami.CreateEc2Ami
+  create-ami: BleepScripts/bleep.scripts.aws.CreateEc2Ami
+  start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
+  stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine
 templates:
   template-common:
     platform:

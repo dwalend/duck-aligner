@@ -1,4 +1,4 @@
-package bleep.scripts.ami
+package bleep.scripts.aws
 
 import bleep.model.{CrossProjectName, ProjectName, ScriptName}
 import bleep.packaging.dist
@@ -53,7 +53,7 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
     val authorizeIngressResponse = ec2Client.authorizeSecurityGroupIngress(authorizeIngressRequest)
     println(authorizeIngressResponse)
 */
-    /* All this to make the launch template
+    /// All this to make the launch template
     val ebsInstanceBlockDeviceSpecification = LaunchTemplateEbsBlockDeviceRequest.builder()
       .deleteOnTermination(true)
       .volumeSize(8)
@@ -68,36 +68,45 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
 
     val requestLaunchTemplateData = RequestLaunchTemplateData.builder()
       .keyName("davidAtWalendDotNet")
-      .imageId("ami-0eae2a0fc13b15fce")
+      .imageId("aws-0eae2a0fc13b15fce")  //need some way to say "latest amazon linux"
       .instanceType("t4g.nano")
       .securityGroups(securityGroupName)
       .ebsOptimized(true)
       .blockDeviceMappings(blockDeviceMapping)
       .build()
 
-    val launchTemplateName = "duck-update-service-launch-template"
     val createLaunchTemplateRequest = CreateLaunchTemplateRequest.builder()
-      .launchTemplateName(launchTemplateName)
+      .launchTemplateName(Names.launchTemplateName)
       .launchTemplateData(requestLaunchTemplateData)
       .build()
 
     val createLaunchTemplateResponse = ec2Client.createLaunchTemplate(createLaunchTemplateRequest)
     println(createLaunchTemplateResponse)
-*/
-    val launchTemplateName = "duck-update-service-launch-template"
+
+//    val launchTemplateName = "duck-update-service-launch-template"
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
-      .launchTemplateName(launchTemplateName)
+      .launchTemplateName(Names.launchTemplateName)
       .build()
+
+    val startScript =
+      s"""#!/bin/bash -x
+         |sudo yum --assumeyes install java-21-amazon-corretto-headless
+         |sudo yum --assumeyes upgrade
+         |""".stripMargin
 
     val runInstancesRequest = RunInstancesRequest.builder()
       .launchTemplate(launchTemplateSpecification)
       .minCount(1)
       .maxCount(1)
+      .userData(startScript)
       .build()
     val runInstanceResponse = ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)
 
-    //todo next look up the public IP
+//todo rebake the image / make a new launch template?
+//todo less storage? How?
+
+//todo next look up the public IP
     //todo how to execute script via ssh?
     //todo sudo yum install java-21-amazon-corretto-headless
     //todo yum update/upgrade
@@ -105,8 +114,6 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
     //todo scp the fat jar
     //todo start the service
     //todo or
-    //todo rebake the image / make a new launch template?
-    //todo less memory?
 
     /*
     //upload the fat jar to s3
@@ -141,7 +148,7 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
     //todo delete the bucket at the end
 
 
-    //todo create an ec2 ami with AWS Linux, Latest LTS Corretto JDK (21), the fat jar, and a command line to start it on start-up ... maybe to use an argument from somewhere for who to let in
+    //todo create an ec2 aws with AWS Linux, Latest LTS Corretto JDK (21), the fat jar, and a command line to start it on start-up ... maybe to use an argument from somewhere for who to let in
 /*
     val imageBuilderClient = ImagebuilderClient.builder()
       .region(Region.US_EAST_1)
