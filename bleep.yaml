@@ -96,6 +96,7 @@ scripts:
   create-ami: BleepScripts/bleep.scripts.aws.CreateEc2Ami
   start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
   stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine
+  push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
 templates:
   template-common:
     platform:

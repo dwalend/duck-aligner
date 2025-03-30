@@ -28,10 +28,6 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
 
     commands.script(ScriptName("fat-jar"),args)
 
-    val ec2Client = Ec2Client.builder()
-      .region(Region.US_EAST_1)
-      .build()
-
     val securityGroupName = "Duck Update Server Security"
 
     /*
@@ -76,16 +72,16 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
       .build()
 
     val createLaunchTemplateRequest = CreateLaunchTemplateRequest.builder()
-      .launchTemplateName(Names.launchTemplateName)
+      .launchTemplateName(CommonEc2.launchTemplateName)
       .launchTemplateData(requestLaunchTemplateData)
       .build()
 
-    val createLaunchTemplateResponse = ec2Client.createLaunchTemplate(createLaunchTemplateRequest)
+    val createLaunchTemplateResponse = CommonEc2.ec2Client.createLaunchTemplate(createLaunchTemplateRequest)
     println(createLaunchTemplateResponse)
 
 //    val launchTemplateName = "duck-update-service-launch-template"
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
-      .launchTemplateName(Names.launchTemplateName)
+      .launchTemplateName(CommonEc2.launchTemplateName)
       .build()
 
     val startScript =
@@ -100,7 +96,7 @@ object CreateEc2Ami extends BleepScript("CreateEc2Ami") :
       .maxCount(1)
       .userData(startScript)
       .build()
-    val runInstanceResponse = ec2Client.runInstances(runInstancesRequest)
+    val runInstanceResponse = CommonEc2.ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)
 
 //todo rebake the image / make a new launch template?

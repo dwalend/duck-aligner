@@ -11,14 +11,8 @@ import java.nio.charset.StandardCharsets
 object StartEc2Machine extends BleepScript("CreateEc2Ami") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
 
-//    commands.script(ScriptName("fat-jar"),args)
-
-    val ec2Client = Ec2Client.builder()
-      .region(Region.US_EAST_1)
-      .build()
-
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
-      .launchTemplateName(Names.launchTemplateName)
+      .launchTemplateName(CommonEc2.launchTemplateName)
       .build()
 
     val startScript =
@@ -30,7 +24,7 @@ object StartEc2Machine extends BleepScript("CreateEc2Ami") :
     val startBase64 = Base64.getEncoder.encodeToString(startScript.getBytes(StandardCharsets.UTF_8))
     
     val tagSpecification = TagSpecification.builder()
-      .tags(Names.tag)
+      .tags(CommonEc2.tag)
       .resourceType(ResourceType.INSTANCE)
       .build()
 
@@ -41,5 +35,5 @@ object StartEc2Machine extends BleepScript("CreateEc2Ami") :
       .userData(startBase64)
       .tagSpecifications(tagSpecification)
       .build()
-    val runInstanceResponse = ec2Client.runInstances(runInstancesRequest)
+    val runInstanceResponse = CommonEc2.ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)

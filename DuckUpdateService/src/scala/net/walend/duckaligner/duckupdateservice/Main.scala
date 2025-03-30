@@ -2,7 +2,7 @@ package net.walend.duckaligner.duckupdateservice
 
 import cats.effect.{IO, IOApp}
 import org.http4s.ember.server.EmberServerBuilder
-import com.comcast.ip4s.{host, port}
+import com.comcast.ip4s.{host, ipv4, port}
 import cats.effect.*
 import cats.implicits.toSemigroupKOps
 import net.walend.duckaligner.duckupdateservice.awssdklocation.{AwsLocationRoutes, MapLibreGLRoutes}
@@ -27,6 +27,7 @@ object Main extends IOApp.Simple:
       routes.flatMap { r =>
         EmberServerBuilder
           .default[IO]
+          .withHost(ipv4"0.0.0.0")
           .withHttpApp(r.orNotFound)
           .build
       }.use(_ => IO.never)
