@@ -15,7 +15,9 @@ object PingRoutes {
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {
-      case _@GET -> Root / "ping"  =>
-        Ok("pong")
+      case _@GET -> Root / "bing"  =>
+        Ok("bong")
+      case _@GET -> Root  =>
+        Ok("root")
     }
 }
