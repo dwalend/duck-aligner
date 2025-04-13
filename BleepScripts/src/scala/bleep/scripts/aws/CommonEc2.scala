@@ -16,7 +16,7 @@ object CommonEc2:
   lazy val ec2Client = Ec2Client.builder()
     .region(Region.US_EAST_1)
     .build()
-  
+
   val launchTemplateName = "duck-update-service-launch-template"
 
   val tagKey = "Name"
@@ -26,10 +26,10 @@ object CommonEc2:
     .key(tagKey)
     .value(tagValue)
     .build()
-  
+
   def describeTestInstances():Seq[Instance] =
     val describeInstancesResponse = ec2Client.describeInstances()
-    println(describeInstancesResponse)
+//    println(describeInstancesResponse)
 
     //find the one with the right tag and terminate that one
     describeInstancesResponse.reservations().asScala.flatMap { r =>

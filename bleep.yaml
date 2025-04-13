@@ -11,9 +11,11 @@ projects:
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.30
       - org.apache.ant:ant-jsch:1.10.15
       - com.github.mwiede:jsch:0.2.24
-      - software.amazon.awssdk:ec2:2.31.2 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:imagebuilder:2.31.2 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:s3:2.31.2 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:cloudformation:2.31.20 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:ec2:2.31.20 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:apigateway:2.31.20 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:imagebuilder:2.31.20 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:s3:2.31.20 #todo maybe replace with a smithy4s http4s library when available
       - org.slf4j:slf4j-simple:2.0.17
   TestFatJar:
     extends: template-common
@@ -93,7 +95,10 @@ scripts:
   # noinspection YAMLSchemaValidation
   gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
-  create-ami: BleepScripts/bleep.scripts.aws.CreateEc2Ami
+  create-cloudformation-stack: BleepScripts/bleep.scripts.aws.CreateTestDuckServerCloudFormation
+  create-ec2-launch-template: BleepScripts/bleep.scripts.aws.CreateEc2LaunchTemplate
+  delete-api-gateways: BleepScripts/bleep.scripts.aws.DeleteApiGateways
+  create-api-gateway: BleepScripts/bleep.scripts.aws.CreateApiGateway
   start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
   stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine
   push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
