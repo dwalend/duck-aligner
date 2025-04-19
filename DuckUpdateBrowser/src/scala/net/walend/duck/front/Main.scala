@@ -13,6 +13,7 @@ import typings.maplibreGl.global.maplibregl.Map as MapLibreMap
 
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
+import scala.util.Random
 
 @JSExportTopLevel("Main")
 object Main extends IOWebApp:
@@ -30,31 +31,32 @@ object Main extends IOWebApp:
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       appDiv <- div("") //todo eventually make this a control overlay
-      _ <- startPinger(geoIO,client)
+      duckId = DuckId(Random().nextLong())
+      _ <- startPinger(geoIO,client,duckId)
     yield
       println("See ducks!")
       appDiv
 
-  private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO]): Resource[IO, FiberIO[Unit]] =
+  private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO],duckId: DuckId): Resource[IO, FiberIO[Unit]] =
     MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
       Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
-        .evalMap(_ => ping(geoIO, client, mapLibre))
+        .evalMap(_ => ping(geoIO, client, mapLibre,duckId))
         .compile.drain.start
     }.toResource
 
-  private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap): IO[UpdatePositionOutput]  =
+  private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap,duckId: DuckId): IO[UpdatePositionOutput]  =
     for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
-      update: UpdatePositionOutput <- updatePosition[IO](position,client)
+      update: UpdatePositionOutput <- updatePosition[IO](position,client,duckId)
       _ <- IO.println(update.sitRep)
       _ <- MapLibreGL.updateMapLibre[IO](mapLibre,update)
     yield
       update
 
-  private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F]): F[UpdatePositionOutput] =
+  private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
-      id = DuckId(0),  //todo get from start property
+      id = duckId,  //todo get from start property
       snapshot = 0,  //todo update a counter
       position = position
     )

@@ -47,6 +47,8 @@ final class DuckId(val v:Long) extends AnyVal:
 
   def toDuckI: DuckI = DuckI(v)
 
+  override def toString: String = s"DuckId($v)"
+
 /**
  * Mostly from org.scalajs.dom.{Geolocation, Position, PositionError, document}'s idea of coordinates
  */
