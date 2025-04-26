@@ -7,15 +7,15 @@ import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest
 
 import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava}
 
-object TerminateEc2Machine extends BleepScript("CreateEc2Ami") :
+object TerminateEc2Machine extends BleepScript("CreateEc2LaunchTemplate") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
 
-    val instanceIds = CommonEc2.describeTestInstances().map(_.instanceId())
+    val instanceIds = CommonAws.describeTestInstances().map(_.instanceId())
     println(instanceIds)
 
     val terminateInstancesRequest = TerminateInstancesRequest.builder()
       .instanceIds(instanceIds.asJava)
       .build()
 
-    val terminateInstanceResponse = CommonEc2.ec2Client.terminateInstances(terminateInstancesRequest)
+    val terminateInstanceResponse = CommonAws.ec2Client.terminateInstances(terminateInstancesRequest)
     println(terminateInstanceResponse)
