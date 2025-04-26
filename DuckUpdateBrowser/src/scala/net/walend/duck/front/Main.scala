@@ -31,7 +31,7 @@ object Main extends IOWebApp:
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       appDiv <- div("") //todo eventually make this a control overlay
-      duckId = DuckId(Random().nextLong())
+      duckId = DuckId(Random().nextLong()) //todo get from start property or the server
       _ <- startPinger(geoIO,client,duckId)
     yield
       println("See ducks!")
@@ -56,7 +56,7 @@ object Main extends IOWebApp:
 
   private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
-      id = duckId,  //todo get from start property
+      id = duckId,
       snapshot = 0,  //todo update a counter
       position = position
     )
