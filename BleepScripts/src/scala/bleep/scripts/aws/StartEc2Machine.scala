@@ -1,18 +1,16 @@
 package bleep.scripts.aws
 
 import bleep.{BleepScript, Commands, Started}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.ec2.model.{LaunchTemplateSpecification, ResourceType, RunInstancesRequest, Tag, TagSpecification}
 
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 
-object StartEc2Machine extends BleepScript("CreateEc2Ami") :
+object StartEc2Machine extends BleepScript("CreateEc2LaunchTemplate") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
 
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
-      .launchTemplateName(CommonEc2.launchTemplateName)
+      .launchTemplateName(CommonAws.launchTemplateName)
       .build()
 
     val startScript =
@@ -24,7 +22,7 @@ object StartEc2Machine extends BleepScript("CreateEc2Ami") :
     val startBase64 = Base64.getEncoder.encodeToString(startScript.getBytes(StandardCharsets.UTF_8))
     
     val tagSpecification = TagSpecification.builder()
-      .tags(CommonEc2.tag)
+      .tags(CommonAws.tag)
       .resourceType(ResourceType.INSTANCE)
       .build()
 
@@ -35,5 +33,5 @@ object StartEc2Machine extends BleepScript("CreateEc2Ami") :
       .userData(startBase64)
       .tagSpecifications(tagSpecification)
       .build()
-    val runInstanceResponse = CommonEc2.ec2Client.runInstances(runInstancesRequest)
+    val runInstanceResponse = CommonAws.ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)
