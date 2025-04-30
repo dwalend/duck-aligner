@@ -1,11 +1,9 @@
 package bleep.scripts.aws
 
 import bleep.{BleepScript, Commands, Started}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest
 
-import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava}
+import scala.jdk.CollectionConverters.SeqHasAsJava
 
 object TerminateEc2Machine extends BleepScript("CreateEc2LaunchTemplate") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =

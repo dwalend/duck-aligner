@@ -3,7 +3,7 @@ package bleep.scripts.aws
 import bleep.{BleepScript, Commands, Started}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient
-import software.amazon.awssdk.services.apigateway.model.{ApiKeySourceType, ConnectionType, CreateDeploymentRequest, CreateResourceRequest, CreateRestApiRequest, EndpointConfiguration, EndpointType, GetIntegrationRequest, GetMethodRequest, GetResourcesRequest, GetRestApiRequest, GetStageRequest, IntegrationType, PutIntegrationRequest, PutIntegrationResponseRequest, PutMethodRequest, TestInvokeMethodRequest}
+import software.amazon.awssdk.services.apigateway.model.{ApiKeySourceType, ConnectionType, CreateDeploymentRequest, CreateResourceRequest, CreateRestApiRequest, EndpointConfiguration, EndpointType, GetResourcesRequest, GetStageRequest, IntegrationType, PutIntegrationRequest, PutIntegrationResponseRequest, PutMethodRequest, TestInvokeMethodRequest}
 
 import scala.jdk.CollectionConverters.MapHasAsJava
 

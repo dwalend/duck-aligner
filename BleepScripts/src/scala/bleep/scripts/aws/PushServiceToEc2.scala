@@ -1,14 +1,11 @@
 package bleep.scripts.aws
 
-import bleep.model.{ProjectName, ScriptName}
+import bleep.model.ProjectName
 import bleep.scripts.fatjar.FatJar
 import bleep.{BleepScript, Commands, Started}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.ec2.Ec2Client
-import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest
 
 import java.nio.file.Path
-import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava}
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 object PushServiceToEc2 extends BleepScript("PushServiceToEc2") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =

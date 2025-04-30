@@ -1,10 +1,8 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
-import cats.effect.{Async, IO, Sync}
+import cats.effect.IO
 import software.amazon.awssdk.services.geomaps.GeoMapsAsyncClient
-import software.amazon.awssdk.services.geomaps.model.{GetStaticMapRequest, GetStaticMapResponse, GetStyleDescriptorRequest, GetTileRequest, MapStyle, ScaleBarUnit, StaticMapStyle}
-
-import java.util.concurrent.CompletableFuture
+import software.amazon.awssdk.services.geomaps.model.{GetStaticMapRequest, GetStaticMapResponse, GetStyleDescriptorRequest, MapStyle, ScaleBarUnit, StaticMapStyle}
 
 /**
  *

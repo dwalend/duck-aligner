@@ -127,7 +127,6 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     val putIntegrationResponseResponse = CommonAws.apiGatewayClient.putIntegrationResponse(putIntegrationResponseRequest)
     println(putIntegrationResponseResponse)
 
-    /*
     val testRequest = TestInvokeMethodRequest.builder()
       .restApiId(restApiId)
       .resourceId(createResourceResponse.id())
@@ -137,7 +136,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     val testResponse = CommonAws.apiGatewayClient.testInvokeMethod(testRequest)
     //todo something more interesting with the test response
     println(testResponse)
-  */
+
     val stageName = "dev"
 
     val createDeploymentRequest = CreateDeploymentRequest.builder()

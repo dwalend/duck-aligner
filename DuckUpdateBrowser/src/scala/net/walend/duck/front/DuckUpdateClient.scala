@@ -1,6 +1,6 @@
 package net.walend.duck.front
 
-import cats.effect.{Async, IO, Resource}
+import cats.effect.{Async, Resource}
 import fs2.dom.Window
 import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
 import org.http4s.Uri

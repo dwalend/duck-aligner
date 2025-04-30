@@ -18,7 +18,7 @@ object MapLibreGLRoutes:
 
   //todo clean out this cors foolishness, too
   private val awsRegion = "us-east-1"
-  private val mapsLibreUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2"
+//  private val mapsLibreUrl = s"https://maps.geo.$awsRegion.amazonaws.com/v2"
 
   private val mapsLibreHostName = s"maps.geo.$awsRegion.amazonaws.com"
 

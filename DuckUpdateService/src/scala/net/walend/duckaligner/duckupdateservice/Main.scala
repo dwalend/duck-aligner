@@ -2,10 +2,9 @@ package net.walend.duckaligner.duckupdateservice
 
 import cats.effect.{IO, IOApp}
 import org.http4s.ember.server.EmberServerBuilder
-import com.comcast.ip4s.{host, ipv4, port}
-import cats.effect.*
+import com.comcast.ip4s.ipv4
 import cats.implicits.toSemigroupKOps
-import net.walend.duckaligner.duckupdateservice.awssdklocation.{AwsLocationRoutes, MapLibreGLRoutes}
+import net.walend.duckaligner.duckupdateservice.awssdklocation.MapLibreGLRoutes
 import org.http4s.*
 
 /**
