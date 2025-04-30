@@ -96,7 +96,9 @@ scripts:
   gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
 
-  run-ec2: BleepScripts/bleep.scripts.aws.RunEc2Machine
+  fat-duck-update: BleepScripts/bleep.scripts.webapp.FatDuckUpdate
+
+  start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
   push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
   create-api-gateway: BleepScripts/bleep.scripts.aws.CreateApiGateway
   stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine

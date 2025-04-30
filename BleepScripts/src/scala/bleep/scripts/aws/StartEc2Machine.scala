@@ -6,7 +6,7 @@ import software.amazon.awssdk.services.ec2.model.{LaunchTemplateSpecification, R
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 
-object StartEc2Machine extends BleepScript("CreateEc2LaunchTemplate") :
+object StartEc2Machine extends BleepScript("StartEc2Machine") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
 
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()

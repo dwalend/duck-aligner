@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava}
 object PushServiceToEc2 extends BleepScript("PushServiceToEc2") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
 
-    commands.script(ScriptName("fat-jar"), args)
+//    commands.script(ScriptName("fat-jar"), args)
 
     //get the server's IP address
     val serverIpAddress: Seq[String] = CommonAws.describeTestInstances().flatMap(_.networkInterfaces().asScala).map(_.association().publicIp())
