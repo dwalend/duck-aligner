@@ -1,0 +1,12 @@
+[Unit]
+Description=Duck Update Web Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -jar /home/ec2-user/DuckUpdateService.jar
+Type=simple
+Restart=no
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target

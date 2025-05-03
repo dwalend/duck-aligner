@@ -5,6 +5,7 @@ import software.amazon.awssdk.services.apigateway.ApiGatewayClient
 import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.ec2.model.{Instance, Tag}
 
+import scala.annotation.tailrec
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -40,6 +41,17 @@ object CommonAws:
         i.tags().contains(CommonAws.tag)
       }
     }.toSeq
+
+  //wait for an IP address
+  @tailrec
+  def pollForIp: String = {
+    println("Polling for IP")
+    val duckServerIp: String = CommonAws.describeTestInstances().map(_.publicIpAddress()).head
+    if (duckServerIp != null) duckServerIp
+    else
+      Thread.sleep(5000)
+      pollForIp
+  }
 
   lazy val apiGatewayClient: ApiGatewayClient = ApiGatewayClient.builder()
     .region(Region.US_EAST_1)

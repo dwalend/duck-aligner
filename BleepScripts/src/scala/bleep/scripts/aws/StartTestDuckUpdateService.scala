@@ -1,18 +1,23 @@
 package bleep.scripts.aws
 
 import bleep.{BleepScript, Commands, Started}
+import com.jcraft.jsch.JSchException
 import software.amazon.awssdk.services.apigateway.model.{ApiKeySourceType, ConnectionType, CreateDeploymentRequest, CreateResourceRequest, CreateRestApiRequest, EndpointConfiguration, EndpointType, GetResourcesRequest, GetStageRequest, IntegrationType, PutIntegrationRequest, PutIntegrationResponseRequest, PutMethodRequest, TestInvokeMethodRequest}
 import software.amazon.awssdk.services.ec2.model.{LaunchTemplateSpecification, ResourceType, RunInstancesRequest, Tag, TagSpecification}
 
 import scala.jdk.CollectionConverters.MapHasAsJava
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.util.Base64
 import scala.annotation.tailrec
 
 object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateService") :
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
     startEc2Machine()
-    createApiGateway()
+    val duckServerIp = CommonAws.pollForIp
+    createApiGateway(duckServerIp)
+    setUpSystemctl(duckServerIp)
+    println(s"duckServerIp $duckServerIp")
 
   private def startEc2Machine(): Unit =
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
@@ -21,6 +26,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
 
     val startScript =
       s"""#!/bin/bash -x
+         |#upgrade everything and install the latest JRE 21
          |sudo yum --assumeyes install java-21-amazon-corretto-headless
          |sudo yum --assumeyes upgrade
          |""".stripMargin
@@ -42,8 +48,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     val runInstanceResponse = CommonAws.ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)
 
-
-  private def createApiGateway():Unit =
+  private def createApiGateway(duckServerIp:String):Unit =
     val endpointConfiguration = EndpointConfiguration.builder()
       .types(EndpointType.REGIONAL)
       .build
@@ -86,20 +91,6 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     println(putMethodResponse)
 
     val requestParameters = Map("integration.request.path.proxy" -> "method.request.path.proxy").asJava
-
-    //wait for an IP address
-    @tailrec
-    def pollForIp:String = {
-      println("Polling for IP")
-      val duckServerIp: String = CommonAws.describeTestInstances().map(_.publicIpAddress()).head
-      if(duckServerIp != null) duckServerIp
-      else
-        Thread.sleep(5000)
-        pollForIp
-    }
-    
-    val duckServerIp: String = pollForIp
-    println(s"duckServerIp $duckServerIp")
 
     val putIntegrationRequest = PutIntegrationRequest.builder()
       .restApiId(restApiId)
@@ -155,3 +146,27 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
 
     val url = s"https://$restApiId.execute-api.${CommonAws.region.id()}.amazonaws.com/$stageName"
     println(url)
+
+  private def setUpSystemctl(duckServerIp: String): Unit =
+    @tailrec
+    def pollConnection(attempts:Int):Option[Throwable] =
+      println(s"attempt $attempts")
+      val maybeFailed =
+        try
+          Ssh.runCommand(duckServerIp, """echo "ssh command worked!" """)
+          None
+        catch
+          case sshx:JSchException => Option(sshx)
+          case x:Throwable =>
+            x.printStackTrace()
+            Option(x)
+      if(maybeFailed.isEmpty) maybeFailed
+      else if (attempts == 0) maybeFailed
+      else
+        Thread.sleep(1000)
+        pollConnection(attempts - 1)
+
+    pollConnection(20).map(x => throw x).orElse
+      val duckUpdateSystemCtlFile = Path.of("DuckUpdateService/src/sh/DuckUpdate.service")
+      Scp.scpFile(duckServerIp, duckUpdateSystemCtlFile, duckUpdateSystemCtlFile.getFileName.toString)
+      Ssh.runScript(duckServerIp, "DuckUpdateService/src/sh/DuckUpdateAtStart.bash")

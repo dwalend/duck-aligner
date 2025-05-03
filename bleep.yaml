@@ -10,7 +10,7 @@ projects:
       - build.bleep::bleep-model:${BLEEP_VERSION}
       - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.30
       - org.apache.ant:ant-jsch:1.10.15
-      - com.github.mwiede:jsch:0.2.24
+      - com.github.mwiede:jsch:0.2.25
       - software.amazon.awssdk:cloudformation:2.31.20 #todo maybe replace with a smithy4s http4s library when available
       - software.amazon.awssdk:ec2:2.31.20 #todo maybe replace with a smithy4s http4s library when available
       - software.amazon.awssdk:apigateway:2.31.20 #todo maybe replace with a smithy4s http4s library when available
@@ -93,20 +93,22 @@ projects:
 scripts:
   # todo why?
   # noinspection YAMLSchemaValidation
-  gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
-  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
+  create-ec2-launch-template: BleepScripts/bleep.scripts.aws.CreateEc2LaunchTemplate
+
+  start-duck-update: BleepScripts/bleep.scripts.aws.StartTestDuckUpdateService
+  stop-duck-update: BleepScripts/bleep.scripts.aws.StopTestDuckUpdateService
+  push-duck-update: BleepScripts/bleep.scripts.aws.PushDuckUpdateServiceToEc2
 
   fat-duck-update: BleepScripts/bleep.scripts.webapp.FatDuckUpdate
 
+  gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
+  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
+
   start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
-  push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
   create-api-gateway: BleepScripts/bleep.scripts.aws.CreateApiGateway
   stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine
   delete-api-gateways: BleepScripts/bleep.scripts.aws.DeleteApiGateways
-
-  create-ec2-launch-template: BleepScripts/bleep.scripts.aws.CreateEc2LaunchTemplate
-  start-duck-update: BleepScripts/bleep.scripts.aws.StartTestDuckUpdateService
-  stop-duck-update: BleepScripts/bleep.scripts.aws.StopTestDuckUpdateService
+  push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
 
   #todo push-duck-update
 templates:
