@@ -3,7 +3,7 @@ package bleep.scripts.aws
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient
 import software.amazon.awssdk.services.ec2.Ec2Client
-import software.amazon.awssdk.services.ec2.model.{Instance, Tag}
+import software.amazon.awssdk.services.ec2.model.{Instance, InstanceState, Tag}
 
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters.ListHasAsScala
@@ -46,8 +46,12 @@ object CommonAws:
   @tailrec
   def pollForIp: String = {
     println("Polling for IP")
-    val duckServerIp: String = CommonAws.describeTestInstances().map(_.publicIpAddress()).head
-    if (duckServerIp != null) duckServerIp
+    val duckServerIp = CommonAws.describeTestInstances()
+      .filter(_.state().code() == 16)
+      .find(_.tags().contains(tag))
+      .flatMap(firstInstance => Option(firstInstance.publicIpAddress()))
+
+    if (duckServerIp.nonEmpty) duckServerIp.get
     else
       Thread.sleep(5000)
       pollForIp

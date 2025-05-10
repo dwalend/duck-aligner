@@ -4,7 +4,9 @@ import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.syntax.all.*
 import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, MapLibreGlKeyOutput, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdateservice.Log
 import net.walend.duckaligner.duckupdateservice.awssdklocation.AwsSecrets
+
 
 /**
  * @author David Walend
@@ -24,7 +26,7 @@ object DucksStateStore:
           ducksStateCell.updateAndGet { ducksState =>
               ducksState.updated(updatePosition)
             }.map { ducksState =>
-              println(ducksState)
+              Log.log(ducksState.toDuckSitRepUpdate.toString)
               UpdatePositionOutput(ducksState.toDuckSitRepUpdate)
             }
 

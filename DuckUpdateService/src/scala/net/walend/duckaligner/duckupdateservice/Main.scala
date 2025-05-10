@@ -29,5 +29,8 @@ object Main extends IOApp.Simple:
           .withHost(ipv4"0.0.0.0")
           .withHttpApp(r.orNotFound)
           .build
+          .handleErrorWith{ (t:Throwable) => 
+            Log.log[IO]("Caught top-level error",Option(t)).toResource
+          }
       }.use(_ => IO.never)
     }
