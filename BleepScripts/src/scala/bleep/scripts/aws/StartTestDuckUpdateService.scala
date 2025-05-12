@@ -15,10 +15,11 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
   override def run(started: Started, commands: Commands, args: List[String]): Unit =
     startEc2Machine()
     val duckServerIp = CommonAws.pollForIp
-    createApiGateway(duckServerIp)
+    val url = createApiGateway(duckServerIp)
     setUpSystemctl(duckServerIp)
     println(s"duckServerIp $duckServerIp")
-
+    println(s"duckServerUrl $url")
+  
   private def startEc2Machine(): Unit =
     val launchTemplateSpecification = LaunchTemplateSpecification.builder()
       .launchTemplateName(CommonAws.launchTemplateName)
@@ -48,7 +49,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     val runInstanceResponse = CommonAws.ec2Client.runInstances(runInstancesRequest)
     println(runInstanceResponse)
 
-  private def createApiGateway(duckServerIp:String):Unit =
+  private def createApiGateway(duckServerIp:String):String =
     val endpointConfiguration = EndpointConfiguration.builder()
       .types(EndpointType.REGIONAL)
       .build
@@ -146,6 +147,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
 
     val url = s"https://$restApiId.execute-api.${CommonAws.region.id()}.amazonaws.com/$stageName"
     println(url)
+    url
 
   private def setUpSystemctl(duckServerIp: String): Unit =
     @tailrec

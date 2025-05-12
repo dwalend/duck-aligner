@@ -6,6 +6,7 @@ import fs2.dom.HtmlElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
 import fs2.Stream
 import cats.implicits.*
+import smithy4s.http.UnknownErrorResponse
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -44,15 +45,19 @@ object Main extends IOWebApp:
         .compile.drain.start
     }.toResource
 
-  private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap,duckId: DuckId): IO[UpdatePositionOutput]  =
-    for
+  private def ping(geoIO: GeoIO,client: DuckUpdateService[IO],mapLibre: MapLibreMap,duckId: DuckId): IO[Unit]  =
+    val p = for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
       update: UpdatePositionOutput <- updatePosition[IO](position,client,duckId)
       _ <- IO.println(update.sitRep)
       _ <- MapLibreGL.updateMapLibre[IO](mapLibre,update)
     yield
-      update
+      ()
+    p.recover {
+      case uer: UnknownErrorResponse if uer.code == 504 =>
+        println(s"${uer.getMessage}. Will try again.")
+    }
 
   private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
