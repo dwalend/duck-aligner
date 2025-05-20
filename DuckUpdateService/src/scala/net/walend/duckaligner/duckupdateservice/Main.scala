@@ -6,6 +6,8 @@ import com.comcast.ip4s.ipv4
 import cats.implicits.toSemigroupKOps
 import net.walend.duckaligner.duckupdateservice.awssdklocation.MapLibreGLRoutes
 import org.http4s.*
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 /**
  *
@@ -29,8 +31,8 @@ object Main extends IOApp.Simple:
           .withHost(ipv4"0.0.0.0")
           .withHttpApp(r.orNotFound)
           .build
-          .handleErrorWith{ (t:Throwable) => 
-            Log.log[IO]("Caught top-level error",Option(t)).toResource
+          .handleErrorWith{ (t:Throwable) =>
+            Slf4jLogger.create[IO].flatMap(_.error(t)("Top level error trap")).toResource
           }
       }.use(_ => IO.never)
     }
