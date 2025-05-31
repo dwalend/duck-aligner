@@ -8,7 +8,7 @@ projects:
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.30
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.36
       - org.apache.ant:ant-jsch:1.10.15
       - com.github.mwiede:jsch:0.2.25
       - software.amazon.awssdk:cloudformation:2.31.20 #todo maybe replace with a smithy4s http4s library when available
@@ -36,7 +36,7 @@ projects:
       - ch.qos.logback:logback-classic:1.5.17
       - org.fusesource.jansi:jansi:2.4.1
       - io.circe::circe-parser:0.14.10
-#      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.24
+#      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.36
   ShareLocationServiceTest:
     extends: template-common
     isTestProject: true
@@ -47,7 +47,7 @@ projects:
   DuckUpdateSmithy:
     extends: template-cross
     dependencies:
-      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.30
+      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.36
       - com.disneystreaming.alloy:alloy-core:0.3.14
   DuckUpdateBrowser:
     extends: template-js
@@ -70,7 +70,7 @@ projects:
       - org.http4s::http4s-ember-client:0.23.30
       - org.http4s::http4s-circe:0.23.30
       - org.http4s::http4s-dsl:0.23.30
-      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.25
+      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.36
       - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available
       - org.typelevel::log4cats-core:2.7.0
       - org.typelevel::log4cats-slf4j:2.7.0

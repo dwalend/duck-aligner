@@ -20,6 +20,12 @@ structure DuckId {
     v: Long
 }
 
+//todo not used yet 
+structure DuckIdFinder {
+    @required
+    v: String
+}
+
 list Positions {
     member: GeoPoint
 }

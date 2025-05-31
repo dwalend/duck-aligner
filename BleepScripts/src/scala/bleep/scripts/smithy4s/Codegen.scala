@@ -17,6 +17,9 @@ object Codegen extends BleepScript("Smithy4sCodegen") {
     val crossProjectName: CrossProjectName = projectNameMap.getOrElse(cpn,
       projectNameMap.getOrElse(s"$cpn@jvm", sys.error(s"'$cpn' is not a valid crossProjectName"))
     )
+
+    commands.clean(List(crossProjectName))
+
     val theProject = started.buildPaths
       .project(
         crossProjectName,

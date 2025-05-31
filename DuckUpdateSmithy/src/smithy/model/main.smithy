@@ -10,7 +10,8 @@ service DuckUpdateService {
     version: "0.0.0"  //todo link to the build system
     operations: [
         UpdatePosition,
-        MapLibreGlKey
+        MapLibreGlKey,
+        GetDuckId
     ]
 }
 
@@ -31,5 +32,20 @@ operation MapLibreGlKey {
     output := {
         @required
         key:String
+    }
+}
+
+//todo this should probably use a POST and something more sophisticated - from an identity server
+@http(method: "GET", uri: "/duckId/{duckIdFinder}", code: 200)
+operation GetDuckId {
+    input := {
+        @required
+        @httpLabel
+        duckIdFinder: String
+    }
+
+    output := {
+        @required
+        duckId:DuckId
     }
 }

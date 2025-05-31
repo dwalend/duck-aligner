@@ -3,7 +3,7 @@ package net.walend.duckaligner.duckupdateservice.store
 import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.syntax.all.*
-import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, MapLibreGlKeyOutput, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckUpdate, DuckUpdateService, GetDuckIdOutput, MapLibreGlKeyOutput, UpdatePositionOutput}
 import net.walend.duckaligner.duckupdateservice.awssdklocation.AwsSecrets
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
@@ -21,6 +21,11 @@ object DucksStateStore:
   def makeDuckStateStore[F[_]: Async]:F[DucksStateStore[F]] =
     AtomicCell[F].of(DucksState.start).map{ducksStateCell =>
       new DucksStateStore[F]:
+
+        override def getDuckId(duckIdFinder: String): F[GetDuckIdOutput] = 
+          //todo eventually some kind of lookup and a check that this duck belongs goes here
+          Async[F].pure(GetDuckIdOutput(DuckId(duckIdFinder.hashCode).toDuckI))
+
         override def updatePosition(positionUpdate: DuckUpdate): F[UpdatePositionOutput] =
           val updatePosition = UpdatePosition(positionUpdate)
           ducksStateCell.updateAndGet { ducksState =>
@@ -31,5 +36,6 @@ object DucksStateStore:
             Slf4jLogger.create[F].flatMap(_.info(s"${upo.sitRep}"))
           }
 
-        override def mapLibreGlKey(): F[MapLibreGlKeyOutput] = Async[F].pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
+        override def mapLibreGlKey(): F[MapLibreGlKeyOutput] = 
+          Async[F].pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
     }

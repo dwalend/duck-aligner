@@ -32,7 +32,7 @@ object Main extends IOWebApp:
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       appDiv <- div("") //todo eventually make this a control overlay
-      duckId = DuckId(Random().nextLong()) //todo get from start property or the server
+      duckId <- client.getDuckId("It's me").map(_.duckId).toResource //todo use something user-specific
       _ <- startPinger(geoIO,client,duckId)
     yield
       println("See ducks!")
