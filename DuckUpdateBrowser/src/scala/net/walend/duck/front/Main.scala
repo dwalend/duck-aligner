@@ -6,6 +6,7 @@ import fs2.dom.HtmlElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
 import fs2.Stream
 import cats.implicits.*
+import org.http4s.Uri
 import smithy4s.http.UnknownErrorResponse
 
 import scala.annotation.unused
@@ -14,7 +15,6 @@ import typings.maplibreGl.global.maplibregl.Map as MapLibreMap
 
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
-import scala.util.Random
 
 @JSExportTopLevel("Main")
 object Main extends IOWebApp:
@@ -31,12 +31,17 @@ object Main extends IOWebApp:
       client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
+      duckName = duckNameFromUri(document)
       appDiv <- div("") //todo eventually make this a control overlay
-      duckId <- client.getDuckId("It's me").map(_.duckId).toResource //todo use something user-specific
+      duckId <- client.getDuckId(duckName).map(_.duckId).toResource //todo remember the user if possible
       _ <- startPinger(geoIO,client,duckId)
     yield
       println("See ducks!")
       appDiv
+
+  private def duckNameFromUri(document:org.scalajs.dom.html.Document):String =
+    val uri = Uri.unsafeFromString(document.documentURI)
+    uri.query.pairs.toMap.apply("duckName").get
 
   private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO],duckId: DuckId): Resource[IO, FiberIO[Unit]] =
     MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
@@ -62,7 +67,7 @@ object Main extends IOWebApp:
   private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
       id = duckId,
-      snapshot = 0,  //todo update a counter
+      snapshot = 0,  //todo update a counter maybe - maybe not needed
       position = position
     )
     client.updatePosition(duckUpdate)
