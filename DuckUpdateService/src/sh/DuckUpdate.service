@@ -3,7 +3,7 @@ Description=Duck Update Web Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/java -jar /home/ec2-user/DuckUpdateService.jar 
+ExecStart=/usr/bin/java -Dorg.slf4j.simpleLogger.logFile=/home/ec2-user/DuckUpdateService.log -jar /home/ec2-user/DuckUpdateService.jar
 Type=simple
 Restart=no
 
