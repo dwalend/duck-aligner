@@ -23,7 +23,7 @@ object DucksStateStore:
       new DucksStateStore[F]:
 
         override def getDuckId(duckIdFinder: String): F[GetDuckIdOutput] = 
-          //todo eventually some kind of lookup and a check that this duck belongs goes here
+          //todo eventually some kind of lookup and a check that this duck belongs here
           Async[F].pure(GetDuckIdOutput(DuckId(duckIdFinder.hashCode).toDuckI))
 
         override def updatePosition(positionUpdate: DuckUpdate): F[UpdatePositionOutput] =
