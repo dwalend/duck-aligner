@@ -31,7 +31,7 @@ object Main extends IOWebApp:
       client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
-      duckName = duckNameFromUri(document)
+      duckName = duckNameFromUriQuery(document)
       appDiv <- div("") //todo eventually make this a control overlay
       duckId <- client.getDuckId(duckName).map(_.duckId).toResource //todo remember the user if possible
       _ <- startPinger(geoIO,client,duckId)
@@ -39,14 +39,14 @@ object Main extends IOWebApp:
       println("See ducks!")
       appDiv
 
-  private def duckNameFromUri(document:org.scalajs.dom.html.Document):String =
+  private def duckNameFromUriQuery(document:org.scalajs.dom.html.Document):String =
     val uri = Uri.unsafeFromString(document.documentURI)
     uri.query.pairs.toMap.apply("duckName").get
 
   private def startPinger(geoIO: GeoIO,client: DuckUpdateService[IO],duckId: DuckId): Resource[IO, FiberIO[Unit]] =
     MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
       Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
-        .evalMap(_ => ping(geoIO, client, mapLibre,duckId))
+        .evalMap(_ => ping(geoIO, client, mapLibre, duckId))
         .compile.drain.start
     }.toResource
 

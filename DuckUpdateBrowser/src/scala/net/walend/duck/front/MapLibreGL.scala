@@ -9,6 +9,7 @@ import org.scalablytyped.runtime.StringDictionary
 import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Map as MapLibreMap}
 import typings.maplibreGl.mod.{GetResourceResponse, MapOptions}
 import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
+import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings.top
 import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
 import typings.std.ImageBitmap
 
@@ -50,9 +51,9 @@ object MapLibreGL:
     val addNewDucks = newDucks.map{ d =>
       //add an image for each of those ducks
       val imageName = d.id.imageName
-      val loadImage = Async[F].fromFuture(Async[F].blocking(mapLibre.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
+      val loadDuckImage = Async[F].fromFuture(Async[F].blocking(mapLibre.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
         .toFuture))
-      val addImage: F[mapLibre.type] = loadImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
+      val addImage: F[mapLibre.type] = loadDuckImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
         case element: HTMLImageElement => mapLibre.addImage(imageName, element)
         case bitmap => mapLibre.addImage(imageName, bitmap.asInstanceOf[typings.std.global.ImageBitmap])
       })
@@ -66,7 +67,16 @@ object MapLibreGL:
 
       addImage.map { _ =>
         mapLibre.addSource(sourceName, featureSpec)
-        val layerSpec = LayerSpecification.SymbolLayerSpecification(layerName, sourceName).setLayout(Iconallowoverlap().`setIcon-image`(imageName).`setIcon-size`(0.125))
+        val layerSpec = LayerSpecification
+          .SymbolLayerSpecification(layerName, sourceName)
+          .setLayout(
+            Iconallowoverlap()
+              .`setIcon-image`(imageName)
+              .`setIcon-size`(0.125)
+              .`setText-field`("DuckName")
+              .`setText-offset`((0d, 1.25))
+              .`setText-anchor`(top)
+          )
         mapLibre.addLayer(layerSpec)
       }
     }.sequence
@@ -76,13 +86,14 @@ object MapLibreGL:
         val p: GeoPoint = track.positions.head
         val data:GeoJSON[Geometry, GeoJsonProperties] = Feature(
           geometry = Point(js.Array(p.longitude, p.latitude)),
-          properties = StringDictionary.empty)
+          properties = StringDictionary.empty
+        )
         mapLibre.getSource(track.id.sourceName).map {
           (geo: GeoJSONSource) => geo.setData(data)
         }
       }
     }
-    positionDucks.void//.map(_ => ())
+    positionDucks.void
 
   extension (duckId:DuckId)
     private def imageName = s"image${duckId.v}"
