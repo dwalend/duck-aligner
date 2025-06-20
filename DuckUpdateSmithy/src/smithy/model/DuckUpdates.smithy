@@ -29,10 +29,20 @@ structure DuckIdFinder {
 list Positions {
     member: GeoPoint
 }
+structure DuckInfo {
+    @required
+    id:DuckId
+
+    @required
+    duckName:String
+
+    @required
+    lastChanged:Long
+}
 
 structure Track {
     @required
-    id:DuckId
+    duckInfo:DuckInfo
 
     @required
     positions: Positions

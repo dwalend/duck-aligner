@@ -2,7 +2,7 @@ package net.walend.duck.front
 
 import cats.effect.{Async, IO, Resource}
 import org.scalajs.dom.HTMLImageElement
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
 import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary
@@ -47,10 +47,10 @@ object MapLibreGL:
 
     //filter the list of ducks for ducks that don't have images
     val imageNames: js.Array[String] = mapLibre.listImages()
-    val newDucks = duckTracks.filterNot(d => imageNames.contains(d.id.imageName))
-    val addNewDucks = newDucks.map{ d =>
+    val newDucks = duckTracks.filterNot(d => imageNames.contains(d.duckInfo.imageName))
+    val addNewDucks = newDucks.map{ track =>
       //add an image for each of those ducks
-      val imageName = d.id.imageName
+      val imageName = track.duckInfo.imageName
       val loadDuckImage = Async[F].fromFuture(Async[F].blocking(mapLibre.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
         .toFuture))
       val addImage: F[mapLibre.type] = loadDuckImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
@@ -58,12 +58,12 @@ object MapLibreGL:
         case bitmap => mapLibre.addImage(imageName, bitmap.asInstanceOf[typings.std.global.ImageBitmap])
       })
 
-      val p: GeoPoint = d.positions.head
+      val p: GeoPoint = track.positions.head
       val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
         js.Array(Feature(Point(js.Array(p.longitude, p.latitude)), ""))
       ))
-      val sourceName = d.id.sourceName
-      val layerName = d.id.layerName
+      val sourceName = track.duckInfo.sourceName
+      val layerName = track.duckInfo.layerName
 
       addImage.map { _ =>
         mapLibre.addSource(sourceName, featureSpec)
@@ -73,7 +73,7 @@ object MapLibreGL:
             Iconallowoverlap()
               .`setIcon-image`(imageName)
               .`setIcon-size`(0.125)
-              .`setText-field`("DuckName")
+              .`setText-field`(track.duckInfo.duckName)
               .`setText-offset`((0d, 1.25))
               .`setText-anchor`(top)
           )
@@ -88,16 +88,16 @@ object MapLibreGL:
           geometry = Point(js.Array(p.longitude, p.latitude)),
           properties = StringDictionary.empty
         )
-        mapLibre.getSource(track.id.sourceName).map {
+        mapLibre.getSource(track.duckInfo.sourceName).map {
           (geo: GeoJSONSource) => geo.setData(data)
         }
       }
     }
     positionDucks.void
 
-  extension (duckId:DuckId)
-    private def imageName = s"image${duckId.v}"
+  extension (duckInfo:DuckInfo)
+    private def imageName = s"image${duckInfo.id.v}"
   
-    private def sourceName = s"source${duckId.v}"
+    private def sourceName = s"source${duckInfo.id.v}"
   
-    private def layerName = s"layer${duckId.v}"
+    private def layerName = s"layer${duckInfo.id.v}"
