@@ -29,7 +29,7 @@ object Main extends IOApp:
   private def updatePosition(position:(Double,Double),client: DuckUpdateService[IO]): IO[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
       id = DuckId(1), //todo from command line
-      snapshot = 0, //todo from counter
+      duckName = "Wooden duck", //todo from counter
       position = GeoPoint(position._1,position._2, timestamp = System.currentTimeMillis()) 
     )
     client.updatePosition(duckUpdate)

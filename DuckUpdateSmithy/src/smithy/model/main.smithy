@@ -12,6 +12,8 @@ service DuckUpdateService {
         UpdatePosition,
         MapLibreGlKey,
         GetDuckId
+        //todo add a "put all my state to rescue the server" - and have the client detect the problem and push the fix
+
     ]
 }
 

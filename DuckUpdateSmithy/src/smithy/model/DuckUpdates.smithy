@@ -73,9 +73,8 @@ structure DuckUpdate {
     @required
     id:DuckId
 
-    //Incremented every update
-    @required  //I might back off requiring the snapshot version if not needed for recovering tracks
-    snapshot: Integer
+    @required
+    duckName:String
 
     @required
     position:GeoPoint

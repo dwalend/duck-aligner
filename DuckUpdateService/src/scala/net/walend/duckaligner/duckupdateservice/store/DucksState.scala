@@ -17,15 +17,27 @@ final case class DucksState private(snapshot:Int, tracks: Map[DuckId,Track], duc
   }
 
   def updatedPosition(updatePosition: UpdatePosition):DucksState =
-    val duckInfo = ducks(updatePosition.id)
+//todo easy cleanup when duck info is from a persistent store or startup info
+    ducks.get(updatePosition.id).map { di =>
+      val updatedTracks: Map[DuckId, Track] = tracks.updatedWith(updatePosition.id) { maybeTrack =>
+        Option(
+          maybeTrack.getOrElse(Track(di, List.empty))
+            .updated(updatePosition.geoPoint)
+        )
+      }
+      this.copy(snapshot = this.snapshot + 1, tracks = updatedTracks)
+    }.getOrElse{
+      val duckInfo = DuckInfo(updatePosition.id,updatePosition.duckName,0L)
 
-    val updatedTracks: Map[DuckId, Track] = tracks.updatedWith(updatePosition.id){ maybeTrack =>
-      Option(
-        maybeTrack.getOrElse(Track(duckInfo,List.empty))
-        .updated(updatePosition.geoPoint)
-      )
+      val hasDuck = updatedDuckInfo(duckInfo)
+      val updatedTracks: Map[DuckId, Track] = tracks.updatedWith(updatePosition.id) { maybeTrack =>
+        Option(
+          maybeTrack.getOrElse(Track(duckInfo, List.empty))
+            .updated(updatePosition.geoPoint)
+        )
+      }
+      hasDuck.copy(snapshot = this.snapshot + 1, tracks = updatedTracks)
     }
-    this.copy(snapshot = this.snapshot + 1,tracks = updatedTracks)
 
   def toDuckSitRepUpdate:DuckSitRepUpdate =
     DuckSitRepUpdate(
@@ -37,12 +49,11 @@ final case class DucksState private(snapshot:Int, tracks: Map[DuckId,Track], duc
 object DucksState:
   def start: DucksState = DucksState(snapshot = 0, tracks = Map.empty, ducks = Map.empty)
 
-final case class UpdatePosition(snapshot:Int, id: DuckId, geoPoint: GeoPoint)
+final case class UpdatePosition(duckName:String, id: DuckId, geoPoint: GeoPoint)
 
-//todo don't need this
 object UpdatePosition:
   def apply(duckUpdate:DuckUpdate):UpdatePosition =
-    UpdatePosition(duckUpdate.snapshot,new DuckId(duckUpdate.id.v),duckUpdate.position)
+    UpdatePosition(duckUpdate.duckName,new DuckId(duckUpdate.id.v),duckUpdate.position)
 
 extension(track:Track)
   def updated(geoPoint: GeoPoint): Track =

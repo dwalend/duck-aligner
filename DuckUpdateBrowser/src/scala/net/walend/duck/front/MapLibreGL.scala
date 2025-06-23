@@ -2,7 +2,7 @@ package net.walend.duck.front
 
 import cats.effect.{Async, IO, Resource}
 import org.scalajs.dom.HTMLImageElement
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckInfo, DuckUpdateService, GeoPoint, Track, UpdatePositionOutput}
 import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary

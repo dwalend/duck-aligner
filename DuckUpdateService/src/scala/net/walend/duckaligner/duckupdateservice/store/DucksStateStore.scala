@@ -23,6 +23,7 @@ object DucksStateStore:
       new DucksStateStore[F]:
 
         override def getDuckId(duckIdFinder: String): F[GetDuckIdOutput] = { 
+          //todo real time stamp from Clock
           val duckInfo = DuckInfo(DuckId(duckIdFinder.hashCode),duckIdFinder,0L)
           ducksStateCell.updateAndGet { ducksState =>
             ducksState.updatedDuckInfo(duckInfo)
