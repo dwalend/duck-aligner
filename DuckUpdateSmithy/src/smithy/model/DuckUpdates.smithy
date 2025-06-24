@@ -79,3 +79,40 @@ structure DuckUpdate {
     @required
     position:GeoPoint
 }
+/////
+@mixin
+structure DuckEventBits {
+    @required
+    protocol: Integer = 0
+    @required
+    order: Integer
+    @required
+    id:DuckId
+}
+
+structure DuckPositionEvent with [
+    DuckEventBits
+] {
+    @required
+    position:GeoPoint
+}
+
+structure DuckInfoEvent with [
+    DuckEventBits
+] {
+    @required
+    duckInfo:DuckInfo
+}
+
+union DuckEvent {
+    position:DuckPositionEvent
+    info:DuckInfoEvent
+}
+
+list DuckEvents {
+    member: DuckEvent
+}
+
+list DuckEventWishList {
+    member: Integer
+}

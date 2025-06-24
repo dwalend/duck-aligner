@@ -3,7 +3,7 @@ package net.walend.duck.front
 import calico.IOWebApp
 import cats.effect.{FiberIO, IO, Resource}
 import fs2.dom.HtmlElement
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckPositionEvent, DuckUpdate, DuckUpdateService, GeoPoint, ProposeEventsOutput, UpdatePositionOutput}
 import fs2.Stream
 import cats.implicits.*
 import org.http4s.Uri
@@ -54,6 +54,7 @@ object Main extends IOWebApp:
     val p = for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
+      eventsFromServer <- sendPosition(position,client,duckId)
       update: UpdatePositionOutput <- updatePosition[IO](position,client,duckId,duckName)
       _ <- IO.println(update.sitRep)
       _ <- MapLibreGL.updateMapLibre[IO](mapLibre,update)
@@ -64,6 +65,15 @@ object Main extends IOWebApp:
         println(s"${uer.getMessage}. Will try again.")
     }
 
+  private def sendPosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId): F[ProposeEventsOutput] =
+    val duckPositionEvent = DuckPositionEvent(
+      order = 0, //todo use the local store to get the order
+      id = duckId,
+      position = position
+    )
+    client.proposeEvents(List(DuckEvent.position(duckPositionEvent)))
+
+  //todo delete when no longer needed
   private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId,duckName: String): F[UpdatePositionOutput] =
     val duckUpdate: DuckUpdate = DuckUpdate(
       id = duckId,
