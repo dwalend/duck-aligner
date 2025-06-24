@@ -121,7 +121,7 @@ templates:
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
       strict: true
-      version: 3.3.4
+      version: 3.3.6
   template-js:
     platform:
       name: js
@@ -130,7 +130,7 @@ templates:
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
       strict: true
-      version: 3.3.3
+      version: 3.3.6
   template-cross:
     cross:
       js:
