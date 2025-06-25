@@ -1,10 +1,10 @@
 package net.walend.duck.front
 
 import cats.effect.implicits.*
+import cats.implicits.*
 import cats.effect.{Async, Resource}
 import cats.effect.std.AtomicCell
 import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckPositionEvent, DuckUpdateService, GeoPoint, ProposeEventsOutput}
-import cats.implicits.*
 
 /**
  * @author David Walend
