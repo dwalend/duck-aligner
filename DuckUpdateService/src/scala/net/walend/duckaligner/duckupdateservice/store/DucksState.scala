@@ -32,7 +32,8 @@ final case class DucksState private(snapshot:Int, events:List[DuckEvent], tracks
     this.copy(snapshot = this.snapshot +1, events = updatedEvents)
 
   def eventsToClient(proposedEvents:List[DuckEvent]): (List[DuckEvent], List[Nothing]) =
-    val clientKnowsEventsUpTo = proposedEvents.headOption.map(_.order - 1).getOrElse(0)
+
+    val clientKnowsEventsUpTo: Int = proposedEvents.head.order - 1
     val eventsToClient = events.drop(clientKnowsEventsUpTo)
     (eventsToClient,List.empty)
 

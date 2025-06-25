@@ -51,9 +51,9 @@ object DucksStateStore:
           ducksStateCell.updateAndGet{ ducksState =>
             ducksState.updateEvents(proposal)
           }.map { duckState =>
-            val forClient = duckState.eventsToClient(proposal) 
+            val forClient = duckState.eventsToClient(proposal)
             ProposeEventsOutput(forClient._1,forClient._2)
           }.flatTap{ eventsAndMissing =>
-            Slf4jLogger.create[F].flatMap(_.info(s"Events: ${eventsAndMissing._1} Missing ${eventsAndMissing._2}"))
+            Slf4jLogger.create[F].flatMap(_.info(s"Events: ${eventsAndMissing._1} Missing ${eventsAndMissing._2} Proposed: $proposal"))
           }
     }
