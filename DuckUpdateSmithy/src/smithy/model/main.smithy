@@ -10,10 +10,8 @@ service DuckUpdateService {
     version: "0.0.0"  //todo link to the build system
     operations: [
         ProposeEvents,
-        UpdatePosition,
         MapLibreGlKey,
-        GetDuckId
-        //todo change to an event and CQRS model
+        //changed to an event and CQRS model
         //todo add method put ProposeEvents - reply is server's events to add to the client
         //todo that reply can include a list of events the server wants to know about (is missing due to ec2 reboot)
         //events are numbered. Proposed event number is next from the client's point of view N
@@ -40,39 +38,11 @@ operation ProposeEvents {
         pleaseSend:DuckEventWishList
     }
 }
-/////
-
-@http(method: "POST", uri: "/update", code: 200)
-operation UpdatePosition {
-    input := {
-        @required
-        positionUpdate:DuckUpdate
-    }
-    output := {
-        @required
-        sitRep:DuckSitRepUpdate
-    }
-}
 
 @http(method: "GET", uri: "/mapKey", code: 200)
 operation MapLibreGlKey {
     output := {
         @required
         key:String
-    }
-}
-
-//todo this should probably use a POST and something more sophisticated - from an identity server
-@http(method: "GET", uri: "/duckId/{duckIdFinder}", code: 200)
-operation GetDuckId {
-    input := {
-        @required
-        @httpLabel
-        duckIdFinder: String
-    }
-
-    output := {
-        @required
-        duckId:DuckId
     }
 }

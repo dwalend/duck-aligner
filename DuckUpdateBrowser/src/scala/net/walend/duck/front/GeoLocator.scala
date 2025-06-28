@@ -1,11 +1,7 @@
 package net.walend.duck.front
 
-import cats.effect.IO
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
-import org.scalajs.dom.html.Document
-import org.scalajs.dom.{Position, PositionError}
-
 //todo almost ready to delete this one
+/*
 trait GeoLocator:
   def geoLocate():Unit
 
@@ -57,3 +53,4 @@ object GeoLocator:
          */
 
       def onError(p: PositionError): Unit = println(s"Error ${p.code} ${p.message}")
+*/

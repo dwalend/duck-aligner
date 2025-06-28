@@ -21,12 +21,6 @@ structure DuckId {
     v: Long
 }
 
-//todo not used yet 
-structure DuckIdFinder {
-    @required
-    v: String
-}
-
 list Positions {
     member: GeoPoint
 }
@@ -41,45 +35,6 @@ structure DuckInfo {
     lastChanged:Long
 }
 
-structure Track {
-    @required
-    duckInfo:DuckInfo
-
-    @required
-    positions: Positions
-}
-
-list DuckTracks {
-    member: Track
-}
-
-//All the data needed to show all the duck tracks
-structure DuckSitRepUpdate {
-    @required
-    protocol: Integer = 0
-
-    //Incremented every update
-    @required
-    snapshot: Integer
-
-    @required
-    tracks: DuckTracks
-}
-
-//all the info needed to update the track of a single duck
-structure DuckUpdate {
-    @required
-    protocol: Integer = 0
-
-    @required
-    id:DuckId
-
-    @required
-    duckName:String
-
-    @required
-    position:GeoPoint
-}
 /////
 @mixin
 structure DuckEventBits {

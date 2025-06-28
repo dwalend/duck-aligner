@@ -27,7 +27,7 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
       duckInfo = duckInfo
     )
     client.proposeEvents(List[DuckEvent](duckInfoEvent))
-  
+
   private def insertEvents(eventsToInsert: List[DuckEvent]): F[List[DuckEvent]] =
     cell.updateAndGet { currentEvents =>
       val allEvents = currentEvents.appendedAll(eventsToInsert)
@@ -46,7 +46,7 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
       peo <- sendPosition(position,client,duckId,next)
       allEvents <- insertEvents(peo.updates)
     yield allEvents
-    
+
   private def createDuckInfo(duckName:String): DuckInfo =
     DuckInfo(
       id = DuckId(duckName.hashCode),
@@ -54,9 +54,9 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
       lastChanged = 0L //todo don't worry - this all moves outside
     )
 
-  def sendDuckInfo(duckName:String,client: DuckUpdateService[F]):F[DuckId] = 
-    val duckInfo = createDuckInfo(duckName)
-    for 
+  def sendDuckInfo(duckName:String,client: DuckUpdateService[F]):F[DuckId] =
+    val duckInfo = createDuckInfo(duckName) //todo - should get duck info from central server instead - and prefetch on the duck line server
+    for
       next <- nextNumber
       dio <- sendDuckInfo(duckInfo,client,next)
       _ <- insertEvents(dio.updates)

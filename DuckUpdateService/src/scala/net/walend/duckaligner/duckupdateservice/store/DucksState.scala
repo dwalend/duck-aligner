@@ -1,7 +1,7 @@
 package net.walend.duckaligner.duckupdateservice.store
 
 import scala.collection.immutable.Map
-import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, DuckSitRepUpdate, DuckUpdate, GeoPoint, Track}
+import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, GeoPoint}
 /**
  * Shared structures between the ShareLocationService and the front end.
  *
@@ -9,7 +9,7 @@ import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, DuckS
  * @since v0.0.0
  */
 //todo remove snapshot, tracks, ducks
-final case class DucksState private(snapshot:Int, events:List[DuckEvent], tracks: Map[DuckId,Track], ducks: Map[DuckId,DuckInfo]):
+final case class DucksState private(snapshot:Int, events:List[DuckEvent]):
 
   //todo recover from missing events
   //events are numbered. Proposed event number is next from the client's point of view N
@@ -37,40 +37,6 @@ final case class DucksState private(snapshot:Int, events:List[DuckEvent], tracks
     val eventsToClient = events.drop(clientKnowsEventsUpTo)
     (eventsToClient,List.empty)
 
-
-  def updatedDuckInfo(duckInfo: DuckInfo):DucksState =
-    val updatedDucks = ducks.updated(duckInfo.id,duckInfo)
-    this.copy(snapshot = this.snapshot + 1, ducks = updatedDucks)
-
-  def updatedPosition(updatePosition: UpdatePosition):DucksState =
-//todo easy cleanup when duck info is from a persistent store or startup info
-    ducks.get(updatePosition.id).map { di =>
-      val updatedTracks: Map[DuckId, Track] = tracks.updatedWith(updatePosition.id) { maybeTrack =>
-        Option(
-          maybeTrack.getOrElse(Track(di, List.empty))
-            .updated(updatePosition.geoPoint)
-        )
-      }
-      this.copy(snapshot = this.snapshot + 1, tracks = updatedTracks)
-    }.getOrElse{
-      val duckInfo = DuckInfo(updatePosition.id,updatePosition.duckName,0L)
-
-      val hasDuck = updatedDuckInfo(duckInfo)
-      val updatedTracks: Map[DuckId, Track] = tracks.updatedWith(updatePosition.id) { maybeTrack =>
-        Option(
-          maybeTrack.getOrElse(Track(duckInfo, List.empty))
-            .updated(updatePosition.geoPoint)
-        )
-      }
-      hasDuck.copy(snapshot = this.snapshot + 1, tracks = updatedTracks)
-    }
-
-  def toDuckSitRepUpdate:DuckSitRepUpdate =
-    DuckSitRepUpdate(
-      snapshot = snapshot,
-      tracks = tracks.values.toList.sortBy(_.positions.head.timestamp)
-    )
-
 extension(duckEvent:DuckEvent)
   def withOrder(order:Int):DuckEvent =
     duckEvent.accept(new DuckEvent.Visitor[DuckEvent]:
@@ -79,17 +45,8 @@ extension(duckEvent:DuckEvent)
     )
 
 object DucksState:
-  def start: DucksState = DucksState(snapshot = 0, events = List.empty, tracks = Map.empty, ducks = Map.empty)
+  def start: DucksState = DucksState(snapshot = 0, events = List.empty)
 
-final case class UpdatePosition(duckName:String, id: DuckId, geoPoint: GeoPoint)
-
-object UpdatePosition:
-  def apply(duckUpdate:DuckUpdate):UpdatePosition =
-    UpdatePosition(duckUpdate.duckName,new DuckId(duckUpdate.id.v),duckUpdate.position)
-
-extension(track:Track)
-  def updated(geoPoint: GeoPoint): Track =
-    track.copy(positions = track.positions.prepended(geoPoint))
 /*
  * Mostly from org.scalajs.dom.{Geolocation, Position, PositionError, document}'s idea of coordinates
 
