@@ -3,7 +3,7 @@ package net.walend.duck.front
 import calico.IOWebApp
 import cats.effect.{FiberIO, IO, Resource}
 import fs2.dom.HtmlElement
-import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckUpdate, DuckUpdateService, GeoPoint, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint}
 import fs2.Stream
 import cats.implicits.*
 import org.http4s.Uri
@@ -32,10 +32,11 @@ object Main extends IOWebApp:
       eventStore <- EventStore.create[IO]()
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
-      duckName = duckNameFromUriQuery(document)
+      duckName = duckNameFromUriQuery(document) //todo send via proposing an event
+      _ <- eventStore.sendDuckInfo(duckName,client).toResource
       appDiv <- div("") //todo eventually make this a control overlay
       duckId <- client.getDuckId(duckName).map(_.duckId).toResource //todo remember the user if possible
-      _ <- startPinger(geoIO,client,eventStore,duckId,duckName)
+      _ <- startPinger(geoIO,client,eventStore,duckId)
     yield
       println("See ducks!")
       appDiv
@@ -49,11 +50,10 @@ object Main extends IOWebApp:
                            client: DuckUpdateService[IO],
                            eventStore: EventStore[IO],
                            duckId: DuckId,
-                           duckName: String
                          ): Resource[IO, FiberIO[Unit]] =
     MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
       Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
-        .evalMap(_ => ping(geoIO, client, eventStore, mapLibre, duckId, duckName))
+        .evalMap(_ => ping(geoIO, client, eventStore, mapLibre, duckId))
         .compile.drain.start
     }.toResource
 
@@ -63,29 +63,16 @@ object Main extends IOWebApp:
                     eventStore: EventStore[IO],
                     mapLibre: MapLibreMap,
                     duckId: DuckId,
-                    duckName: String
                   ): IO[Unit]  =
     val p:IO[Unit] = for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")
       eventsFromServer <- eventStore.sendPositionAndGetUpdates(position,client,duckId)
-      _ <- IO.println(eventsFromServer)
-      update: UpdatePositionOutput <- updatePosition[IO](position,client,duckId,duckName)
-      _ <- IO.println(update.sitRep)
-      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,update)
+      sitRep = SitRep(eventsFromServer)
+      _ <- IO.println(sitRep)
+      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,sitRep)
     yield ()
     p.recover {
       case uer: UnknownErrorResponse if uer.code == 504 =>
         println(s"${uer.getMessage}. Will try again.")
     }
-
-  //todo delete when no longer needed
-  private def updatePosition[F[_]](position: GeoPoint,client: DuckUpdateService[F],duckId: DuckId,duckName: String): F[UpdatePositionOutput] =
-    val duckUpdate: DuckUpdate = DuckUpdate(
-      id = duckId,
-      duckName = duckName,  //todo update a counter maybe - maybe not needed
-      position = position
-    )
-    client.updatePosition(duckUpdate)
-
-
