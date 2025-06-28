@@ -3,6 +3,7 @@ $version: "2.0"
 namespace net.walend.duckaligner.duckupdates.v0
 
 use smithy.api#required
+use smithy4s.meta#adt
 
 structure GeoPoint {
     @required
@@ -104,6 +105,7 @@ structure DuckInfoEvent with [
     duckInfo:DuckInfo
 }
 
+@adt
 union DuckEvent {
     position:DuckPositionEvent
     info:DuckInfoEvent

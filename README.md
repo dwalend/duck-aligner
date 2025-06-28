@@ -17,7 +17,8 @@ To build it all:
 cd MapLibreGlScalablyTyped
 mill app.something
 cd ..
-rm -rf DuckUpdateSmithy/src/resources/ .bleep/projects-jars/DuckUpdateSmithy@jvm/my.org/DuckUpdateSmithy_3/0.1.0-SNAPSHOT/jars/DuckUpdateSmithy_3.jar
+rm -rf DuckUpdateSmithy/src/resources/ .bleep/projects-jars/DuckUpdateSmithy@jvm/my.org/DuckUpdateSmithy_3/0.1.0-SNAPSHOT/jars/DuckUpdateSmithy_3.jar DuckUpdateSmithy/src/scala/net/walend/duckaligner/duckupdates/v0/*
+
 bleep gen-smithy-code DuckUpdateSmithy
 bleep compile DuckUpdateSmithy
 bleep link DuckUpdateBrowser

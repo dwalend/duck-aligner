@@ -72,15 +72,11 @@ final case class DucksState private(snapshot:Int, events:List[DuckEvent], tracks
     )
 
 extension(duckEvent:DuckEvent)
-  def order:Int = duckEvent match {
-    case DuckEvent.PositionCase(position) => position.order
-    case DuckEvent.InfoCase(info) => info.order
-  }
-
-  def withOrder(order:Int):DuckEvent = duckEvent match {
-    case DuckEvent.PositionCase(position) => DuckEvent.position(position.copy(order = order))
-    case DuckEvent.InfoCase(info) => DuckEvent.info(info.copy(order = order))
-  }
+  def withOrder(order:Int):DuckEvent =
+    duckEvent.accept(new DuckEvent.Visitor[DuckEvent]:
+      def position(value: DuckEvent.DuckPositionEvent): DuckEvent = value.copy(order = order)
+      def info(value: DuckEvent.DuckInfoEvent): DuckEvent = value.copy(order = order)
+    )
 
 object DucksState:
   def start: DucksState = DucksState(snapshot = 0, events = List.empty, tracks = Map.empty, ducks = Map.empty)
