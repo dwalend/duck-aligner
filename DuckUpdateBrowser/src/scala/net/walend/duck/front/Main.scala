@@ -33,9 +33,8 @@ object Main extends IOWebApp:
       document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
-      _ <- eventStore.sendDuckInfo(duckName,client).toResource
+      duckId <- eventStore.sendDuckInfo(duckName,client).toResource
       appDiv <- div("") //todo eventually make this a control overlay
-      duckId <- client.getDuckId(duckName).map(_.duckId).toResource //todo remember the user if possible
       _ <- startPinger(geoIO,client,eventStore,duckId)
     yield
       println("See ducks!")
