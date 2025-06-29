@@ -33,14 +33,17 @@ final case class DucksState private(snapshot:Int, events:List[DuckEvent]):
   def eventsToClient(proposedEvents:List[DuckEvent]): List[DuckEvent] =
     val clientKnowsEventsUpTo: Int = proposedEvents.head.order - 1
     val eventsForClient = events.drop(clientKnowsEventsUpTo)
-
-    //todo handle this part
-    //if the client knows events that the server does not:
-    //if the events list only includes events from this proposal
-    //but the proposed events start with a higher number
-    //request events up to that number
-
     eventsForClient
+    
+  def restartedNeedsEvents(proposedEvents:List[DuckEvent]):Boolean = 
+    //If the events list is empty due to restart 
+    //and the client knows more than the proposed events 
+    //then the server needs the client's events
+    events.isEmpty && proposedEvents.head.order != 1
+
+  def rescue(proposedEvents: List[DuckEvent]): DucksState =
+    if (events.isEmpty) this.copy(snapshot = this.snapshot + 1, events = proposedEvents)
+    else this 
 
 extension(duckEvent:DuckEvent)
   def withOrder(order:Int):DuckEvent =

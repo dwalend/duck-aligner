@@ -4,7 +4,7 @@ import cats.effect.implicits.*
 import cats.implicits.*
 import cats.effect.{Async, Resource}
 import cats.effect.std.AtomicCell
-import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, DuckUpdateService, GeoPoint, NewDuckEventsResponse, ProposeEventsOutput}
+import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, DuckUpdateService, GeoPoint, NewDuckEventsResponse}
 
 /**
  * @author David Walend
@@ -12,47 +12,38 @@ import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, DuckU
  */
 case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
 
-  private def sendPosition(position: GeoPoint, client: DuckUpdateService[F], duckId: DuckId,order:Int): F[ProposeEventsOutput] =
-    val duckPositionEvent = DuckEvent.duckPositionEvent(
-      order = order,
-      id = duckId,
-      position = position
-    )
-    client.proposeEvents(List[DuckEvent](duckPositionEvent))
-
-  private def sendDuckInfo(duckInfo:DuckInfo, client: DuckUpdateService[F], order: Int): F[ProposeEventsOutput] =
-    val duckInfoEvent = DuckEvent.duckInfoEvent(
-      order = order,
-      id = duckInfo.id,
-      duckInfo = duckInfo
-    )
-    client.proposeEvents(List[DuckEvent](duckInfoEvent))
-
   private def insertEvents(eventsToInsert: List[DuckEvent]): F[List[DuckEvent]] =
     cell.updateAndGet { currentEvents =>
       val allEvents = currentEvents.appendedAll(eventsToInsert)
       allEvents
     }
 
-  private def insertOrRescueServer(response:NewDuckEventsResponse):F[List[DuckEvent]] =
+  private def sendRescueEvents(event:DuckEvent,client: DuckUpdateService[F]): F[List[DuckEvent]] =
+    for
+      currentEvents <- cell.get
+      _ <- client.rescueServer(currentEvents)
+      peo <- client.proposeEvents(List[DuckEvent](event))
+      allEvents <- insertOrRescueServer(peo.updates, event, client)
+    yield allEvents
+
+  private def insertOrRescueServer(response:NewDuckEventsResponse,event:DuckEvent,client: DuckUpdateService[F]):F[List[DuckEvent]] =
     response.accept(new NewDuckEventsResponse.Visitor{
       def eventsForClient(value: List[DuckEvent]):F[List[DuckEvent]] = insertEvents(value)
 
-      def rescueServer(value: NewDuckEventsResponse.RescueServerCase.type):F[List[DuckEvent]] = ???
-      //todo fill in recovery
+      def rescueServer(value: NewDuckEventsResponse.RescueServerCase.type):F[List[DuckEvent]] = sendRescueEvents(event,client)
     })
 
   private def nextNumber: F[Int] =
     cell.get.map {
-      case Seq() => 0
+      case Seq() => 1
       case currentEvents => currentEvents.maxBy(_.order).order + 1
     }
 
   def sendPositionAndGetUpdates(position: GeoPoint, client: DuckUpdateService[F], duckId: DuckId):F[List[DuckEvent]] =
     for
-      next <- nextNumber
-      peo <- sendPosition(position,client,duckId,next)
-      allEvents <- insertOrRescueServer(peo.updates)
+      event <- nextNumber.map(DuckEvent.duckPositionEvent(_,duckId,position))
+      peo <- client.proposeEvents(List[DuckEvent](event))
+      allEvents <- insertOrRescueServer(peo.updates,event,client)
     yield allEvents
 
   private def createDuckInfo(duckName:String): DuckInfo =
@@ -65,9 +56,9 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
   def sendDuckInfo(duckName:String,client: DuckUpdateService[F]):F[DuckId] =
     val duckInfo = createDuckInfo(duckName) //todo - should get duck info from central server instead - and prefetch on the duck line server
     for
-      next <- nextNumber
-      peo <- sendDuckInfo(duckInfo,client,next)
-      _ <- insertOrRescueServer(peo.updates)
+      duckInfoEvent <- nextNumber.map(DuckEvent.duckInfoEvent(_, duckInfo.id, duckInfo))
+      peo <- client.proposeEvents(List[DuckEvent](duckInfoEvent))
+      _ <- insertOrRescueServer(peo.updates,duckInfoEvent,client)
     yield duckInfo.id
 
 object EventStore:

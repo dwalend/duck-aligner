@@ -27,7 +27,7 @@ object SitRep:
         val bestDuckInfo: DuckInfo = idAndEvents._2
           .collect{case info:DuckInfoEvent => info}
           .match
-            case Seq() => uknownDuck(idAndEvents._1)
+            case Seq() => unknownDuck(idAndEvents._1)
             case infos => infos.maxBy(_.order).duckInfo
         val duckEvents = idAndEvents._2.sortBy(_.order).reverse 
         bestDuckInfo -> duckEvents
@@ -35,7 +35,7 @@ object SitRep:
     SitRep(order,ducksToEvents)  
   }
   
-  private def uknownDuck(duckId: DuckId): DuckInfo = DuckInfo(duckId,duckName = "MysteryDuck",0L)
+  private def unknownDuck(duckId: DuckId): DuckInfo = DuckInfo(duckId,duckName = "MysteryDuck",0L)
   
 
 

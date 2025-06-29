@@ -11,7 +11,7 @@ service DuckUpdateService {
     operations: [
         ProposeEvents,
         MapLibreGlKey,
-
+        RescueServer,
     ]
 }
 //an event and CQRS model
@@ -34,6 +34,15 @@ operation ProposeEvents {
         @required
         updates:NewDuckEventsResponse
     }
+}
+
+@http(method: "POST", uri: "/rescueServer", code: 200)
+operation RescueServer {
+    input := {
+        @required
+        proposal:DuckEvents
+    }
+
 }
 
 @http(method: "GET", uri: "/mapKey", code: 200)
