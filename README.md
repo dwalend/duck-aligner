@@ -30,9 +30,9 @@ Here's the sketch of a plan:
 * Mostly eat what amazon puts on the plate, build the system up by getting things going, then take on the biggest risks - least familiarity for me - first. Numbers indicate order I plan to chip away at the project.
           
 * - [x] Get a server up and running, and sharing location data
-* - [ ] (2) Get it running on some tiny machine on AWS (t4 I think is the current generation)
+* - [X] (2) Get it running on an AWS EC2 t4 
 * * - [x] (1) Package up all the bits for the server in a jar using a new bleep plugin
-* * - [ ] (3) Run the server from the jar via bleep plugin
+* * - [x] (3) Run the server from the jar via bleep plugin
 * * - [ ] (4) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
 * * - [ ] (5) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
 * * - [ ] (6) Bleep plugin to create an AMI with the jar
@@ -48,8 +48,8 @@ Here's the sketch of a plan:
 * - [x] Use scalajs to build a web app
 * *  Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
 * - [x] Use the dom to get location from the device http://docs.glngn.com/latest/api/org.scala-js.scalajs-dom_sjs1_2.12/org/scalajs/dom/raw/Geolocation.html https://stackoverflow.com/questions/40483880/geolocation-in-scala-js
-* * - [ ] (1.1) Bleep copy static javascript and html to a (bleep-managed) resource directory
-* * - [ ] (4.8) Test javascript in bleep - how to access dom (or not use dom)
+* * - [x] (1.1) Bleep copy static javascript and html to a (bleep-managed) resource directory
+* * - [x] (4.8) Test javascript in bleep - how to access dom (or not use dom)
 * * Add an optional stealth zone - maybe the first quarter of the trip - to hide origin
 * - [x] Send that to some URL, receive locations (stored in memory) back from other users (blocked bleep vs scalajs)
 * - [x] Get map sections from location data from AWS' location service
