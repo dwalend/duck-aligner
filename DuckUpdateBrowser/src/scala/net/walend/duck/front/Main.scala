@@ -69,7 +69,8 @@ object Main extends IOWebApp:
       eventsFromServer <- eventStore.sendPositionAndGetUpdates(position,client,duckId)
       sitRep = SitRep(eventsFromServer)
       _ <- IO.println(sitRep)
-      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,sitRep)
+      now <- IO.realTime
+      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,sitRep,now)
     yield ()
     p.recover {
       case uer: UnknownErrorResponse if uer.code == 504 =>

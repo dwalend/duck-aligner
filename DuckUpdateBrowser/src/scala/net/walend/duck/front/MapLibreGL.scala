@@ -15,7 +15,7 @@ import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings.to
 import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
 import typings.std.ImageBitmap
 
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 
 object MapLibreGL:
@@ -52,7 +52,7 @@ object MapLibreGL:
     } yield mapLibre
     ml.toResource
 
-  def updateMapLibre[F[_] : Async](mapLibre: MapLibreMap, sitRep: SitRep): F[Unit] =
+  def updateMapLibre[F[_] : Async](mapLibre: MapLibreMap, sitRep: SitRep, now:Duration): F[Unit] =
     val duckInfos = sitRep.ducksToEvents.keys
 
     //filter the list of ducks for ducks that don't have images
@@ -76,15 +76,19 @@ object MapLibreGL:
       val sourceName = d.sourceName
       val layerName = d.layerName
 
+      val age = (now.toMillis - sitRep.bestPositionOf(d).timestamp)/1000
+      val labelText = s"${d.duckName}\n${age}s"
+
       addImage.map { _ =>
         mapLibre.addSource(sourceName, featureSpec)
         val layerSpec = LayerSpecification
           .SymbolLayerSpecification(layerName, sourceName)
           .setLayout(
             Iconallowoverlap()
+              .`setIcon-allow-overlap`(true)
               .`setIcon-image`(imageName)
               .`setIcon-size`(0.125)
-              .`setText-field`(d.duckName)
+              .`setText-field`(labelText)
               .`setText-offset`((0d, 1.25))
               .`setText-anchor`(top)
           )
