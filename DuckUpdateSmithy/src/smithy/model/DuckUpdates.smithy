@@ -21,9 +21,6 @@ structure DuckId {
     v: Long
 }
 
-list Positions {
-    member: GeoPoint
-}
 structure DuckInfo {
     @required
     id:DuckId
@@ -72,4 +69,9 @@ list DuckEvents {
 
 list DuckEventWishList {
     member: Integer
+}
+
+union NewDuckEventsResponse {
+    eventsForClient: DuckEvents
+    eventsServerWants: DuckEventWishList
 }

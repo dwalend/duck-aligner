@@ -1,7 +1,6 @@
 package net.walend.duckaligner.duckupdateservice.store
 
-import scala.collection.immutable.Map
-import net.walend.duckaligner.duckupdates.v0.{DuckEvent, DuckId, DuckInfo, GeoPoint}
+import net.walend.duckaligner.duckupdates.v0.DuckEvent
 /**
  * Shared structures between the ShareLocationService and the front end.
  *
@@ -31,11 +30,17 @@ final case class DucksState private(snapshot:Int, events:List[DuckEvent]):
 
     this.copy(snapshot = this.snapshot +1, events = updatedEvents)
 
-  def eventsToClient(proposedEvents:List[DuckEvent]): (List[DuckEvent], List[Nothing]) =
-
+  def eventsToClient(proposedEvents:List[DuckEvent]): List[DuckEvent] =
     val clientKnowsEventsUpTo: Int = proposedEvents.head.order - 1
-    val eventsToClient = events.drop(clientKnowsEventsUpTo)
-    (eventsToClient,List.empty)
+    val eventsForClient = events.drop(clientKnowsEventsUpTo)
+
+    //todo handle this part
+    //if the client knows events that the server does not:
+    //if the events list only includes events from this proposal
+    //but the proposed events start with a higher number
+    //request events up to that number
+
+    eventsForClient
 
 extension(duckEvent:DuckEvent)
   def withOrder(order:Int):DuckEvent =
