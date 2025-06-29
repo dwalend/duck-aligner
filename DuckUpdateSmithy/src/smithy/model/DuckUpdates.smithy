@@ -67,11 +67,7 @@ list DuckEvents {
     member: DuckEvent
 }
 
-list DuckEventWishList {
-    member: Integer
-}
-
 union NewDuckEventsResponse {
     eventsForClient: DuckEvents
-    eventsServerWants: DuckEventWishList
+    rescueServer: Unit
 }

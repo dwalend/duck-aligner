@@ -33,12 +33,13 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
       val allEvents = currentEvents.appendedAll(eventsToInsert)
       allEvents
     }
-    
+
   private def insertOrRescueServer(response:NewDuckEventsResponse):F[List[DuckEvent]] =
     response.accept(new NewDuckEventsResponse.Visitor{
       def eventsForClient(value: List[DuckEvent]):F[List[DuckEvent]] = insertEvents(value)
 
-      def eventsServerWants(value: List[Int]):F[List[DuckEvent]] = ??? //todo fill in recovery
+      def rescueServer(value: NewDuckEventsResponse.RescueServerCase.type):F[List[DuckEvent]] = ???
+      //todo fill in recovery
     })
 
   private def nextNumber: F[Int] =
