@@ -12,7 +12,7 @@ import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Map as MapLibreMap}
 import typings.maplibreGl.mod.{GetResourceResponse, MapOptions}
 import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
 import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings.top
-import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
+import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceFunctionSpecification, SourceSpecification}
 import typings.std.ImageBitmap
 
 import scala.concurrent.duration.{Duration, DurationInt}
@@ -88,7 +88,8 @@ object MapLibreGL:
               .`setIcon-allow-overlap`(true)
               .`setIcon-image`(imageName)
               .`setIcon-size`(0.125)
-              .`setText-field`(labelText)
+//              .`setText-field`("""["get", "labelText"]""")
+              .`setText-field`(SourceFunctionSpecification.PropertyType_("labelText"))
               .`setText-offset`((0d, 1.25))
               .`setText-anchor`(top)
           )
@@ -100,12 +101,14 @@ object MapLibreGL:
     val positionDucks = addNewDucksF.map { _ =>
       sitRep.ducksToEvents.keys.map { d =>
         val p: GeoPoint = sitRep.bestPositionOf(d)
+        val age = (now.toMillis - p.timestamp) / 1000
+        val labelText = s"${d.duckName}\n${age}s"
         val data: GeoJSON[Geometry, GeoJsonProperties] = Feature(
           geometry = Point(js.Array(p.longitude, p.latitude)),
-          properties = StringDictionary.empty
+          properties = StringDictionary("labelText" -> labelText)
         )
-        mapLibre.getSource(d.sourceName).map {
-          (geo: GeoJSONSource) => geo.setData(data)
+        mapLibre.getSource(d.sourceName).map { (geo: GeoJSONSource) =>
+          geo.setData(data)
         }
       }
     }

@@ -60,6 +60,9 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
       peo <- client.proposeEvents(List[DuckEvent](duckInfoEvent))
       _ <- insertOrRescueServer(peo.updates,duckInfoEvent,client)
     yield duckInfo.id
+    
+  def allEvents:F[List[DuckEvent]] =
+    cell.get
 
 object EventStore:
   def create[F[_]: Async]():Resource[F,EventStore[F]] =

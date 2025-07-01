@@ -35,6 +35,7 @@ object Main extends IOWebApp:
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
       appDiv <- div("") //todo eventually make this a control overlay
+      _ <- startMap(geoIO,client,eventStore)
       _ <- startPinger(geoIO,client,eventStore,duckId)
     yield
       println("See ducks!")
@@ -50,17 +51,15 @@ object Main extends IOWebApp:
                            eventStore: EventStore[IO],
                            duckId: DuckId,
                          ): Resource[IO, FiberIO[Unit]] =
-    MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
-      Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
-        .evalMap(_ => ping(geoIO, client, eventStore, mapLibre, duckId))
-        .compile.drain.start
-    }.toResource
+    Stream.fixedRateStartImmediately[IO](10.seconds,dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
+      .evalMap(_ => ping(geoIO, client, eventStore, duckId))
+      .compile.drain.start
+      .toResource
 
   private def ping(
                     geoIO: GeoIO,
                     client: DuckUpdateService[IO],
                     eventStore: EventStore[IO],
-                    mapLibre: MapLibreMap,
                     duckId: DuckId,
                   ): IO[Unit]  =
     val p:IO[Unit] = for
@@ -69,10 +68,34 @@ object Main extends IOWebApp:
       eventsFromServer <- eventStore.sendPositionAndGetUpdates(position,client,duckId)
       sitRep = SitRep(eventsFromServer)
       _ <- IO.println(sitRep)
-      now <- IO.realTime
-      _ <- MapLibreGL.updateMapLibre[IO](mapLibre,sitRep,now)
     yield ()
     p.recover {
       case uer: UnknownErrorResponse if uer.code == 504 =>
-        println(s"${uer.getMessage}. Will try again.")
+        println(s"${uer.getMessage}. Will try ping again.")
+    }
+
+  private def startMap(
+                        geoIO: GeoIO,
+                        client: DuckUpdateService[IO],
+                        eventStore: EventStore[IO],
+                      ): Resource[IO, FiberIO[Unit]] =
+    MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
+      Stream.fixedRateStartImmediately[IO](1.seconds,dampen = true)
+        .evalMap(_ => redrawMap(eventStore, mapLibre))
+        .compile.drain.start
+    }.toResource
+
+  private def redrawMap(
+                          eventStore: EventStore[IO],
+                          mapLibre: MapLibreMap,
+                        ): IO[Unit] =
+    val p: IO[Unit] = for
+      eventsFromServer <- eventStore.allEvents
+      sitRep = SitRep(eventsFromServer)
+      now <- IO.realTime
+      _ <- MapLibreGL.updateMapLibre[IO](mapLibre, sitRep, now)
+    yield ()
+    p.recover {
+      case uer: UnknownErrorResponse if uer.code == 504 =>
+        println(s"${uer.getMessage}. Will try redrawMap again.")
     }
