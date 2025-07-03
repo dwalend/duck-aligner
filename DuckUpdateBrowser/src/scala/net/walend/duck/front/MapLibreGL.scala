@@ -9,7 +9,7 @@ import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperti
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary
 import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Map as MapLibreMap}
-import typings.maplibreGl.mod.{GetResourceResponse, MapOptions}
+import typings.maplibreGl.mod.{GetResourceResponse, MapOptions, SymbolLayoutProps, SymbolLayoutPropsPossiblyEvaluated}
 import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
 import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings.top
 import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceFunctionSpecification, SourceSpecification}
@@ -84,7 +84,7 @@ object MapLibreGL:
         val layerSpec = LayerSpecification
           .SymbolLayerSpecification(layerName, sourceName)
           .setLayout(
-            Iconallowoverlap()
+            Iconallowoverlap()  //todo try a marker instead of an icon
               .`setIcon-allow-overlap`(true)
               .`setIcon-image`(imageName)
               .`setIcon-size`(0.125)

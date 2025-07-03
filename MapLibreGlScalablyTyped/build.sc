@@ -3,7 +3,7 @@ import $ivy.`com.github.lolgab::mill-scalablytyped::0.1.15`
 import com.github.lolgab.mill.scalablytyped._
 
 trait Base extends ScalaJSModule {
-  def scalaVersion = "3.3.4"
+  def scalaVersion = "3.3.6"
   def scalaJSVersion = "1.18.2"
 }
 

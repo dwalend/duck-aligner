@@ -58,7 +58,7 @@ projects:
       - com.armanbilge::calico:0.2.3
       - org.scala-js::scalajs-dom:2.8.0
       - org.http4s::http4s-dom:0.2.11
-      - org.scalablytyped:maplibre-gl_sjs1_3:4.7.1-3c0a45
+      - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
   #      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
   DuckUpdateService:
     extends: template-common
