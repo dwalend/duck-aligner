@@ -11,7 +11,6 @@ import smithy4s.http.UnknownErrorResponse
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import typings.maplibreGl.global.maplibregl.Map as MapLibreMap
 
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
@@ -79,23 +78,32 @@ object Main extends IOWebApp:
                         client: DuckUpdateService[IO],
                         eventStore: EventStore[IO],
                       ): Resource[IO, FiberIO[Unit]] =
-    MapLibreGL.mapLibreResource(geoIO, client).use { mapLibre =>
+    def mapUpdateStream(duckView: MapLibreDuckView[IO]) =
       Stream.fixedRateStartImmediately[IO](1.seconds,dampen = true)
-        .evalMap(_ => redrawMap(eventStore, mapLibre))
+        .evalMap(_ => redrawMap(eventStore, duckView))
         .compile.drain.start
-    }.toResource
+        .toResource
+
+    for
+      mapLibre <- MapLibreGL.mapLibreResource(geoIO, client)
+      duckView <- MapLibreDuckView.create[IO](mapLibre)
+      fiber <- mapUpdateStream(duckView)
+    yield
+      fiber
 
   private def redrawMap(
                           eventStore: EventStore[IO],
-                          mapLibre: MapLibreMap,
+                          duckView: MapLibreDuckView[IO],
                         ): IO[Unit] =
     val p: IO[Unit] = for
       eventsFromServer <- eventStore.allEvents
       sitRep = SitRep(eventsFromServer)
       now <- IO.realTime
-      _ <- MapLibreGL.updateMapLibre[IO](mapLibre, sitRep, now)
+      _ <- duckView.updateMapLibre(sitRep, now)
     yield ()
     p.recover {
       case uer: UnknownErrorResponse if uer.code == 504 =>
         println(s"${uer.getMessage}. Will try redrawMap again.")
+      case x =>
+        x.printStackTrace() //todo remove when you haven't trapped a problem in a while
     }
