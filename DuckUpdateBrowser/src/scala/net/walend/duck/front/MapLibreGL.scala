@@ -4,97 +4,50 @@ import cats.effect.implicits.effectResourceOps
 import cats.effect.kernel.Temporal
 import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
-import org.scalajs.dom.HTMLImageElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint}
-import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, Point}
 import cats.implicits.*
-import org.scalablytyped.runtime.StringDictionary
-import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
-import typings.maplibreGl.mod.{GetResourceResponse, MapOptions, MarkerOptions, SymbolLayoutProps, SymbolLayoutPropsPossiblyEvaluated}
-import typings.maplibreMaplibreGlStyleSpec.anon.Iconallowoverlap
-import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings.top
-import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceFunctionSpecification, SourceSpecification}
-import typings.std.ImageBitmap
+import typings.maplibreGl.global.maplibregl.{Marker, Map as MapLibreMap}
+import typings.maplibreGl.mod.MapOptions
 
 import scala.concurrent.duration.{Duration, DurationInt}
-import scala.collection.mutable.Map as MutableMap
 import scala.scalajs.js
 
 //todo create a case class that has a MapLibreMap and a map from duckIds to Markers
 //todo put a mutable map in an atomic cell
-case class MapLibreDuckView[F[_]: Async](mapLibreMap: MapLibreMap,cell:AtomicCell[F,MutableMap[DuckId,Marker]]):
+case class MapLibreDuckView[F[_]: Async](mapLibreMap: MapLibreMap,cell:AtomicCell[F,Map[DuckId,Marker]]):
   def updateMapLibre(sitRep: SitRep, now: Duration): F[Unit] =
-    val duckInfos = sitRep.ducksToEvents.keys
+    val duckInfos: Iterable[DuckInfo] = sitRep.ducksToEvents.keys
 
-    //filter the list of ducks for ducks that don't have images
-    val imageNames: js.Array[String] = mapLibreMap.listImages()
-    val newDucks: Seq[DuckInfo] = duckInfos.filterNot(d => imageNames.contains(d.imageName)).toSeq
-
-    val addNewDucksF = newDucks.map { d =>
-      //add an image for each of those ducks
-      val imageName = d.imageName
-      val loadDuckImage = Async[F].fromFuture(Async[F].blocking(mapLibreMap.loadImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
-        .toFuture))
-      val addImage: F[mapLibreMap.type] = loadDuckImage.map((i: GetResourceResponse[HTMLImageElement | ImageBitmap]) => i.data match {
-        case element: HTMLImageElement => mapLibreMap.addImage(imageName, element)
-        case bitmap => mapLibreMap.addImage(imageName, bitmap.asInstanceOf[typings.std.global.ImageBitmap])
-      })
-
-      val p: GeoPoint = sitRep.bestPositionOf(d) //todo handle no position - probably just bail out before even loading an image, or put the duck in a UFO
-      val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
-        js.Array(Feature(Point(js.Array(p.longitude, p.latitude)), ""))
-      ))
-      val sourceName = d.sourceName
-      val layerName = d.layerName
-
-      val age = (now.toMillis - sitRep.bestPositionOf(d).timestamp) / 1000
-      val labelText = s"${d.duckName}\n${age}s"
-
-      addImage.map { _ =>
-        mapLibreMap.addSource(sourceName, featureSpec)
-        val layerSpec = LayerSpecification
-          .SymbolLayerSpecification(layerName, sourceName)
-          .setLayout(
-            Iconallowoverlap() //todo try a marker instead of an icon
-              .`setIcon-allow-overlap`(true)
-              .`setIcon-image`(imageName)
-              .`setIcon-size`(0.125)
-              //              .`setText-field`("""["get", "labelText"]""")
-              .`setText-field`(SourceFunctionSpecification.PropertyType_("labelText"))
-              .`setText-offset`((0d, 1.25))
-              .`setText-anchor`(top)
-          )
-        mapLibreMap.addLayer(layerSpec)
-      }
-    }.sequence
-
-    //for each duck get the layer spec, move the feature spec
-    val positionDucks = addNewDucksF.map { _ =>
-      sitRep.ducksToEvents.keys.map { d =>
-        val p: GeoPoint = sitRep.bestPositionOf(d)
+    //add markers for any new ducks
+    val addAndGetDucks: F[Map[DuckId, Marker]] = cell.updateAndGet{ ducksToMarkers =>
+      val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
+      val addMarkers = addDucksFor.map{di =>
+        val marker = Marker()
+        val p: GeoPoint = sitRep.bestPositionOf(di)
         val age = (now.toMillis - p.timestamp) / 1000
-        val labelText = s"${d.duckName}\n${age}s"
-        val data: GeoJSON[Geometry, GeoJsonProperties] = Feature(
-          geometry = Point(js.Array(p.longitude, p.latitude)),
-          properties = StringDictionary("labelText" -> labelText)
-        )
-        mapLibreMap.getSource(d.sourceName).map { (geo: GeoJSONSource) =>
-          geo.setData(data)
-        }
+        val labelText = s"${di.duckName}\n${age}s"
+        marker.setLngLat((p.longitude, p.latitude))
+        marker.addTo(mapLibreMap)
+        println(s"Added $marker for ${di.id} $labelText")
+        di.id -> marker
       }
+      ducksToMarkers.concat(addMarkers)
     }
-    positionDucks.void
 
-  extension (duckInfo:DuckInfo)
-    private def imageName = s"image${duckInfo.id.v}"
-
-    private def sourceName = s"source${duckInfo.id.v}"
-
-    private def layerName = s"layer${duckInfo.id.v}"
+    //update all the locations for all the ducks
+    addAndGetDucks.map{ ducksToMarkers =>
+      duckInfos.map{ di =>
+        val p: GeoPoint = sitRep.bestPositionOf(di)
+        val age = (now.toMillis - p.timestamp) / 1000
+        val labelText = s"${di.duckName}\n${age}s"
+        val marker = ducksToMarkers(di.id)
+        marker.setLngLat((p.longitude, p.latitude))
+      }
+    }.void
 
 object MapLibreDuckView:
   def create[F[_]: Async](mapLibreMap: MapLibreMap): Resource[F, MapLibreDuckView[F]] =
-    val cell: F[AtomicCell[F, MutableMap[DuckId, Marker]]] = AtomicCell[F].of(MutableMap.empty[DuckId,Marker])
+    val cell: F[AtomicCell[F, Map[DuckId, Marker]]] = AtomicCell[F].of(Map.empty[DuckId,Marker])
     cell.map(c => MapLibreDuckView(mapLibreMap,c)).toResource
 
 object MapLibreGL:

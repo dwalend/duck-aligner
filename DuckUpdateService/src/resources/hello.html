@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8"/>
         <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.x/dist/maplibre-gl.css' />
         <style>
             body { margin: 0; padding: 0; }
             html, body, #map { height: 100%; }
@@ -10,9 +11,9 @@
         <title>Duck Aligner</title>
     </head>
     <body onload="Main.main()">
-        <div id="app"></div>
         <div id="map"></div>
-        <script src='https://unpkg.com/maplibre-gl@4.x/dist/maplibre-gl.js'></script>
+        <div id="app"></div>
+        <script src='https://unpkg.com/maplibre-gl@5.x/dist/maplibre-gl.js'></script>
         <script src="main.js"></script>
     </body>
 </html>

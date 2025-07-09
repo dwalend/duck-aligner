@@ -21,7 +21,7 @@ object Scp {
     antScp.setRemoteTofile(remoteTarget)
     antScp.setTrust(true)
 
-    println(s"coping $fromLocalFile to $remoteTarget")
+    println(s"copying $fromLocalFile to $remoteTarget")
     antScp.execute()
 
     println(s"copied $fromLocalFile to $remoteTarget")
