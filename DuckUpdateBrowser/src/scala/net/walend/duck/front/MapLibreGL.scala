@@ -6,30 +6,46 @@ import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint}
 import cats.implicits.*
+import org.scalajs.dom.HTMLElement
 import typings.maplibreGl.global.maplibregl.{Marker, Map as MapLibreMap}
-import typings.maplibreGl.mod.MapOptions
+import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 
 //todo create a case class that has a MapLibreMap and a map from duckIds to Markers
 //todo put a mutable map in an atomic cell
-case class MapLibreDuckView[F[_]: Async](mapLibreMap: MapLibreMap,cell:AtomicCell[F,Map[DuckId,Marker]]):
+case class MapLibreDuckView[F[_]: Async](
+                                          mapLibreMap: MapLibreMap,
+                                          cell:AtomicCell[F,Map[DuckId,MarkerAndElement]],
+                                          document: org.scalajs.dom.html.Document,
+                                        ):
   def updateMapLibre(sitRep: SitRep, now: Duration): F[Unit] =
     val duckInfos: Iterable[DuckInfo] = sitRep.ducksToEvents.keys
 
     //add markers for any new ducks
-    val addAndGetDucks: F[Map[DuckId, Marker]] = cell.updateAndGet{ ducksToMarkers =>
+    val addAndGetDucks: F[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
       val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
       val addMarkers = addDucksFor.map{di =>
-        val marker = Marker()
-        val p: GeoPoint = sitRep.bestPositionOf(di)
-        val age = (now.toMillis - p.timestamp) / 1000
-        val labelText = s"${di.duckName}\n${age}s"
-        marker.setLngLat((p.longitude, p.latitude))
+        val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
+
+        val img = document.createElement("img").asInstanceOf[HTMLElement]
+        img.setAttribute("src","https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
+        img.setAttribute("width","50")
+        img.setAttribute("height","50")
+        div.appendChild(img)
+
+        val p = document.createElement("p").asInstanceOf[HTMLElement]
+        p.textContent = di.duckName
+        div.appendChild(p)
+
+        val markerOptions = MarkerOptions().setElement(div)
+        val marker = Marker(markerOptions)
+        val point: GeoPoint = sitRep.bestPositionOf(di)
+        marker.setLngLat((point.longitude, point.latitude))
         marker.addTo(mapLibreMap)
-        println(s"Added $marker for ${di.id} $labelText")
-        di.id -> marker
+        println(s"Added $marker for ${di.id} ${di.duckName}")
+        di.id -> MarkerAndElement(marker,p)
       }
       ducksToMarkers.concat(addMarkers)
     }
@@ -40,15 +56,22 @@ case class MapLibreDuckView[F[_]: Async](mapLibreMap: MapLibreMap,cell:AtomicCel
         val p: GeoPoint = sitRep.bestPositionOf(di)
         val age = (now.toMillis - p.timestamp) / 1000
         val labelText = s"${di.duckName}\n${age}s"
-        val marker = ducksToMarkers(di.id)
+        val marker = ducksToMarkers(di.id).marker
         marker.setLngLat((p.longitude, p.latitude))
+        val element = ducksToMarkers(di.id).element
+        element.textContent = labelText
       }
     }.void
 
+case class MarkerAndElement(marker:Marker,element: HTMLElement)
+
 object MapLibreDuckView:
-  def create[F[_]: Async](mapLibreMap: MapLibreMap): Resource[F, MapLibreDuckView[F]] =
-    val cell: F[AtomicCell[F, Map[DuckId, Marker]]] = AtomicCell[F].of(Map.empty[DuckId,Marker])
-    cell.map(c => MapLibreDuckView(mapLibreMap,c)).toResource
+  def create[F[_]: Async](
+                           mapLibreMap: MapLibreMap,
+                           document: org.scalajs.dom.html.Document,
+                         ): Resource[F, MapLibreDuckView[F]] =
+    val cell: F[AtomicCell[F, Map[DuckId, MarkerAndElement]]] = AtomicCell[F].of(Map.empty[DuckId,MarkerAndElement])
+    cell.map(c => MapLibreDuckView(mapLibreMap,c,document)).toResource
 
 object MapLibreGL:
   //todo make tagless final after GeoIO is unstuck from IO

@@ -11,7 +11,6 @@ import smithy4s.http.UnknownErrorResponse
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
 
@@ -34,7 +33,7 @@ object Main extends IOWebApp:
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
       appDiv <- div("") //todo eventually make this a control overlay
-      _ <- startMap(geoIO,client,eventStore)
+      _ <- startMap(geoIO,client,eventStore,document)
       _ <- startPinger(geoIO,client,eventStore,duckId)
     yield
       println("See ducks!")
@@ -77,6 +76,7 @@ object Main extends IOWebApp:
                         geoIO: GeoIO,
                         client: DuckUpdateService[IO],
                         eventStore: EventStore[IO],
+                        document: org.scalajs.dom.html.Document,
                       ): Resource[IO, FiberIO[Unit]] =
     def mapUpdateStream(duckView: MapLibreDuckView[IO]) =
       Stream.fixedRateStartImmediately[IO](1.seconds,dampen = true)
@@ -86,7 +86,7 @@ object Main extends IOWebApp:
 
     for
       mapLibre <- MapLibreGL.mapLibreResource(geoIO, client)
-      duckView <- MapLibreDuckView.create[IO](mapLibre)
+      duckView <- MapLibreDuckView.create[IO](mapLibre, document)
       fiber <- mapUpdateStream(duckView)
     yield
       fiber
