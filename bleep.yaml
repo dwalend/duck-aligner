@@ -59,7 +59,8 @@ projects:
       - org.scala-js::scalajs-dom:2.8.0
       - org.http4s::http4s-dom:0.2.11
       - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
-  #      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
+      - org.creativescala::doodle:0.30.0
+#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
   DuckUpdateService:
     extends: template-common
     dependsOn:
@@ -126,7 +127,7 @@ templates:
     platform:
       name: js
       jsNodeVersion: 21.7.2
-      jsVersion: 1.18.2
+      jsVersion: 1.19.0
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
       strict: true

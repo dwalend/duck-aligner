@@ -27,6 +27,7 @@ case class MapLibreDuckView[F[_]: Async](
       val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
       val addMarkers = addDucksFor.map{di =>
         val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
+        div.setAttribute("id",di.id.toString)
 /*
         val img = document.createElement("img").asInstanceOf[HTMLElement]
         img.setAttribute("src","https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
@@ -34,15 +35,18 @@ case class MapLibreDuckView[F[_]: Async](
         img.setAttribute("height","50")
         div.appendChild(img)
 */
+
         val p = document.createElement("p").asInstanceOf[HTMLElement]
         p.textContent = di.duckName
         div.appendChild(p)
 
+/*
         div.innerHTML =
           """ <svg height="24" width="24" xmlns="http://www.w3.org/2000/svg">
             |  <circle r="10" cx="12" cy="12" fill="red" />
             |</svg> 
             |""".stripMargin
+*/
 
         val markerOptions = MarkerOptions().setElement(div)
         val marker = Marker(markerOptions)
@@ -50,7 +54,7 @@ case class MapLibreDuckView[F[_]: Async](
         marker.setLngLat((point.longitude, point.latitude))
         marker.addTo(mapLibreMap)
         println(s"Added $marker for ${di.id} ${di.duckName}")
-        di.id -> MarkerAndElement(marker,p)
+        di.id -> MarkerAndElement(marker,div)
       }
       ducksToMarkers.concat(addMarkers)
     }
@@ -64,7 +68,10 @@ case class MapLibreDuckView[F[_]: Async](
         val marker = ducksToMarkers(di.id).marker
         marker.setLngLat((p.longitude, p.latitude))
         val element = ducksToMarkers(di.id).element
-        element.textContent = labelText
+        element.innerHTML = ""
+//        element.textContent = labelText
+        //todo detect if anything interesting has changed before drawing to avoid blinking
+        SvgDuck.duckSvg(di) //todo this should be an IO, but it's very in-the-middle of not-IO , and probably needs to happen in the update
       }
     }.void
 
