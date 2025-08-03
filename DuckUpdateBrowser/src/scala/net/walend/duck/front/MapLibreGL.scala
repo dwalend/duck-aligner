@@ -6,6 +6,7 @@ import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint}
 import cats.implicits.*
+import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
 import typings.maplibreGl.global.maplibregl.{Marker, Map as MapLibreMap}
 import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
@@ -13,8 +14,6 @@ import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 
-//todo create a case class that has a MapLibreMap and a map from duckIds to Markers
-//todo put a mutable map in an atomic cell
 case class MapLibreDuckView[F[_]: Async](
                                           mapLibreMap: MapLibreMap,
                                           cell:AtomicCell[F,Map[DuckId,MarkerAndElement]],
@@ -28,16 +27,22 @@ case class MapLibreDuckView[F[_]: Async](
       val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
       val addMarkers = addDucksFor.map{di =>
         val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
-
+/*
         val img = document.createElement("img").asInstanceOf[HTMLElement]
         img.setAttribute("src","https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
         img.setAttribute("width","50")
         img.setAttribute("height","50")
         div.appendChild(img)
-
+*/
         val p = document.createElement("p").asInstanceOf[HTMLElement]
         p.textContent = di.duckName
         div.appendChild(p)
+
+        div.innerHTML =
+          """ <svg height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+            |  <circle r="10" cx="12" cy="12" fill="red" />
+            |</svg> 
+            |""".stripMargin
 
         val markerOptions = MarkerOptions().setElement(div)
         val marker = Marker(markerOptions)
