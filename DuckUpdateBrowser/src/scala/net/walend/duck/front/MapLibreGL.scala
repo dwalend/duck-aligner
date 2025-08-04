@@ -1,6 +1,6 @@
 package net.walend.duck.front
 
-import cats.effect.implicits.effectResourceOps
+import cats.effect.implicits.*
 import cats.effect.kernel.Temporal
 import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
@@ -14,16 +14,16 @@ import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 
-case class MapLibreDuckView[F[_]: Async](
+case class MapLibreDuckView(
                                           mapLibreMap: MapLibreMap,
-                                          cell:AtomicCell[F,Map[DuckId,MarkerAndElement]],
+                                          cell:AtomicCell[IO,Map[DuckId,MarkerAndElement]],
                                           document: org.scalajs.dom.html.Document,
                                         ):
-  def updateMapLibre(sitRep: SitRep, now: Duration): F[Unit] =
+  def updateMapLibre(sitRep: SitRep, now: Duration): IO[Unit] =
     val duckInfos: Iterable[DuckInfo] = sitRep.ducksToEvents.keys
 
     //add markers for any new ducks
-    val addAndGetDucks: F[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
+    val addAndGetDucks: IO[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
       val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
       val addMarkers = addDucksFor.map{di =>
         val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
@@ -60,7 +60,7 @@ case class MapLibreDuckView[F[_]: Async](
     }
 
     //update all the locations for all the ducks
-    addAndGetDucks.map{ ducksToMarkers =>
+    addAndGetDucks.flatMap { ducksToMarkers =>
       duckInfos.map{ di =>
         val p: GeoPoint = sitRep.bestPositionOf(di)
         val age = (now.toMillis - p.timestamp) / 1000
@@ -71,18 +71,18 @@ case class MapLibreDuckView[F[_]: Async](
         element.innerHTML = ""
 //        element.textContent = labelText
         //todo detect if anything interesting has changed before drawing to avoid blinking
-        SvgDuck.duckSvg(di) //todo this should be an IO, but it's very in-the-middle of not-IO , and probably needs to happen in the update
-      }
+        SvgDuck.duckSvg(di,age) //todo this should be an IO, but it's very in-the-middle of not-IO , and probably needs to happen in the update
+      }.toSeq.sequence
     }.void
 
 case class MarkerAndElement(marker:Marker,element: HTMLElement)
 
 object MapLibreDuckView:
-  def create[F[_]: Async](
+  def create(
                            mapLibreMap: MapLibreMap,
                            document: org.scalajs.dom.html.Document,
-                         ): Resource[F, MapLibreDuckView[F]] =
-    val cell: F[AtomicCell[F, Map[DuckId, MarkerAndElement]]] = AtomicCell[F].of(Map.empty[DuckId,MarkerAndElement])
+                         ): Resource[IO, MapLibreDuckView] =
+    val cell: IO[AtomicCell[IO, Map[DuckId, MarkerAndElement]]] = AtomicCell[IO].of(Map.empty[DuckId,MarkerAndElement])
     cell.map(c => MapLibreDuckView(mapLibreMap,c,document)).toResource
 
 object MapLibreGL:

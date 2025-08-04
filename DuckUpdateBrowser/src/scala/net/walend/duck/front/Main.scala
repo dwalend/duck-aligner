@@ -78,7 +78,7 @@ object Main extends IOWebApp:
                         eventStore: EventStore[IO],
                         document: org.scalajs.dom.html.Document,
                       ): Resource[IO, FiberIO[Unit]] =
-    def mapUpdateStream(duckView: MapLibreDuckView[IO]) =
+    def mapUpdateStream(duckView: MapLibreDuckView) =
       Stream.fixedRateStartImmediately[IO](1.seconds,dampen = true)
         .evalMap(_ => redrawMap(eventStore, duckView))
         .compile.drain.start
@@ -86,14 +86,14 @@ object Main extends IOWebApp:
 
     for
       mapLibre <- MapLibreGL.mapLibreResource(geoIO, client)
-      duckView <- MapLibreDuckView.create[IO](mapLibre, document)
+      duckView <- MapLibreDuckView.create(mapLibre, document)
       fiber <- mapUpdateStream(duckView)
     yield
       fiber
 
   private def redrawMap(
                           eventStore: EventStore[IO],
-                          duckView: MapLibreDuckView[IO],
+                          duckView: MapLibreDuckView,
                         ): IO[Unit] =
     val p: IO[Unit] = for
       eventsFromServer <- eventStore.allEvents
