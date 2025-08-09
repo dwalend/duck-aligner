@@ -155,7 +155,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
       println(s"attempt $attempts")
       val maybeFailed =
         try
-          Ssh.runCommand(duckServerIp, """echo "ssh command worked!" """)
+          Ssh.runCommand(duckServerIp, """echo "Did an ssh command work?" """)
           None
         catch
           case sshx:JSchException => Option(sshx)

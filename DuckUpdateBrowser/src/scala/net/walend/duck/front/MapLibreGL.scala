@@ -6,10 +6,15 @@ import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint}
 import cats.implicits.*
+import org.scalablytyped.runtime.StringDictionary
 import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
-import typings.maplibreGl.global.maplibregl.{Marker, Map as MapLibreMap}
+import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, LineString}
+import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
 import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
+import typings.maplibreMaplibreGlStyleSpec.anon.{Lineblur, Linecap}
+import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings
+import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
@@ -20,34 +25,49 @@ case class MapLibreDuckView(
                                           document: org.scalajs.dom.html.Document,
                                         ):
   def updateMapLibre(sitRep: SitRep, now: Duration): IO[Unit] =
-    val duckInfos: Iterable[DuckInfo] = sitRep.ducksToEvents.keys
+    val duckInfos: Seq[DuckInfo] = sitRep.ducksToEvents.keys.toSeq
+
+    val lineBlur = Lineblur()
+    lineBlur.`line-color` = "red"
+    lineBlur.`line-width` = 8
+
+    val lineCap = Linecap()
+    lineCap.`line-cap` = maplibreMaplibreGlStyleSpecStrings.round
+    lineCap.`line-join` = maplibreMaplibreGlStyleSpecStrings.round
 
     //add markers for any new ducks
     val addAndGetDucks: IO[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
-      val addDucksFor = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
-      val addMarkers = addDucksFor.map{di =>
+      val addedDucks = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
+
+      val addMarkers: Iterable[(DuckId, MarkerAndElement)] = addedDucks.map{ di =>
+        val _ = mapLibreMap.getSource(di.sourceName).getOrElse {
+
+          import js.JSConverters._
+          val points = sitRep.positionsOf(di)
+          //add all the points to the duck's source
+          val positions = points.take(1).map { p => js.Array(p.longitude, p.latitude) }.toJSArray
+
+          val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
+            js.Array(Feature(geometry = LineString(positions), properties = ""))
+          ))
+
+          mapLibreMap.addSource(di.sourceName, featureSpec)
+          //add a layer for each new duck's line
+          val layerSpec = LayerSpecification
+            .LineLayerSpecification(di.layerName, di.sourceName)
+            .setPaint(lineBlur)
+            .setLayout(lineCap)
+          mapLibreMap.addLayer(layerSpec)
+        }
+
+        //add a marker for each new duck's position
         val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
         div.setAttribute("id",di.id.toString)
-/*
-        val img = document.createElement("img").asInstanceOf[HTMLElement]
-        img.setAttribute("src","https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png")
-        img.setAttribute("width","50")
-        img.setAttribute("height","50")
-        div.appendChild(img)
-*/
 
         val p = document.createElement("p").asInstanceOf[HTMLElement]
         p.textContent = di.duckName
-        div.appendChild(p)
-
-/*
-        div.innerHTML =
-          """ <svg height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-            |  <circle r="10" cx="12" cy="12" fill="red" />
-            |</svg> 
-            |""".stripMargin
-*/
-
+        val _ = div.appendChild(p)
+        
         val markerOptions = MarkerOptions().setElement(div)
         val marker = Marker(markerOptions)
         val point: GeoPoint = sitRep.bestPositionOf(di)
@@ -61,21 +81,44 @@ case class MapLibreDuckView(
 
     //update all the locations for all the ducks
     addAndGetDucks.flatMap { ducksToMarkers =>
-      duckInfos.map{ di =>
+
+      val updateLines = duckInfos.map { di =>
+        import js.JSConverters._
+        val points = sitRep.positionsOf(di)
+        //add all the points to the duck's source
+        val positions = points.map{p => js.Array(p.longitude, p.latitude)}.toJSArray
+        val data: GeoJSON[Geometry, GeoJsonProperties] = Feature(
+          geometry = LineString(positions),
+          properties = StringDictionary.empty
+        )
+        IO(mapLibreMap.getSource(di.sourceName).map {
+          (geo: GeoJSONSource) => geo.setData(data)
+        })
+      }.sequence
+
+      val updateDucks: IO[Seq[Unit]] = duckInfos.map{ di =>
         val p: GeoPoint = sitRep.bestPositionOf(di)
         val age = (now.toMillis - p.timestamp) / 1000
-        val labelText = s"${di.duckName}\n${age}s"
         val marker = ducksToMarkers(di.id).marker
         marker.setLngLat((p.longitude, p.latitude))
         val element = ducksToMarkers(di.id).element
         element.innerHTML = ""
-//        element.textContent = labelText
-        //todo detect if anything interesting has changed before drawing to avoid blinking
-        SvgDuck.duckSvg(di,age) //todo this should be an IO, but it's very in-the-middle of not-IO , and probably needs to happen in the update
-      }.toSeq.sequence
-    }.void
+        SvgDuck.duckSvg(di,age)
+      }.sequence
 
-case class MarkerAndElement(marker:Marker,element: HTMLElement)
+      updateLines *> updateDucks.void
+    }   
+
+  extension (duckInfo: DuckInfo)
+    private def sourceName = s"source${duckInfo.id.v}"
+
+    private def layerName = s"layer${duckInfo.id.v}"
+
+case class MarkerAndElement(
+                             marker:Marker,
+                             element: HTMLElement,
+                             //featureSpec: GeoJSONSourceSpecification,
+                           )
 
 object MapLibreDuckView:
   def create(
@@ -86,7 +129,6 @@ object MapLibreDuckView:
     cell.map(c => MapLibreDuckView(mapLibreMap,c,document)).toResource
 
 object MapLibreGL:
-  //todo make tagless final after GeoIO is unstuck from IO
   def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO]): Resource[IO, MapLibreMap] =
 
     def mapLibreF[F[_] : Async](apiKey: String, c: GeoPoint): F[MapLibreMap] =

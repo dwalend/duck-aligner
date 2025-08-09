@@ -15,6 +15,10 @@ case class SitRep(order:Int,ducksToEvents:Map[DuckInfo,Seq[DuckEvent]]):
     ducksToEvents.get(duckInfo)
       .flatMap(_.collectFirst { case p: DuckPositionEvent => p.position })
       .get //todo handle no position - probably return unknown position
+      
+  def positionsOf(duckInfo: DuckInfo): Seq[GeoPoint] =
+    ducksToEvents.getOrElse(duckInfo,Seq.empty)
+      .collect{case p: DuckPositionEvent => p.position}
 
 object SitRep:
   def apply(events:List[DuckEvent]):SitRep = {
