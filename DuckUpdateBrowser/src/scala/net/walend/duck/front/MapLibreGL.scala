@@ -42,9 +42,9 @@ case class MapLibreDuckView(
 
   private def addDuck(di: DuckInfo, sitRep: SitRep): (DuckId, MarkerAndElement) =
     addDuckLine(di,sitRep)
-    addDuckMarker(di,sitRep)
+    addDuckMarker(di)
 
-  private def addDuckMarker(di: DuckInfo, sitRep: SitRep):(DuckId,MarkerAndElement) =
+  private def addDuckMarker(di: DuckInfo):(DuckId,MarkerAndElement) =
     val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
     div.setAttribute("id", di.id.toString)
 
@@ -54,8 +54,7 @@ case class MapLibreDuckView(
 
     val markerOptions = MarkerOptions().setElement(div)
     val marker = Marker(markerOptions)
-    val point: GeoPoint = sitRep.bestPositionOf(di)
-    marker.setLngLat((point.longitude, point.latitude))
+    marker.setLngLat((0.0,0.0))
     marker.addTo(mapLibreMap)
     println(s"Added $marker for ${di.id} ${di.duckName}")
     di.id -> MarkerAndElement(marker, div)

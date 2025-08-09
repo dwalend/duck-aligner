@@ -6,7 +6,7 @@ package net.walend.duckaligner.duckupdateservice
  * @author David Walend
  * @since v0.0.0
  */
-import net.walend.duckaligner.duckupdates.v0.{DuckUpdateService, DuckUpdateServiceGen}
+import net.walend.duckaligner.duckupdates.v0.DuckUpdateServiceGen
 import cats.effect.*
 import cats.implicits.toFunctorOps
 import org.http4s.*
