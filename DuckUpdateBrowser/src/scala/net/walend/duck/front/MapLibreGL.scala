@@ -27,92 +27,99 @@ case class MapLibreDuckView(
   def updateMapLibre(sitRep: SitRep, now: Duration): IO[Unit] =
     val duckInfos: Seq[DuckInfo] = sitRep.ducksToEvents.keys.toSeq
 
-    val lineBlur = Lineblur()
-    lineBlur.`line-color` = "red"
-    lineBlur.`line-width` = 8
-
-    val lineCap = Linecap()
-    lineCap.`line-cap` = maplibreMaplibreGlStyleSpecStrings.round
-    lineCap.`line-join` = maplibreMaplibreGlStyleSpecStrings.round
-
     //add markers for any new ducks
     val addAndGetDucks: IO[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
       val addedDucks = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
 
-      val addMarkers: Iterable[(DuckId, MarkerAndElement)] = addedDucks.map{ di =>
-        val _ = mapLibreMap.getSource(di.sourceName).getOrElse {
-
-          import js.JSConverters._
-          val points = sitRep.positionsOf(di)
-          //add all the points to the duck's source
-          val positions = points.take(1).map { p => js.Array(p.longitude, p.latitude) }.toJSArray
-
-          val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
-            js.Array(Feature(geometry = LineString(positions), properties = ""))
-          ))
-
-          mapLibreMap.addSource(di.sourceName, featureSpec)
-          //add a layer for each new duck's line
-          val layerSpec = LayerSpecification
-            .LineLayerSpecification(di.layerName, di.sourceName)
-            .setPaint(lineBlur)
-            .setLayout(lineCap)
-          mapLibreMap.addLayer(layerSpec)
-        }
-
-        //add a marker for each new duck's position
-        val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
-        div.setAttribute("id",di.id.toString)
-
-        val p = document.createElement("p").asInstanceOf[HTMLElement]
-        p.textContent = di.duckName
-        val _ = div.appendChild(p)
-        
-        val markerOptions = MarkerOptions().setElement(div)
-        val marker = Marker(markerOptions)
-        val point: GeoPoint = sitRep.bestPositionOf(di)
-        marker.setLngLat((point.longitude, point.latitude))
-        marker.addTo(mapLibreMap)
-        println(s"Added $marker for ${di.id} ${di.duckName}")
-        di.id -> MarkerAndElement(marker,div)
-      }
+      val addMarkers: Iterable[(DuckId, MarkerAndElement)] = addedDucks.map(addDuck(_,sitRep))
       ducksToMarkers.concat(addMarkers)
     }
 
     //update all the locations for all the ducks
-    addAndGetDucks.flatMap { ducksToMarkers =>
-
-      val updateLines = duckInfos.map { di =>
-        import js.JSConverters._
-        val points = sitRep.positionsOf(di)
-        //add all the points to the duck's source
-        val positions = points.map{p => js.Array(p.longitude, p.latitude)}.toJSArray
-        val data: GeoJSON[Geometry, GeoJsonProperties] = Feature(
-          geometry = LineString(positions),
-          properties = StringDictionary.empty
-        )
-        IO(mapLibreMap.getSource(di.sourceName).map {
-          (geo: GeoJSONSource) => geo.setData(data)
-        })
-      }.sequence
-
-      val updateDucks: IO[Seq[Unit]] = duckInfos.map{ di =>
-        val p: GeoPoint = sitRep.bestPositionOf(di)
-        val age = (now.toMillis - p.timestamp) / 1000
-        val marker = ducksToMarkers(di.id).marker
-        marker.setLngLat((p.longitude, p.latitude))
-        val element = ducksToMarkers(di.id).element
-        element.innerHTML = ""
-        SvgDuck.duckSvg(di,age)
-      }.sequence
-
-      updateLines *> updateDucks.void
+    addAndGetDucks.flatMap { (ducksToMarkers: Map[DuckId, MarkerAndElement]) =>
+      moveDucks(duckInfos,ducksToMarkers,sitRep,now)
     }   
+
+  private def addDuck(di: DuckInfo, sitRep: SitRep): (DuckId, MarkerAndElement) =
+    val _ = mapLibreMap.getSource(di.sourceName).getOrElse {
+      import js.JSConverters._
+      val points = sitRep.positionsOf(di)
+      //add all the points to the duck's source
+      val positions = points.take(1).map { p => js.Array(p.longitude, p.latitude) }.toJSArray
+
+      val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
+        js.Array(Feature(geometry = LineString(positions), properties = ""))
+      ))
+
+      mapLibreMap.addSource(di.sourceName, featureSpec)
+      //add a layer for each new duck's line
+      val layerSpec = LayerSpecification
+        .LineLayerSpecification(di.layerName, di.sourceName)
+        .setPaint(lineBlur)
+        .setLayout(lineCap)
+      mapLibreMap.addLayer(layerSpec)
+    }
+
+    //add a marker for each new duck's position
+    val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
+    div.setAttribute("id",di.id.toString)
+
+    val p = document.createElement("p").asInstanceOf[HTMLElement]
+    p.textContent = di.duckName
+    val _ = div.appendChild(p)
+
+    val markerOptions = MarkerOptions().setElement(div)
+    val marker = Marker(markerOptions)
+    val point: GeoPoint = sitRep.bestPositionOf(di)
+    marker.setLngLat((point.longitude, point.latitude))
+    marker.addTo(mapLibreMap)
+    println(s"Added $marker for ${di.id} ${di.duckName}")
+    di.id -> MarkerAndElement(marker,div)
+
+  private def moveDucks(
+                         duckInfos: Seq[DuckInfo],
+                         ducksToMarkers: Map[DuckId, MarkerAndElement],sitRep: SitRep,
+                         now: Duration
+                       ):IO[Unit] =
+    val updateLines = duckInfos.map { di =>
+      import js.JSConverters._
+      val points = sitRep.positionsOf(di)
+      //add all the points to the duck's source
+      val positions = points.map { p => js.Array(p.longitude, p.latitude) }.toJSArray
+      val data: GeoJSON[Geometry, GeoJsonProperties] = Feature(
+        geometry = LineString(positions),
+        properties = StringDictionary.empty
+      )
+      IO(mapLibreMap.getSource(di.sourceName).map {
+        (geo: GeoJSONSource) => geo.setData(data)
+      })
+    }.sequence
+
+    val updateDucks: IO[Seq[Unit]] = duckInfos.map { di =>
+      val p: GeoPoint = sitRep.bestPositionOf(di)
+      val age = (now.toMillis - p.timestamp) / 1000
+      val marker = ducksToMarkers(di.id).marker
+      marker.setLngLat((p.longitude, p.latitude))
+      val element = ducksToMarkers(di.id).element
+      element.innerHTML = ""
+      SvgDuck.duckSvg(di, age)
+    }.sequence
+
+    updateLines *> updateDucks.void
 
   extension (duckInfo: DuckInfo)
     private def sourceName = s"source${duckInfo.id.v}"
 
     private def layerName = s"layer${duckInfo.id.v}"
+
+  private val lineBlur = Lineblur()
+  lineBlur.`line-color` = "red"
+  lineBlur.`line-width` = 8
+
+  private val lineCap = Linecap()
+  lineCap.`line-cap` = maplibreMaplibreGlStyleSpecStrings.round
+  lineCap.`line-join` = maplibreMaplibreGlStyleSpecStrings.round
+
 
 case class MarkerAndElement(
                              marker:Marker,
