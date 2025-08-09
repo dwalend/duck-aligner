@@ -20,10 +20,10 @@ import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 
 case class MapLibreDuckView(
-                                          mapLibreMap: MapLibreMap,
-                                          cell:AtomicCell[IO,Map[DuckId,MarkerAndElement]],
-                                          document: org.scalajs.dom.html.Document,
-                                        ):
+                              mapLibreMap: MapLibreMap,
+                              cell:AtomicCell[IO,Map[DuckId,MarkerAndElement]],
+                              document: org.scalajs.dom.html.Document,
+                            ):
   def updateMapLibre(sitRep: SitRep, now: Duration): IO[Unit] =
     val duckInfos: Seq[DuckInfo] = sitRep.ducksToEvents.keys.toSeq
 
@@ -41,6 +41,26 @@ case class MapLibreDuckView(
     }   
 
   private def addDuck(di: DuckInfo, sitRep: SitRep): (DuckId, MarkerAndElement) =
+    addDuckLine(di,sitRep)
+    addDuckMarker(di,sitRep)
+
+  private def addDuckMarker(di: DuckInfo, sitRep: SitRep):(DuckId,MarkerAndElement) =
+    val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
+    div.setAttribute("id", di.id.toString)
+
+    val p = document.createElement("p").asInstanceOf[HTMLElement]
+    p.textContent = di.duckName
+    val _ = div.appendChild(p)
+
+    val markerOptions = MarkerOptions().setElement(div)
+    val marker = Marker(markerOptions)
+    val point: GeoPoint = sitRep.bestPositionOf(di)
+    marker.setLngLat((point.longitude, point.latitude))
+    marker.addTo(mapLibreMap)
+    println(s"Added $marker for ${di.id} ${di.duckName}")
+    di.id -> MarkerAndElement(marker, div)
+
+  private def addDuckLine(di: DuckInfo, sitRep: SitRep): Unit =
     val _ = mapLibreMap.getSource(di.sourceName).getOrElse {
       import js.JSConverters._
       val points = sitRep.positionsOf(di)
@@ -60,28 +80,16 @@ case class MapLibreDuckView(
       mapLibreMap.addLayer(layerSpec)
     }
 
-    //add a marker for each new duck's position
-    val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
-    div.setAttribute("id",di.id.toString)
-
-    val p = document.createElement("p").asInstanceOf[HTMLElement]
-    p.textContent = di.duckName
-    val _ = div.appendChild(p)
-
-    val markerOptions = MarkerOptions().setElement(div)
-    val marker = Marker(markerOptions)
-    val point: GeoPoint = sitRep.bestPositionOf(di)
-    marker.setLngLat((point.longitude, point.latitude))
-    marker.addTo(mapLibreMap)
-    println(s"Added $marker for ${di.id} ${di.duckName}")
-    di.id -> MarkerAndElement(marker,div)
-
   private def moveDucks(
                          duckInfos: Seq[DuckInfo],
-                         ducksToMarkers: Map[DuckId, MarkerAndElement],sitRep: SitRep,
-                         now: Duration
+                         ducksToMarkers: Map[DuckId, MarkerAndElement],
+                         sitRep: SitRep,
+                         now: Duration,
                        ):IO[Unit] =
-    val updateLines = duckInfos.map { di =>
+    moveLines(duckInfos,sitRep) *> moveMarkers(duckInfos, ducksToMarkers, sitRep, now)
+
+  private def moveLines(duckInfos: Seq[DuckInfo],sitRep: SitRep): IO[Unit] =
+    duckInfos.map { di =>
       import js.JSConverters._
       val points = sitRep.positionsOf(di)
       //add all the points to the duck's source
@@ -93,9 +101,15 @@ case class MapLibreDuckView(
       IO(mapLibreMap.getSource(di.sourceName).map {
         (geo: GeoJSONSource) => geo.setData(data)
       })
-    }.sequence
+    }.sequence.void
 
-    val updateDucks: IO[Seq[Unit]] = duckInfos.map { di =>
+  private def moveMarkers(
+                           duckInfos: Seq[DuckInfo],
+                           ducksToMarkers: Map[DuckId, MarkerAndElement],
+                           sitRep: SitRep,
+                           now: Duration,
+                         ): IO[Unit] =
+    duckInfos.map { di =>
       val p: GeoPoint = sitRep.bestPositionOf(di)
       val age = (now.toMillis - p.timestamp) / 1000
       val marker = ducksToMarkers(di.id).marker
@@ -103,9 +117,7 @@ case class MapLibreDuckView(
       val element = ducksToMarkers(di.id).element
       element.innerHTML = ""
       SvgDuck.duckSvg(di, age)
-    }.sequence
-
-    updateLines *> updateDucks.void
+    }.sequence.void
 
   extension (duckInfo: DuckInfo)
     private def sourceName = s"source${duckInfo.id.v}"
