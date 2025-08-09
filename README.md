@@ -34,11 +34,12 @@ Here's the sketch of a plan:
 * - [X] (2) Get it running on an AWS EC2 t4 
 * * - [x] (1) Package up all the bits for the server in a jar using a new bleep plugin
 * * - [x] (3) Run the server from the jar via bleep plugin
-* * - [ ] (4) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
-* * - [ ] (5) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
-* * - [ ] (6) Bleep plugin to create an AMI with the jar
-* * - [ ] (7) Bleep plugin to start the AMI with the jar on EC2
-* * - [ ] (8) Start it from an AWS Lambda
+* * - [ ] (4) Duck svg studio 
+* * - [ ] (5) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
+* * - [ ] (6) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
+* * - [ ] (7) Bleep plugin to create an AMI with the jar
+* * - [ ] (8) Bleep plugin to start the AMI with the jar on EC2
+* * - [ ] (9) Start it from an AWS Lambda
 * * send SMS text messages to invite other people to the location sharing service
 * * handle user login and authentication
 
