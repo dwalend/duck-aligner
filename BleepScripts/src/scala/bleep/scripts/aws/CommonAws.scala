@@ -3,7 +3,7 @@ package bleep.scripts.aws
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient
 import software.amazon.awssdk.services.ec2.Ec2Client
-import software.amazon.awssdk.services.ec2.model.{Instance, InstanceState, Tag}
+import software.amazon.awssdk.services.ec2.model.{Instance, Tag}
 
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters.ListHasAsScala

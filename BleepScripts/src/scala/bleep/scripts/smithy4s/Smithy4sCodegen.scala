@@ -1,7 +1,7 @@
 package bleep.scripts.smithy4s
 
 import bleep.{FileSync, PathOps, Started, commands}
-import bleep.model.{CrossProjectName, Dep, Project, Repository, VersionCombo}
+import bleep.model.{CrossProjectName, Dep, IgnoreEvictionErrors, Project, Repository, VersionCombo}
 import bleep.packaging.CoordinatesFor
 import bleep.packaging.IvyLayout
 import bleep.packaging.MapLayout
@@ -145,6 +145,6 @@ class Smithy4sCodegen(
                        versionCombo: VersionCombo,
                        deps: List[Dep]
                      ): List[Path] =
-    started.resolver.force(deps.toSet, versionCombo, SortedSet.empty, "").jars
+    started.resolver.force(deps.toSet, versionCombo, SortedSet.empty, "", IgnoreEvictionErrors.No).jars
 
 }
