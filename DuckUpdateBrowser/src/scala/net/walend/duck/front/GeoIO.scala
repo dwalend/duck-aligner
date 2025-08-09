@@ -22,6 +22,22 @@ case class GeoIO(document: Document):
       pe => cb(Left(new RuntimeException(pe.toString))) //todo better exception
     )
   }
+  /*
+          println(s"latitude=${p.coords.latitude}")
+          println(s"longitude=${p.coords.longitude}")
+          println(s"altitude=${p.coords.altitude}")
+          println(s"speed=${p.coords.speed}")
+          println(s"heading=${p.coords.heading}")
+          println(s"accuracy=${p.coords.accuracy} m")
+          println(s"altitudeAccuracy=${p.coords.altitudeAccuracy}")
+          println(s"timestamp=${p.timestamp}")
+  
+          val geoPoint: GeoPoint = GeoPoint(
+            latitude = p.coords.latitude,
+            longitude = p.coords.longitude,
+            timestamp = p.timestamp.toLong
+          )
+  */
 
   extension (position: Position)
     private def toGeoPoint: GeoPoint =

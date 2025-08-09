@@ -19,10 +19,7 @@ object DuckUpdateRoutes {
     SimpleRestJsonBuilder.routes(ducksStateStore).resource
   }
 
-  private def docs[F[_]: Sync]: HttpRoutes[F] =
-    smithy4s.http4s.swagger.docs[F](DuckUpdateService)  //todo remove this before running it for real - or block it 
-
   def allF[F[_] : Async ]: F[Resource[F, HttpRoutes[F]]] =
-    import cats. syntax. all. toSemigroupKOps
-    duckStoreRoutesF[F].map(_.map(_.combineK(docs)))
+    //import cats. syntax. all. toSemigroupKOps
+    duckStoreRoutesF[F]//.map(_.map(_.combineK(docs)))
 }

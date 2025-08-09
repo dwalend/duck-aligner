@@ -1,28 +1,26 @@
 $schema: https://raw.githubusercontent.com/oyvindberg/bleep/master/schema.json
 $version: 0.0.13
 jvm:
-  name: graalvm-java17:22.3.1
+  name: corretto:21.0.7.6.1
 projects:
   BleepScripts:
     extends: template-common
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.38
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.41
       - org.apache.ant:ant-jsch:1.10.15
-      - com.github.mwiede:jsch:0.2.25
-      - software.amazon.awssdk:cloudformation:2.31.20 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:ec2:2.31.20 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:apigateway:2.31.20 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:imagebuilder:2.31.20 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:s3:2.31.20 #todo maybe replace with a smithy4s http4s library when available
+      - com.github.mwiede:jsch:2.27.2
+      - software.amazon.awssdk:ec2:2.32.19 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:apigateway:2.32.19 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:s3:2.32.19 #todo maybe replace with a smithy4s http4s library when available
       - org.slf4j:slf4j-simple:2.0.17
   TestFatJar:
     extends: template-common
     platform:
       mainClass: net.walend.fatjar.Main
     dependencies:
-      - org.typelevel::cats-effect:3.5.7
+      - org.typelevel::cats-effect:3.6.3
   ShareLocationService:
     extends: template-common
     platform:
@@ -33,10 +31,9 @@ projects:
       - org.http4s::http4s-ember-client:0.23.30
       - org.http4s::http4s-circe:0.23.30
       - org.http4s::http4s-dsl:0.23.30
-      - ch.qos.logback:logback-classic:1.5.17
-      - org.fusesource.jansi:jansi:2.4.1
-      - io.circe::circe-parser:0.14.10
-#      - com.disneystreaming.smithy4s::smithy4s-aws-http4s:0.18.38
+      - ch.qos.logback:logback-classic:1.5.18
+      - org.fusesource.jansi:jansi:2.4.2
+      - io.circe::circe-parser:0.14.14
   ShareLocationServiceTest:
     extends: template-common
     isTestProject: true
@@ -47,8 +44,8 @@ projects:
   DuckUpdateSmithy:
     extends: template-cross
     dependencies:
-      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.38
-      - com.disneystreaming.alloy:alloy-core:0.3.14
+      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.41
+      - com.disneystreaming.alloy:alloy-core:0.3.31
   DuckUpdateBrowser:
     extends: template-js
     dependsOn: DuckUpdateSmithy
@@ -56,8 +53,8 @@ projects:
       mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
     dependencies:
       - com.armanbilge::calico:0.2.3
-      - org.scala-js::scalajs-dom:2.8.0
-      - org.http4s::http4s-dom:0.2.11
+      - org.scala-js::scalajs-dom:2.8.1
+      - org.http4s::http4s-dom:0.2.12
       - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
       - org.creativescala::doodle:0.30.0
 #      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
@@ -71,10 +68,9 @@ projects:
       - org.http4s::http4s-ember-client:0.23.30
       - org.http4s::http4s-circe:0.23.30
       - org.http4s::http4s-dsl:0.23.30
-      - com.disneystreaming.smithy4s::smithy4s-http4s-swagger:0.18.38
-      - software.amazon.awssdk:geomaps:2.29.17 #todo replace with a smithy4s http4s library when available
-      - org.typelevel::log4cats-core:2.7.0
-      - org.typelevel::log4cats-slf4j:2.7.0
+      - software.amazon.awssdk:geomaps:2.32.19 #todo replace with a smithy4s http4s library when available
+      - org.typelevel::log4cats-core:2.7.1
+      - org.typelevel::log4cats-slf4j:2.7.1
       - org.slf4j:slf4j-simple:2.0.17
     platform:
       mainClass: net.walend.duckaligner.duckupdateservice.Main
@@ -85,8 +81,8 @@ projects:
     isTestProject: true
     dependsOn: DuckUpdateService
     dependencies:
-      - org.scalameta::munit:1.1.0
-      - org.typelevel::munit-cats-effect:2.0.0
+      - org.scalameta::munit:1.1.1
+      - org.typelevel::munit-cats-effect:2.1.0
   WoodenDuck:
     extends: template-common
     dependsOn: DuckUpdateSmithy
