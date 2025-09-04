@@ -31,18 +31,18 @@ case class MapLibreDuckView(
     val addAndGetDucks: IO[Map[DuckId, MarkerAndElement]] = cell.updateAndGet{ ducksToMarkers =>
       val addedDucks = duckInfos.filterNot(di => ducksToMarkers.keys.toSet.contains(di.id))
 
-      val addMarkers: Iterable[(DuckId, MarkerAndElement)] = addedDucks.map(addDuck(_,sitRep))
+      val addMarkers: Iterable[(DuckId, MarkerAndElement)] =
+        addedDucks.flatMap(addDuck(_, sitRep))
       ducksToMarkers.concat(addMarkers)
     }
 
     //update all the locations for all the ducks
     addAndGetDucks.flatMap { (ducksToMarkers: Map[DuckId, MarkerAndElement]) =>
       moveDucks(duckInfos,ducksToMarkers,sitRep,now)
-    }   
+    }
 
-  private def addDuck(di: DuckInfo, sitRep: SitRep): (DuckId, MarkerAndElement) =
-    addDuckLine(di,sitRep)
-    addDuckMarker(di)
+  private def addDuck(di: DuckInfo, sitRep: SitRep): Option[(DuckId, MarkerAndElement)] =
+    addDuckLine(di,sitRep).map(addDuckMarker)
 
   private def addDuckMarker(di: DuckInfo):(DuckId,MarkerAndElement) =
     val div: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
@@ -59,24 +59,28 @@ case class MapLibreDuckView(
     println(s"Added $marker for ${di.id} ${di.duckName}")
     di.id -> MarkerAndElement(marker, div)
 
-  private def addDuckLine(di: DuckInfo, sitRep: SitRep): Unit =
-    val _ = mapLibreMap.getSource(di.sourceName).getOrElse {
-      import js.JSConverters._
+  private def addDuckLine(di: DuckInfo, sitRep: SitRep): Option[DuckInfo] =
+    mapLibreMap.getSource(di.sourceName).getOrElse {
       val points = sitRep.positionsOf(di)
       //add all the points to the duck's source
-      val positions = points.take(1).map { p => js.Array(p.longitude, p.latitude) }.toJSArray
+      val positions: Option[js.Array[Double]] =
+        points
+          .headOption
+          .map { p => js.Array(p.longitude, p.latitude) }
 
-      val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
-        js.Array(Feature(geometry = LineString(positions), properties = ""))
-      ))
+      positions.map { p =>
+        val featureSpec: GeoJSONSourceSpecification = SourceSpecification.GeoJSONSourceSpecification(FeatureCollection(
+          js.Array(Feature(geometry = LineString(js.Array(p)), properties = ""))
+        ))
 
-      mapLibreMap.addSource(di.sourceName, featureSpec)
-      //add a layer for each new duck's line
-      val layerSpec = LayerSpecification
-        .LineLayerSpecification(di.layerName, di.sourceName)
-        .setPaint(lineBlur)
-        .setLayout(lineCap)
-      mapLibreMap.addLayer(layerSpec)
+        mapLibreMap.addSource(di.sourceName, featureSpec)
+        //add a layer for each new duck's line
+        val layerSpec = LayerSpecification
+          .LineLayerSpecification(di.layerName, di.sourceName)
+          .setPaint(lineBlur)
+          .setLayout(lineCap)
+        mapLibreMap.addLayer(layerSpec)
+      }.as(di)
     }
 
   private def moveDucks(
@@ -107,16 +111,19 @@ case class MapLibreDuckView(
                            ducksToMarkers: Map[DuckId, MarkerAndElement],
                            sitRep: SitRep,
                            now: Duration,
-                         ): IO[Unit] =
-    duckInfos.map { di =>
-      val p: GeoPoint = sitRep.bestPositionOf(di)
-      val age = (now.toMillis - p.timestamp) / 1000
-      val marker = ducksToMarkers(di.id).marker
-      marker.setLngLat((p.longitude, p.latitude))
-      val element = ducksToMarkers(di.id).element
-      element.innerHTML = ""
-      SvgDuck.duckSvg(di, age)
-    }.sequence.void
+                         ): IO[Unit] = {
+    duckInfos
+      .map(di => (di,sitRep.bestPositionOf(di)))
+      .collect{case (di,Some(p)) => (di,p)}
+      .map { (di,p) =>
+        val age = (now.toMillis - p.timestamp) / 1000
+        val marker = ducksToMarkers(di.id).marker
+        marker.setLngLat((p.longitude, p.latitude))
+        val element = ducksToMarkers(di.id).element
+        element.innerHTML = ""
+        SvgDuck.duckSvg(di, age)
+      }.sequence.void
+  }
 
   extension (duckInfo: DuckInfo)
     private def sourceName = s"source${duckInfo.id.v}"
@@ -160,7 +167,7 @@ object MapLibreGL:
           var container = "map"
           center = (c.longitude, c.latitude)
           zoom = 7 //7 is about a 3-hour drive from the center
-        })
+        }.setAttributionControlUndefined)
       }
 
     def waitToLoad[F[_] : Async : Console](mapLibreMap: MapLibreMap):F[Unit] = {

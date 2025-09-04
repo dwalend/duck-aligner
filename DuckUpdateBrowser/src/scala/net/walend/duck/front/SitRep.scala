@@ -11,10 +11,9 @@ import net.walend.duckaligner.duckupdates.v0.DuckEvent.{DuckInfoEvent, DuckPosit
  * @since v0.0.0
  */
 case class SitRep(order:Int,ducksToEvents:Map[DuckInfo,Seq[DuckEvent]]): 
-  def bestPositionOf(duckInfo: DuckInfo): GeoPoint =
+  def bestPositionOf(duckInfo: DuckInfo): Option[GeoPoint] =
     ducksToEvents.get(duckInfo)
       .flatMap(_.collectFirst { case p: DuckPositionEvent => p.position })
-      .get //todo handle no position - probably return unknown position
       
   def positionsOf(duckInfo: DuckInfo): Seq[GeoPoint] =
     ducksToEvents.getOrElse(duckInfo,Seq.empty)

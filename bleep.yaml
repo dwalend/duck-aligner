@@ -56,7 +56,7 @@ projects:
       - org.scala-js::scalajs-dom:2.8.1
       - org.http4s::http4s-dom:0.2.12
       - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
-      - org.creativescala::doodle:0.30.0
+      - org.creativescala::doodle:0.31-4ec838e-20250813T235909Z-SNAPSHOT #0.30.0
 #      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
   DuckUpdateService:
     extends: template-common
@@ -83,6 +83,12 @@ projects:
     dependencies:
       - org.scalameta::munit:1.1.1
       - org.typelevel::munit-cats-effect:2.1.0
+  DuckStudio:
+    extends: template-common
+    platform:
+#      mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
+    dependencies:
+      - org.creativescala::doodle:0.31-4ec838e-20250813T235909Z-SNAPSHOT #0.30.0
   WoodenDuck:
     extends: template-common
     dependsOn: DuckUpdateSmithy
