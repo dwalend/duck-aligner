@@ -8,13 +8,18 @@ projects:
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.41
       - org.apache.ant:ant-jsch:1.10.15
       - com.github.mwiede:jsch:2.27.2
       - software.amazon.awssdk:ec2:2.32.19 #todo maybe replace with a smithy4s http4s library when available
       - software.amazon.awssdk:apigateway:2.32.19 #todo maybe replace with a smithy4s http4s library when available
       - software.amazon.awssdk:s3:2.32.19 #todo maybe replace with a smithy4s http4s library when available
       - org.slf4j:slf4j-simple:2.0.17
+  GenSmithy:
+    extends: template-common
+    dependencies:
+      - build.bleep::bleep-core:${BLEEP_VERSION}
+      - build.bleep::bleep-model:${BLEEP_VERSION}
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.41
   TestFatJar:
     extends: template-common
     platform:
@@ -46,6 +51,9 @@ projects:
     dependencies:
       - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.41
       - com.disneystreaming.alloy:alloy-core:0.3.31
+    sourcegen:
+      project: GenSmithy
+      main: bleep.scripts.smithy4s.GenerateSmithyScala
   DuckUpdateBrowser:
     extends: template-js
     dependsOn: DuckUpdateSmithy

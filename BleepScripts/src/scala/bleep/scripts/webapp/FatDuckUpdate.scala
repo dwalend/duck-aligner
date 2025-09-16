@@ -15,8 +15,6 @@ object FatDuckUpdate extends BleepScript("FatDuckUpdate") :
     val smithyProjectName = ProjectName("DuckUpdateSmithy")
     val smithyCrossProjectName = model.CrossProjectName(smithyProjectName,Option(CrossId("js")))
 
-    commands.script(ScriptName("gen-smithy-code"),List("DuckUpdateSmithy"))
-
     //compile everything
     commands.compile(List(smithyCrossProjectName))
     commands.compile(List(duckUpdateServiceCrossProjectName))

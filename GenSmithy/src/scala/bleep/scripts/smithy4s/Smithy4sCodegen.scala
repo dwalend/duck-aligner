@@ -1,6 +1,6 @@
 package bleep.scripts.smithy4s
 
-import bleep.{FileSync, PathOps, Started, commands}
+import bleep.{FileSync, PathOps, Started}
 import bleep.model.{CrossProjectName, Dep, IgnoreEvictionErrors, Project, Repository, VersionCombo}
 import bleep.packaging.CoordinatesFor
 import bleep.packaging.IvyLayout
@@ -103,13 +103,7 @@ class Smithy4sCodegen(
                                 ): Set[Path] = {
     val localProjects =
       started.build.resolvedDependsOn(crossProjectName) ++ Set(crossProjectName)
-    val compilation = commands
-      .Compile(watch = false, localProjects.toArray)
-      .run(started)
-    require(
-      compilation.isRight,
-      s"Compilation of modules required for code generation failed ${crossProjectName.value}."
-    )
+
     val packagedLibraries: SortedMap[CrossProjectName, PackagedLibrary] =
       packageLibraries(
         started,
