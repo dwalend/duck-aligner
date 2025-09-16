@@ -9,17 +9,17 @@ projects:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
       - org.apache.ant:ant-jsch:1.10.15
-      - com.github.mwiede:jsch:2.27.2
-      - software.amazon.awssdk:ec2:2.32.19 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:apigateway:2.32.19 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:s3:2.32.19 #todo maybe replace with a smithy4s http4s library when available
+      - com.github.mwiede:jsch:2.27.3
+      - software.amazon.awssdk:ec2:2.33.9 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:apigateway:2.33.9 #todo maybe replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:s3:2.33.9 #todo maybe replace with a smithy4s http4s library when available
       - org.slf4j:slf4j-simple:2.0.17
   GenSmithy:
     extends: template-common
     dependencies:
       - build.bleep::bleep-core:${BLEEP_VERSION}
       - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.41
+      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.42
   TestFatJar:
     extends: template-common
     platform:
@@ -44,13 +44,13 @@ projects:
     isTestProject: true
     dependsOn: ShareLocationService
     dependencies:
-      - org.scalameta::munit:1.0.0
-      - org.typelevel::munit-cats-effect:2.0.0
+      - org.scalameta::munit:1.2.0
+      - org.typelevel::munit-cats-effect:2.1.0
   DuckUpdateSmithy:
     extends: template-cross
     dependencies:
-      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.41
-      - com.disneystreaming.alloy:alloy-core:0.3.31
+      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.42
+      - com.disneystreaming.alloy:alloy-core:0.3.33
     sourcegen:
       project: GenSmithy
       main: bleep.scripts.smithy4s.GenerateSmithyScala
@@ -76,7 +76,7 @@ projects:
       - org.http4s::http4s-ember-client:0.23.30
       - org.http4s::http4s-circe:0.23.30
       - org.http4s::http4s-dsl:0.23.30
-      - software.amazon.awssdk:geomaps:2.32.19 #todo replace with a smithy4s http4s library when available
+      - software.amazon.awssdk:geomaps:2.33.9 #todo replace with a smithy4s http4s library when available
       - org.typelevel::log4cats-core:2.7.1
       - org.typelevel::log4cats-slf4j:2.7.1
       - org.slf4j:slf4j-simple:2.0.17
@@ -89,7 +89,7 @@ projects:
     isTestProject: true
     dependsOn: DuckUpdateService
     dependencies:
-      - org.scalameta::munit:1.1.1
+      - org.scalameta::munit:1.2.0
       - org.typelevel::munit-cats-effect:2.1.0
   DuckStudio:
     extends: template-common
@@ -115,7 +115,6 @@ scripts:
 
   fat-duck-update: BleepScripts/bleep.scripts.webapp.FatDuckUpdate
 
-  gen-smithy-code: BleepScripts/bleep.scripts.smithy4s.Codegen
   fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
 
   start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
@@ -137,7 +136,7 @@ templates:
     platform:
       name: js
       jsNodeVersion: 21.7.2
-      jsVersion: 1.19.0
+      jsVersion: 1.20.1
     scala:
       options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
       strict: true
