@@ -35,7 +35,9 @@ Here's the sketch of a plan:
 * * - [x] (1) Package up all the bits for the server in a jar using a new bleep plugin
 * * - [x] (3) Run the server from the jar via bleep plugin
 * * - [ ] (4) Duck svg studio 
-* * - [ ] (5) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
+* * - [x] (5) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
+* * - [ ] (5a) Build the smithy4s aws code using Bleep instead of mill
+* * - [ ] (5b) Use Scalablytyped for MapLibreGL from Bleep instead of mill
 * * - [ ] (6) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
 * * - [ ] (7) Bleep plugin to create an AMI with the jar
 * * - [ ] (8) Bleep plugin to start the AMI with the jar on EC2
@@ -56,8 +58,6 @@ Here's the sketch of a plan:
 * - [x] Send that to some URL, receive locations (stored in memory) back from other users (blocked bleep vs scalajs)
 * - [x] Get map sections from location data from AWS' location service
 * * - Get MapLibra parts from our own server - possibly caching data. (Lots of duplicate calls.)
-* * - [ ] Build the smithy4s aws code using Bleep instead of mill
-* * - [ ] Use Scalablytyped for MapLibreGL from Bleep instead of mill
 * * Possibly offset the location or enter some false locations to put off AWS tracking if they are storing too much data. Amazon is pretty open about which information they keep from AWS API calls.        
 * Set up an ephemeral service (S3 and AWS lambda ?) behind an AWS Gateway endpoint to 
 * * serve the static bits - javascript, html, images, etc
