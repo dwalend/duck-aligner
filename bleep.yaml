@@ -26,26 +26,6 @@ projects:
       mainClass: net.walend.fatjar.Main
     dependencies:
       - org.typelevel::cats-effect:3.6.3
-  ShareLocationService:
-    extends: template-common
-    platform:
-      mainClass: net.walend.sharelocationservice.Main
-    dependsOn: DuckUpdateSmithy
-    dependencies:
-      - org.http4s::http4s-ember-server:0.23.30
-      - org.http4s::http4s-ember-client:0.23.30
-      - org.http4s::http4s-circe:0.23.30
-      - org.http4s::http4s-dsl:0.23.30
-      - ch.qos.logback:logback-classic:1.5.18
-      - org.fusesource.jansi:jansi:2.4.2
-      - io.circe::circe-parser:0.14.14
-  ShareLocationServiceTest:
-    extends: template-common
-    isTestProject: true
-    dependsOn: ShareLocationService
-    dependencies:
-      - org.scalameta::munit:1.2.0
-      - org.typelevel::munit-cats-effect:2.1.0
   DuckUpdateSmithy:
     extends: template-cross
     dependencies:
