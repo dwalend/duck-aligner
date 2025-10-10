@@ -23,7 +23,7 @@ structure DuckId {
 
 structure DuckInfo {
     @required
-    id:DuckId
+    id:DuckId  //todo not needed
 
     @required
     duckName:String

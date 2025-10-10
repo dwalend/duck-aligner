@@ -12,7 +12,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
  * @author David Walend
  * @since v0.0.0
  */
-case class DucksStateStore[F[_]: Async](ducksStateCell:AtomicCell[F,DucksState]) extends DuckUpdateService[F]:
+case class DucksStateStore[F[_]: Async](private val ducksStateCell:AtomicCell[F,DucksState]) extends DuckUpdateService[F]:
   def mapLibreGlKey(): F[MapLibreGlKeyOutput] =
     Async[F].pure(MapLibreGlKeyOutput(AwsSecrets.apiKey))
 

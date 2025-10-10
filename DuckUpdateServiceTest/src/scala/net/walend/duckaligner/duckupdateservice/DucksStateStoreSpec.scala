@@ -2,7 +2,9 @@ package net.walend.duckaligner.duckupdateservice
 
 import cats.effect.IO
 import munit.CatsEffectSuite
-import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckSitRepUpdate, DuckUpdate, GeoPoint, Track, UpdatePositionOutput}
+import net.walend.duckaligner.duckupdates.v0.DuckEvent.{DuckInfoEvent, DuckPositionEvent}
+import net.walend.duckaligner.duckupdates.v0.NewDuckEventsResponse.EventsForClientCase
+import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, GeoPoint, ProposeEventsOutput}
 import net.walend.duckaligner.duckupdateservice.store.DucksStateStore
 
 class DucksStateStoreSpec extends CatsEffectSuite:
@@ -17,27 +19,37 @@ class DucksStateStoreSpec extends CatsEffectSuite:
     )
   }
 
-  private val duckUpdate1 = DuckUpdate(
+  private val duckEvent0 = DuckInfoEvent(
+    order = 1,
     id = DuckId(1),
-    snapshot = 1,
+    duckInfo = DuckInfo(
+      id = DuckId(1),
+      duckName = "testDuck",
+      lastChanged = 0L
+    )
+  )
+
+  private val duckEvent1 = DuckPositionEvent(
+    order = 2,
+    id = DuckId(1),
     position = GeoPoint(0.0, 1.1, 0L)
   )
 
-  private val expected1 = UpdatePositionOutput(DuckSitRepUpdate(
-    snapshot = 1,
-    tracks = List(Track(DuckId(1), List(GeoPoint(0.0, 1.1, 0L))))
-  ))
-
+  private val expected1 = ProposeEventsOutput(
+    EventsForClientCase(
+      List(duckEvent0,duckEvent1)
+    )
+  )
 
   test("DuckUpdate shows up") {
     assertIO(
       DucksStateStore.makeDuckStateStore[IO].flatMap {
         duckStateStore =>
-          duckStateStore.updatePosition(duckUpdate1)
+          duckStateStore.proposeEvents(List(duckEvent0,duckEvent1))
       }
       ,expected1)
   }
-
+/*
   private val duckUpdate2 = DuckUpdate(
     id = DuckId(1),
     snapshot = 2,
@@ -93,4 +105,4 @@ class DucksStateStoreSpec extends CatsEffectSuite:
       },
       expected3
     )
-  }
+  */
