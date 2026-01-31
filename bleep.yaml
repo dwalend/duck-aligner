@@ -1,124 +1,126 @@
 $schema: https://raw.githubusercontent.com/oyvindberg/bleep/master/schema.json
 $version: 0.0.14
 jvm:
-  name: corretto:21.0.7.6.1
+  name: corretto:25
 projects:
   BleepScripts:
-    extends: template-common
     dependencies:
-      - build.bleep::bleep-core:${BLEEP_VERSION}
-      - build.bleep::bleep-model:${BLEEP_VERSION}
-      - org.apache.ant:ant-jsch:1.10.15
-      - com.github.mwiede:jsch:2.27.3
-      - software.amazon.awssdk:ec2:2.33.9 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:apigateway:2.33.9 #todo maybe replace with a smithy4s http4s library when available
-      - software.amazon.awssdk:s3:2.33.9 #todo maybe replace with a smithy4s http4s library when available
-      - org.slf4j:slf4j-simple:2.0.17
+    - build.bleep::bleep-core:${BLEEP_VERSION}
+    - build.bleep::bleep-model:${BLEEP_VERSION}
+    - com.github.mwiede:jsch:2.27.7
+    - org.apache.ant:ant-jsch:1.10.15
+    - org.slf4j:slf4j-simple:2.0.17
+    - software.amazon.awssdk:apigateway:2.41.10
+    - software.amazon.awssdk:ec2:2.41.10
+    - software.amazon.awssdk:s3:2.41.10
+    extends: template-common
+  DuckStudio:
+    dependencies: org.creativescala::doodle:0.32.0
+    extends: template-common
+  DuckUpdateBrowser:
+    dependencies:
+    - com.armanbilge::calico:0.2.3
+    - org.creativescala::doodle:0.32.0
+    - org.http4s::http4s-dom:0.2.12
+    - org.scala-js::scalajs-dom:2.8.1
+    - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
+    dependsOn: DuckUpdateSmithy
+    extends: template-js
+    platform:
+      mainClass: net.walend.duck.front.Main
+  DuckUpdateService:
+    dependencies:
+    - org.http4s::http4s-circe:0.23.33
+    - org.http4s::http4s-dsl:0.23.33
+    - org.http4s::http4s-ember-client:0.23.33
+    - org.http4s::http4s-ember-server:0.23.33
+    - org.slf4j:slf4j-simple:2.0.17
+    - org.typelevel::log4cats-core:2.7.1
+    - org.typelevel::log4cats-slf4j:2.7.1
+    - software.amazon.awssdk:geomaps:2.41.10
+    dependsOn: DuckUpdateSmithy
+    extends: template-common
+    platform:
+      mainClass: net.walend.duckaligner.duckupdateservice.Main
+    resources: ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
+  DuckUpdateServiceTest:
+    dependencies:
+    - org.scalameta::munit:1.2.1
+    - org.typelevel::munit-cats-effect:2.1.0
+    dependsOn: DuckUpdateService
+    extends: template-common
+    isTestProject: true
+  DuckUpdateSmithy:
+    cross:
+      js: {}
+      jvm: {}
+    dependencies:
+    - com.disneystreaming.alloy:alloy-core:0.3.35
+    - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.46
+    extends: template-cross
+    sourcegen:
+      main: bleep.scripts.smithy4s.GenerateSmithyScala
+      project: GenSmithy
   GenSmithy:
-    extends: template-common
     dependencies:
-      - build.bleep::bleep-core:${BLEEP_VERSION}
-      - build.bleep::bleep-model:${BLEEP_VERSION}
-      - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.42
+    - build.bleep::bleep-core:${BLEEP_VERSION}
+    - build.bleep::bleep-model:${BLEEP_VERSION}
+    - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.46
+    extends: template-common
   TestFatJar:
+    dependencies: org.typelevel::cats-effect:3.6.3
     extends: template-common
     platform:
       mainClass: net.walend.fatjar.Main
-    dependencies:
-      - org.typelevel::cats-effect:3.6.3
-  DuckUpdateSmithy:
-    extends: template-cross
-    dependencies:
-      - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.42
-      - com.disneystreaming.alloy:alloy-core:0.3.33
-    sourcegen:
-      project: GenSmithy
-      main: bleep.scripts.smithy4s.GenerateSmithyScala
-  DuckUpdateBrowser:
-    extends: template-js
-    dependsOn: DuckUpdateSmithy
-    platform:
-      mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
-    dependencies:
-      - com.armanbilge::calico:0.2.3
-      - org.scala-js::scalajs-dom:2.8.1
-      - org.http4s::http4s-dom:0.2.12
-      - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
-      - org.creativescala::doodle:0.31.0
-#      - org.scala-js:scalajs-env-jsdom-nodejs_2.13:1.1.0  todo npm install jsdom and the sbt setting on https://www.scala-js.org/doc/project/js-environments.html - but really just for testing
-  DuckUpdateService:
-    extends: template-common
-    dependsOn:
-     - DuckUpdateSmithy
-#     - DuckUpdateBrowser
-    dependencies:
-      - org.http4s::http4s-ember-server:0.23.30
-      - org.http4s::http4s-ember-client:0.23.30
-      - org.http4s::http4s-circe:0.23.30
-      - org.http4s::http4s-dsl:0.23.30
-      - software.amazon.awssdk:geomaps:2.33.9 #todo replace with a smithy4s http4s library when available
-      - org.typelevel::log4cats-core:2.7.1
-      - org.typelevel::log4cats-slf4j:2.7.1
-      - org.slf4j:slf4j-simple:2.0.17
-    platform:
-      mainClass: net.walend.duckaligner.duckupdateservice.Main
-    resources:
-      - ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
-  DuckUpdateServiceTest:
-    extends: template-common
-    isTestProject: true
-    dependsOn: DuckUpdateService
-    dependencies:
-      - org.scalameta::munit:1.2.0
-      - org.typelevel::munit-cats-effect:2.1.0
-  DuckStudio:
-    extends: template-common
-    platform:
-#      mainClass: net.walend.duck.front.Main  #todo duck -> duckaligner
-    dependencies:
-      - org.creativescala::doodle:0.31.0
   WoodenDuck:
-    extends: template-common
+    dependencies: org.http4s::http4s-ember-client:0.23.33
     dependsOn: DuckUpdateSmithy
+    extends: template-common
     platform:
       mainClass: net.walend.duckaligner.wooden.Main
-    dependencies:
-      - org.http4s::http4s-ember-client:0.23.30
 scripts:
-  # todo why?
-  # noinspection YAMLSchemaValidation
-  create-ec2-launch-template: BleepScripts/bleep.scripts.aws.CreateEc2LaunchTemplate
-
-  start-duck-update: BleepScripts/bleep.scripts.aws.StartTestDuckUpdateService
-  stop-duck-update: BleepScripts/bleep.scripts.aws.StopTestDuckUpdateService
-  push-duck-update: BleepScripts/bleep.scripts.aws.PushDuckUpdateServiceToEc2
-
-  fat-duck-update: BleepScripts/bleep.scripts.webapp.FatDuckUpdate
-
-  fat-jar: BleepScripts/bleep.scripts.fatjar.FatJar
-
-  start-ec2: BleepScripts/bleep.scripts.aws.StartEc2Machine
-  create-api-gateway: BleepScripts/bleep.scripts.aws.CreateApiGateway
-  stop-ec2: BleepScripts/bleep.scripts.aws.TerminateEc2Machine
-  delete-api-gateways: BleepScripts/bleep.scripts.aws.DeleteApiGateways
-  push-to-ec2: BleepScripts/bleep.scripts.aws.PushServiceToEc2
-
-  #todo push-duck-update
+  create-api-gateway:
+    main: bleep.scripts.aws.CreateApiGateway
+    project: BleepScripts
+  create-ec2-launch-template:
+    main: bleep.scripts.aws.CreateEc2LaunchTemplate
+    project: BleepScripts
+  delete-api-gateways:
+    main: bleep.scripts.aws.DeleteApiGateways
+    project: BleepScripts
+  fat-duck-update:
+    main: bleep.scripts.webapp.FatDuckUpdate
+    project: BleepScripts
+  fat-jar:
+    main: bleep.scripts.fatjar.FatJar
+    project: BleepScripts
+  push-duck-update:
+    main: bleep.scripts.aws.PushDuckUpdateServiceToEc2
+    project: BleepScripts
+  push-to-ec2:
+    main: bleep.scripts.aws.PushServiceToEc2
+    project: BleepScripts
+  start-duck-update:
+    main: bleep.scripts.aws.StartTestDuckUpdateService
+    project: BleepScripts
+  start-ec2:
+    main: bleep.scripts.aws.StartEc2Machine
+    project: BleepScripts
+  stop-duck-update:
+    main: bleep.scripts.aws.StopTestDuckUpdateService
+    project: BleepScripts
+  stop-ec2:
+    main: bleep.scripts.aws.TerminateEc2Machine
+    project: BleepScripts
 templates:
   template-common:
     platform:
       name: jvm
     scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
-      strict: true
-      version: 3.3.6
-  template-js:
-    platform:
-      name: js
-      jsNodeVersion: 21.7.2
-      jsVersion: 1.20.1
-    scala:
-      options: -encoding utf8 -feature -unchecked -deprecation -language:experimental.macros -language:higherKinds -Ykind-projector -Wvalue-discard -Wnonunit-statement -Wunused:implicits -Wunused:explicits -Wunused:imports -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose
+      options: -Wnonunit-statement -Wunused:explicits -Wunused:implicits -Wunused:imports
+        -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose -Wvalue-discard
+        -Ykind-projector -deprecation -encoding utf8 -feature -language:experimental.macros
+        -language:higherKinds -unchecked
       strict: true
       version: 3.3.6
   template-cross:
@@ -127,5 +129,15 @@ templates:
         extends: template-js
       jvm:
         extends: template-common
-
-    
+  template-js:
+    platform:
+      jsNodeVersion: 21.7.2
+      jsVersion: 1.20.1
+      name: js
+    scala:
+      options: -Wnonunit-statement -Wunused:explicits -Wunused:implicits -Wunused:imports
+        -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose -Wvalue-discard
+        -Ykind-projector -deprecation -encoding utf8 -feature -language:experimental.macros
+        -language:higherKinds -unchecked
+      strict: true
+      version: 3.3.6
