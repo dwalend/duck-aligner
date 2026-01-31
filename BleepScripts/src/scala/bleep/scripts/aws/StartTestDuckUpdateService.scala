@@ -27,8 +27,8 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
 
     val startScript =
       s"""#!/bin/bash -x
-         |#upgrade everything and install the latest JRE 21
-         |sudo yum --assumeyes install java-21-amazon-corretto-headless
+         |#upgrade everything and install the latest JRE 25
+         |sudo yum --assumeyes install java-25-amazon-corretto-headless
          |sudo yum --assumeyes upgrade
          |""".stripMargin
 

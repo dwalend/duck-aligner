@@ -15,7 +15,7 @@ object StartEc2Machine extends BleepScript("StartEc2Machine") :
 
     val startScript =
       s"""#!/bin/bash -x
-         |sudo yum --assumeyes install java-21-amazon-corretto-headless
+         |sudo yum --assumeyes install java-25-amazon-corretto-headless
          |sudo yum --assumeyes upgrade
          |""".stripMargin
 
