@@ -29,23 +29,23 @@ bleep run DuckUpdateService
 Here's the sketch of a plan:
 
 * Mostly eat what amazon puts on the plate, build the system up by getting things going, then take on the biggest risks - least familiarity for me - first. Numbers indicate order I plan to chip away at the project.
-          
-* - [x] Get a server up and running, and sharing location data
-* - [X] (2) Get it running on an AWS EC2 t4 
-* * - [x] (1) Package up all the bits for the server in a jar using a new bleep plugin
-* * - [x] (3) Run the server from the jar via bleep plugin
-* * - [ ] (4) Duck svg studio 
-* * - [x] (5) smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
-* * - [ ] (5a) Build the smithy4s aws code using Bleep instead of mill
-* * - [ ] (5b) Use Scalablytyped for MapLibreGL from Bleep instead of mill
-* * - [ ] (6) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
-* * - [ ] (7) Bleep plugin to create an AMI with the jar
-* * - [ ] (8) Bleep plugin to start the AMI with the jar on EC2
-* * - [ ] (9) Start it from an AWS Lambda
-* * send SMS text messages to invite other people to the location sharing service
-* * handle user login and authentication
+               
+* - [ ] Mac OS-native version Package javascript to run as an app on mac OS
+* * See https://github.com/ionic-team/capacitor?tab=readme-ov-file - library/container to host a javascript app
+* * https://javascript.plainenglish.io/i-replaced-my-native-ios-app-with-a-cross-platform-web-app-and-no-one-noticed-1653901ce244 - article from someone who's happy with Ionic Capacitor
+* * https://medium.com/@roy11manisha/javascript-in-ios-native-app-223aa17428f3 - package a javascript app for the app store
+* * https://scriptable.app/ - alternative to Ionic Capacitor that may be easier to shake out problems
+* - [ ] (4) Duck svg studio 
+* - [ ] (5a) Build the smithy4s aws code using Bleep instead of mill
+* - [ ] (5b) Use Scalablytyped for MapLibreGL from Bleep instead of mill
+* - [ ] (6) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
+* - [ ] (7) Bleep plugin to create an AMI with the jar
+* - [ ] (8) Bleep plugin to start the AMI with the jar on EC2
+* - [ ] (9) Start it from an AWS Lambda
+* send SMS text messages to invite other people to the location sharing service
+* handle user login and authentication
 
-* * It'll only serve about 2 requests per minute per user ~ 240 requests an hour for most uses
+* * It'll only need to serve about 2 requests per minute per user ~ 240 requests an hour for most uses
 * * That might mean compiling it to scala native to fit on the tiny server
 * * - [ ] (4.4) share about smithy in bleep
 
@@ -64,6 +64,12 @@ Here's the sketch of a plan:
 * * start the service - see https://www.youtube.com/watch?v=SBJNAf-OGQw - smithy4s - maybe - not sure it's the right critter.
 * * * compile to scala native again
 * * handle the https cert work (which the geolocation javascript API requires)
+
+* - [x] Get a server up and running, and sharing location data
+* - [X] Get it running on an AWS EC2 t4
+* * - [x] Package up all the bits for the server in a jar using a new bleep plugin
+* * - [x] Run the server from the jar via bleep plugin
+* * - [x] smithy source code should go to a bleep-managed and bleep-cleaned directory to compile
 
 ---
 

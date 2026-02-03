@@ -1,7 +1,7 @@
 $schema: https://raw.githubusercontent.com/oyvindberg/bleep/master/schema.json
 $version: 0.0.14
 jvm:
-  name: corretto:25.0.2.10.1 #From cs java --available
+  name: corretto:25.0.2.10.1
 projects:
   BleepScripts:
     dependencies:
@@ -10,17 +10,17 @@ projects:
     - com.github.mwiede:jsch:2.27.7
     - org.apache.ant:ant-jsch:1.10.15
     - org.slf4j:slf4j-simple:2.0.17
-    - software.amazon.awssdk:apigateway:2.41.10
-    - software.amazon.awssdk:ec2:2.41.10
-    - software.amazon.awssdk:s3:2.41.10
+    - software.amazon.awssdk:apigateway:2.41.20
+    - software.amazon.awssdk:ec2:2.41.20
+    - software.amazon.awssdk:s3:2.41.20
     extends: template-common
   DuckStudio:
-    dependencies: org.creativescala::doodle:0.32.0
+    dependencies: org.creativescala::doodle:0.33.0
     extends: template-common
   DuckUpdateBrowser:
     dependencies:
     - com.armanbilge::calico:0.2.3
-    - org.creativescala::doodle:0.32.0
+    - org.creativescala::doodle:0.33.0
     - org.http4s::http4s-dom:0.2.12
     - org.scala-js::scalajs-dom:2.8.1
     - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
@@ -37,7 +37,7 @@ projects:
     - org.slf4j:slf4j-simple:2.0.17
     - org.typelevel::log4cats-core:2.7.1
     - org.typelevel::log4cats-slf4j:2.7.1
-    - software.amazon.awssdk:geomaps:2.41.10
+    - software.amazon.awssdk:geomaps:2.41.20
     dependsOn: DuckUpdateSmithy
     extends: template-common
     platform:
@@ -45,7 +45,7 @@ projects:
     resources: ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
   DuckUpdateServiceTest:
     dependencies:
-    - org.scalameta::munit:1.2.1
+    - org.scalameta::munit:1.2.2
     - org.typelevel::munit-cats-effect:2.1.0
     dependsOn: DuckUpdateService
     extends: template-common
@@ -55,7 +55,7 @@ projects:
       js: {}
       jvm: {}
     dependencies:
-    - com.disneystreaming.alloy:alloy-core:0.3.35
+    - com.disneystreaming.alloy:alloy-core:0.3.36
     - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.46
     extends: template-cross
     sourcegen:

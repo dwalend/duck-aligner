@@ -43,7 +43,7 @@ object CreateEc2LaunchTemplate extends BleepScript("CreateEc2LaunchTemplate") :
 
     val requestLaunchTemplateData = RequestLaunchTemplateData.builder()
       .keyName("davidAtWalendDotNet") //ssh key name
-      .imageId("resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64")
+      .imageId("resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64") //from https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/downloads-list.html
       .instanceType("t4g.nano")
       .securityGroups(securityGroupName)
       .ebsOptimized(true)
