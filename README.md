@@ -18,6 +18,8 @@ cd MapLibreGlScalablyTyped
 npm install
 mill _.ivyDeps
 cd ..
+
+//todo may not need this rm anymore
 rm -rf DuckUpdateSmithy/src/resources/ .bleep/projects-jars/DuckUpdateSmithy@jvm/my.org/DuckUpdateSmithy_3/0.1.0-SNAPSHOT/jars/DuckUpdateSmithy_3.jar DuckUpdateSmithy/src/scala/net/walend/duckaligner/duckupdates/v0/*
 
 bleep gen-smithy-code DuckUpdateSmithy
@@ -30,18 +32,17 @@ Here's the sketch of a plan:
 
 * Mostly eat what amazon puts on the plate, build the system up by getting things going, then take on the biggest risks - least familiarity for me - first. Numbers indicate order I plan to chip away at the project.
                
-* - [ ] Mac OS-native version Package javascript to run as an app on mac OS
+* - [ ] (1) Mac OS-native version Package javascript to run as an app on mac OS
 * * See https://github.com/ionic-team/capacitor?tab=readme-ov-file - library/container to host a javascript app
 * * https://javascript.plainenglish.io/i-replaced-my-native-ios-app-with-a-cross-platform-web-app-and-no-one-noticed-1653901ce244 - article from someone who's happy with Ionic Capacitor
 * * https://medium.com/@roy11manisha/javascript-in-ios-native-app-223aa17428f3 - package a javascript app for the app store
 * * https://scriptable.app/ - alternative to Ionic Capacitor that may be easier to shake out problems
-* - [ ] (4) Duck svg studio 
-* - [ ] (5a) Build the smithy4s aws code using Bleep instead of mill
-* - [ ] (5b) Use Scalablytyped for MapLibreGL from Bleep instead of mill
-* - [ ] (6) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
-* - [ ] (7) Bleep plugin to create an AMI with the jar
-* - [ ] (8) Bleep plugin to start the AMI with the jar on EC2
-* - [ ] (9) Start it from an AWS Lambda
+* - [ ] (2) Duck svg studio 
+* - [ ] (3) Use Scalablytyped for MapLibreGL from Bleep instead of mill
+* - [ ] (4) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
+* - [ ] (5) Bleep plugin to create an AMI with the jar
+* - [ ] (6) Bleep plugin to start the AMI with the jar on EC2
+* - [ ] (7) Start it from an AWS Lambda
 * send SMS text messages to invite other people to the location sharing service
 * handle user login and authentication
 

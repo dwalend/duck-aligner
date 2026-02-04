@@ -1,7 +1,7 @@
 package net.walend.duckaligner.duckupdateservice.awssdklocation
 
 import cats.effect.Async
-import org.http4s.{HttpRoutes, Method, Request, Response, Uri}
+import org.http4s.{HttpRoutes, Method, Request, Uri}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Origin
 import org.http4s.server.middleware.{CORS, CORSPolicy}

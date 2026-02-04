@@ -12,7 +12,6 @@ import smithy4s.http.UnknownErrorResponse
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.concurrent.duration.DurationInt
-import scala.scalajs.js
 
 @JSExportTopLevel("Main")
 object Main extends IOWebApp:

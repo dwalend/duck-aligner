@@ -4,7 +4,7 @@ import cats.effect.IO
 import net.walend.duckaligner.duckupdates.v0.DuckInfo
 import doodle.image.Image
 import doodle.core.Color
-import doodle.core.font.{Font, FontFamily, FontSize}
+import doodle.core.font.{Font, FontSize}
 
 
 /**

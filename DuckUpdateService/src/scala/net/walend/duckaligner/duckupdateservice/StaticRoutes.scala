@@ -1,8 +1,6 @@
 package net.walend.duckaligner.duckupdateservice
 
-import cats.MonadThrow
 import cats.effect.Sync
-import fs2.io.file.Files
 import org.http4s.{HttpRoutes, StaticFile}
 import org.http4s.dsl.Http4sDsl
 
@@ -13,7 +11,7 @@ import org.http4s.dsl.Http4sDsl
  * @since v0.0.0
  */
 object StaticRoutes {
-  def staticFiles[F[_]: MonadThrow : Files : Sync]:HttpRoutes[F] =
+  def staticFiles[F[_] : Sync]:HttpRoutes[F] =
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {

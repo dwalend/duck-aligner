@@ -13,10 +13,10 @@ projects:
     - software.amazon.awssdk:apigateway:2.41.20
     - software.amazon.awssdk:ec2:2.41.20
     - software.amazon.awssdk:s3:2.41.20
-    extends: template-common
+    extends: template-jvm
   DuckStudio:
     dependencies: org.creativescala::doodle:0.33.0
-    extends: template-common
+    extends: template-jvm
   DuckUpdateBrowser:
     dependencies:
     - com.armanbilge::calico:0.2.3
@@ -39,7 +39,7 @@ projects:
     - org.typelevel::log4cats-slf4j:2.7.1
     - software.amazon.awssdk:geomaps:2.41.20
     dependsOn: DuckUpdateSmithy
-    extends: template-common
+    extends: template-jvm
     platform:
       mainClass: net.walend.duckaligner.duckupdateservice.Main
     resources: ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
@@ -48,7 +48,7 @@ projects:
     - org.scalameta::munit:1.2.2
     - org.typelevel::munit-cats-effect:2.1.0
     dependsOn: DuckUpdateService
-    extends: template-common
+    extends: template-jvm
     isTestProject: true
   DuckUpdateSmithy:
     cross:
@@ -66,16 +66,16 @@ projects:
     - build.bleep::bleep-core:${BLEEP_VERSION}
     - build.bleep::bleep-model:${BLEEP_VERSION}
     - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.46
-    extends: template-common
+    extends: template-jvm
   TestFatJar:
     dependencies: org.typelevel::cats-effect:3.6.3
-    extends: template-common
+    extends: template-jvm
     platform:
       mainClass: net.walend.fatjar.Main
   WoodenDuck:
     dependencies: org.http4s::http4s-ember-client:0.23.33
     dependsOn: DuckUpdateSmithy
-    extends: template-common
+    extends: template-jvm
     platform:
       mainClass: net.walend.duckaligner.wooden.Main
 scripts:
@@ -112,32 +112,32 @@ scripts:
   stop-ec2:
     main: bleep.scripts.aws.TerminateEc2Machine
     project: BleepScripts
-templates:
-  template-common:
+templates: #todo template-common
+  template-jvm:
     platform:
       name: jvm
     scala:
       options: -Wnonunit-statement -Wunused:explicits -Wunused:implicits -Wunused:imports
-        -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose -Wvalue-discard
+        -Wunused:locals -Wunused:params -Wconf:any:warning-verbose -Wvalue-discard
         -Ykind-projector -deprecation -encoding utf8 -feature -language:experimental.macros
         -language:higherKinds -unchecked
       strict: true
-      version: 3.3.6
+      version: 3.3.7
   template-cross:
     cross:
       js:
         extends: template-js
       jvm:
-        extends: template-common
+        extends: template-jvm
   template-js:
     platform:
       jsNodeVersion: 21.7.2
-      jsVersion: 1.20.1
+      jsVersion: 1.20.2
       name: js
     scala:
       options: -Wnonunit-statement -Wunused:explicits -Wunused:implicits -Wunused:imports
-        -Wunused:locals -Wunused:params //-Wconf:any:warning-verbose -Wvalue-discard
+        -Wunused:locals -Wunused:params -Wconf:any:warning-verbose -Wvalue-discard
         -Ykind-projector -deprecation -encoding utf8 -feature -language:experimental.macros
         -language:higherKinds -unchecked
       strict: true
-      version: 3.3.6
+      version: 3.3.7

@@ -1,7 +1,7 @@
 package net.walend.duck.front
 
 import org.scalajs.dom.html.Document
-import org.scalajs.dom.{Position, PositionError}
+import org.scalajs.dom.Position
 import cats.effect.{IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.GeoPoint
 

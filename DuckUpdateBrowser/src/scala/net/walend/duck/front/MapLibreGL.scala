@@ -1,13 +1,11 @@
 package net.walend.duck.front
 
-import cats.effect.implicits.*
 import cats.effect.kernel.Temporal
 import cats.effect.std.{AtomicCell, Console}
 import cats.effect.{Async, IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateService, GeoPoint}
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary
-import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
 import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, LineString}
 import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
