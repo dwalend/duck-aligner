@@ -42,7 +42,7 @@ case class EventStore[F[_]: Async](cell:AtomicCell[F,List[DuckEvent]]):
   def sendPositionAndGetUpdates(position: GeoPoint, client: DuckUpdateService[F], duckId: DuckId):F[List[DuckEvent]] =
     for
       event <- nextNumber.map(DuckEvent.duckPositionEvent(_,duckId,position))
-      peo <- client.proposeEvents(List[DuckEvent](event))
+      peo <- client.proposeEvents(List[DuckEvent](event))//todo throws main.js:3830 scala.scalajs.js.JavaScriptException: TypeError: Failed to fetch
       allEvents <- insertOrRescueServer(peo.updates,event,client)
     yield allEvents
 

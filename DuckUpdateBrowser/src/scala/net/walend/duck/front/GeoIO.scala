@@ -17,7 +17,7 @@ case class GeoIO(document: Document):
   def positionResource(): Resource[IO, GeoPoint] = position().toResource
 
   def position(): IO[GeoPoint] = IO.async_ { (cb: Either[Throwable, GeoPoint] => Unit) =>
-    geolocation.getCurrentPosition(
+    geolocation.getCurrentPosition(  //todo throws 
       p => cb(Right(p.toGeoPoint)),
       pe => cb(Left(new RuntimeException(pe.toString))) //todo better exception
     )
