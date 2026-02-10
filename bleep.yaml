@@ -68,6 +68,8 @@ projects:
     - build.bleep::bleep-model:${BLEEP_VERSION}
     - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.46
     extends: template-jvm
+  MapLibreGlScalablyTyped:
+    extends: template-js
   TestFatJar:
     dependencies: org.typelevel::cats-effect:3.6.3
     extends: template-jvm
@@ -112,6 +114,9 @@ scripts:
     project: BleepScripts
   stop-ec2:
     main: bleep.scripts.aws.TerminateEc2Machine
+    project: BleepScripts
+  stc:
+    main: bleep.scripts.scalablytyped.ScalablyTypedGenerator
     project: BleepScripts
 templates: #todo template-common
   template-common:
