@@ -38,7 +38,7 @@ Here's the sketch of a plan:
 * * https://medium.com/@roy11manisha/javascript-in-ios-native-app-223aa17428f3 - package a javascript app for the app store
 * * https://scriptable.app/ - alternative to Ionic Capacitor that may be easier to shake out problems
 * - [ ] (2) Duck svg studio 
-* - [ ] (3) Use Scalablytyped for MapLibreGL from Bleep instead of mill
+* - [x] (3) Use Scalablytyped for MapLibreGL from Bleep instead of mill
 * - [ ] (4) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
 * - [ ] (5) Bleep plugin to create an AMI with the jar
 * - [ ] (6) Bleep plugin to start the AMI with the jar on EC2

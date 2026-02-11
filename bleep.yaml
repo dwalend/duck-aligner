@@ -24,8 +24,9 @@ projects:
     - org.creativescala::doodle:0.33.0
     - org.http4s::http4s-dom:0.2.12
     - org.scala-js::scalajs-dom:2.8.1
-    - org.scalablytyped:maplibre-gl_sjs1_3:5.6.0-01fc1f
-    dependsOn: DuckUpdateSmithy
+    dependsOn:
+      - DuckUpdateSmithy
+      - MapLibreGlScalablyTyped
     extends: template-js
     platform:
       mainClass: net.walend.duck.front.Main
@@ -70,6 +71,14 @@ projects:
     extends: template-jvm
   MapLibreGlScalablyTyped:
     extends: template-js
+    dependencies:
+      - org.scala-js::scalajs-dom:2.3.0
+      - com.olvind::scalablytyped-runtime:2.4.2
+    sourcegen:
+      main: bleep.scripts.scalablytyped.ScalablyTypedGenerator
+      project: BleepScripts
+    scala:
+      options: -nowarn
   TestFatJar:
     dependencies: org.typelevel::cats-effect:3.6.3
     extends: template-jvm
