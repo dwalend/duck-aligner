@@ -7,12 +7,12 @@ import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckInfo, DuckUpdateServic
 import cats.implicits.*
 import org.scalablytyped.runtime.StringDictionary
 import org.scalajs.dom.HTMLElement
-import typings.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, LineString}
-import typings.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
-import typings.maplibreGl.mod.{MapOptions, MarkerOptions}
-import typings.maplibreMaplibreGlStyleSpec.anon.{Lineblur, Linecap}
-import typings.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings
-import typings.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
+import MapLibreGlScalablyTyped.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, LineString}
+import MapLibreGlScalablyTyped.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
+import MapLibreGlScalablyTyped.maplibreGl.mod.{MapOptions, MarkerOptions}
+import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.anon.{Lineblur, Linecap}
+import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings
+import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
