@@ -42,6 +42,7 @@ Here's the sketch of a plan:
 * handle user login and authentication
 * * Command-line app/bleep script to start
 * * * Send SMS text message
+* * * Device is part of duck-line ID, not just duck name/duck ID. (Track David - iPhone separate from David - Laptop)
 * * * Start duck aligner
 * * Switch from AWS Java library to minimal API (from smithy spec)
 * * Run on AWS Lambda - via command line app
