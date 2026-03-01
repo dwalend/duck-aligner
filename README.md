@@ -32,23 +32,41 @@ Here's the sketch of a plan:
 
 * Mostly eat what amazon puts on the plate, build the system up by getting things going, then take on the biggest risks - least familiarity for me - first. Numbers indicate order I plan to chip away at the project.
                
-* - [ ] (1) Mac OS-native version Package javascript to run as an app on mac OS
-* * See https://github.com/ionic-team/capacitor?tab=readme-ov-file - library/container to host a javascript app
-* * https://javascript.plainenglish.io/i-replaced-my-native-ios-app-with-a-cross-platform-web-app-and-no-one-noticed-1653901ce244 - article from someone who's happy with Ionic Capacitor
-* * https://medium.com/@roy11manisha/javascript-in-ios-native-app-223aa17428f3 - package a javascript app for the app store
-* * https://scriptable.app/ - alternative to Ionic Capacitor that may be easier to shake out problems
 * - [ ] (2) Duck svg studio 
 * - [x] (3) Use Scalablytyped for MapLibreGL from Bleep instead of mill
 * - [ ] (4) Bleep smithy AWS plugin - and update it to generate the code using the new facilities
 * - [ ] (5) Bleep plugin to create an AMI with the jar
 * - [ ] (6) Bleep plugin to start the AMI with the jar on EC2
 * - [ ] (7) Start it from an AWS Lambda
-* send SMS text messages to invite other people to the location sharing service
+* - [ ] (1) send SMS text messages to invite other people to the location sharing service
 * handle user login and authentication
-
-* * It'll only need to serve about 2 requests per minute per user ~ 240 requests an hour for most uses
+* * Command-line app/bleep script to start
+* * * Send SMS text message
+* * * Start duck aligner
+* * Switch from AWS Java library to minimal API (from smithy spec)
+* * Run on AWS Lambda - via command line app
+* * Compile to native
+* * UI to start new duck aligner
+* * * It'll only need to serve about 2 requests per minute per user ~ 240 requests an hour for most uses
 * * That might mean compiling it to scala native to fit on the tiny server
 * * - [ ] (4.4) share about smithy in bleep
+
+
+* Better UI
+* Determine if javascipt-based UI is the way to go for all environments or not. If so:
+* * Move from Scalablytyped for MapLibreGL to a custom mapping
+* * Mac OS-native version Package javascript to run as an app on mac OS
+* * * See https://github.com/ionic-team/capacitor?tab=readme-ov-file - library/container to host a javascript app
+* * * https://javascript.plainenglish.io/i-replaced-my-native-ios-app-with-a-cross-platform-web-app-and-no-one-noticed-1653901ce244 - article from someone who's happy with Ionic Capacitor
+* * * https://medium.com/@roy11manisha/javascript-in-ios-native-app-223aa17428f3 - package a javascript app for the app store
+* * * https://scriptable.app/ - alternative to Ionic Capacitor that may be easier to shake out problems
+* * Same for Android
+* If not - create and coordinate common features for all
+* * Move from Scalablytyped for MapLibreGL to a custom mapping for javscript / browser
+* * Create a UI for Android
+* * * Android device for hacking
+* * * Can this be in Scala? 
+* * Create a UI for iPhone in Swift
 
 * - [x] Use scalajs to build a web app
 * *  Make it look like an app https://matt.might.net/articles/how-to-native-iphone-ipad-apps-in-javascript/
