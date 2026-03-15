@@ -2,12 +2,10 @@ package net.walend.duck.front
 
 import cats.implicits.*
 import calico.IOWebApp
-import calico.html.io.{div, input, label, onInput, placeholder, span}
 import cats.effect.{FiberIO, IO, Resource}
 import fs2.dom.{HtmlDivElement, HtmlElement}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint}
 import fs2.Stream
-import fs2.concurrent.SignallingRef
 import org.http4s.Uri
 import smithy4s.http.UnknownErrorResponse
 
@@ -38,7 +36,6 @@ object Main extends IOWebApp:
 
 
   def render: Resource[IO, HtmlElement[IO]] =
-    import calico.html.io.{*, given}
     //todo try delaying creating the map - do it from a UI widget - todo then add the div("map") here
     for
       client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
@@ -49,7 +46,6 @@ object Main extends IOWebApp:
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
       duckMapUpdater = DuckMapUpdater(client,eventStore,duckId)
       appDiv <- callDucks(duckMapUpdater)//div("") //todo eventually make this a control overlay
-//      _ <- duckMapUpdater.startUpdates()  //todo put this behind a button in the app - todo then add the div("map")
     yield
       println("See ducks!")
       appDiv
@@ -58,9 +54,20 @@ object Main extends IOWebApp:
 
   def callDucks(duckMapUpdater:DuckMapUpdater): Resource[IO, HtmlDivElement[IO]] =
     import calico.html.io.{*, given}
+    import calico.syntax.*
+
+    val startMapButton = button(onClick(duckMapUpdater.updateForever()), "Click me")
 
     div(
-      button(onClick(duckMapUpdater.updateForever()), "Click me")
+/*
+      div(
+        idAttr := "map",
+        styleAttr := "min-height: 90%;",
+        "map"
+      ),
+
+ */
+      startMapButton
     )
     /*
     SignallingRef[IO].of("world").toResource.flatMap { name =>

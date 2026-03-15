@@ -162,7 +162,7 @@ object MapLibreGL:
       Async[F].blocking {
         new MapLibreMap(new MapOptions {
           style = styleUrl
-          var container = "map"
+          var container = "app" //put it in the top-level app div
           center = (c.longitude, c.latitude)
           zoom = 7 //7 is about a 3-hour drive from the center
         }.setAttributionControlUndefined)
