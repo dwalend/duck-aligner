@@ -14,8 +14,6 @@ import net.walend.duckaligner.duckupdates.v0.GeoPoint
 case class GeoIO(document: Document):
   private val geolocation = document.defaultView.navigator.geolocation
 
-  def positionResource(): Resource[IO, GeoPoint] = position().toResource
-
   def position(): IO[GeoPoint] = IO.async_ { (cb: Either[Throwable, GeoPoint] => Unit) =>
     geolocation.getCurrentPosition(  //todo throws 
       p => cb(Right(p.toGeoPoint)),
