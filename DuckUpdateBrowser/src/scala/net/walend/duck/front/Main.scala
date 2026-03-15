@@ -25,7 +25,7 @@ object Main extends IOWebApp:
 
   case class DuckMapUpdater(client:DuckUpdateService[IO],eventStore: EventStore[IO],duckId: DuckId):
 
-    def startUpdates(): Resource[IO, Unit] =
+    private def startUpdates(): Resource[IO, Unit] =
       val document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       val geoIO: GeoIO = GeoIO(document)
 
@@ -33,6 +33,8 @@ object Main extends IOWebApp:
         _ <- startMap(geoIO, client, eventStore, document)
         _ <- startPinger(geoIO, client, eventStore, duckId)
       yield ()
+
+    def updateForever(): IO[Nothing] = startUpdates().useForever
 
 
   def render: Resource[IO, HtmlElement[IO]] =
@@ -46,31 +48,35 @@ object Main extends IOWebApp:
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
       duckMapUpdater = DuckMapUpdater(client,eventStore,duckId)
-      appDiv <- callDucks//div("") //todo eventually make this a control overlay
-      _ <- duckMapUpdater.startUpdates()  //todo put this behind a button in the app - todo then add the div("map")
+      appDiv <- callDucks(duckMapUpdater)//div("") //todo eventually make this a control overlay
+//      _ <- duckMapUpdater.startUpdates()  //todo put this behind a button in the app - todo then add the div("map")
     yield
       println("See ducks!")
       appDiv
 
 
 
-  def callDucks: Resource[IO, HtmlDivElement[IO]] =
+  def callDucks(duckMapUpdater:DuckMapUpdater): Resource[IO, HtmlDivElement[IO]] =
     import calico.html.io.{*, given}
 
-    SignallingRef[IO].of("world").toResource.flatMap { name =>
     div(
-      label("Your name: "),
-      input.withSelf { self =>
-        (
-          placeholder := "Enter your name here",
-          // here, input events are run through the given Pipe
-          // this starts background fibers within the lifecycle of the <input> element
-          onInput --> (_.foreach(_ => self.value.get.flatMap(name.set)))
-        )
-      },
-      span(" Hello, ", name.map(_.toUpperCase))
+      button(onClick(duckMapUpdater.updateForever()), "Click me")
     )
-  }
+    /*
+    SignallingRef[IO].of("world").toResource.flatMap { name =>
+      div(
+        label("Your name: "),
+        input.withSelf { self =>
+          (
+            placeholder := "Enter your name here",
+            // here, input events are run through the given Pipe
+            // this starts background fibers within the lifecycle of the <input> element
+            onInput --> (_.foreach(_ => self.value.get.flatMap(name.set)))
+          )
+        },
+        span(" Hello, ", name.map(_.toUpperCase))
+      )
+    } */
 
   private def duckNameFromUriQuery(document:org.scalajs.dom.html.Document):String =
     val uri = Uri.unsafeFromString(document.documentURI)
