@@ -4,7 +4,7 @@ import fs2.Stream
 import cats.implicits.*
 import cats.effect.{FiberIO, IO, Resource}
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint}
-import org.scalajs.dom.window.window
+import org.scalajs.dom.HTMLDocument
 import smithy4s.http.UnknownErrorResponse
 
 import scala.concurrent.duration.DurationInt
@@ -15,28 +15,26 @@ import scala.concurrent.duration.DurationInt
  * @author David Walend
  * @since v0.0.0
  */
-case class DuckMapUpdater(client: DuckUpdateService[IO], eventStore: EventStore[IO], duckId: DuckId):
+case class DuckMapUpdater(
+                           client: DuckUpdateService[IO], 
+                           eventStore: EventStore[IO], 
+                           document: HTMLDocument,
+                           geoIO: GeoIO , 
+                           duckId: DuckId
+                         ):
 
   private def startUpdates(): Resource[IO, Unit] =
-    val document = window.document//.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
-    val geoIO: GeoIO = GeoIO(document)
-
     for
-      _ <- startMap(geoIO, client, eventStore, document)
-      _ <- startPinger(geoIO, client, eventStore, duckId)
+      _ <- startMap()
+      _ <- startPinger()
     yield ()
 
   def updateForever(): IO[Nothing] = startUpdates().useForever
 
-  private def startMap(
-                        geoIO: GeoIO,
-                        client: DuckUpdateService[IO],
-                        eventStore: EventStore[IO],
-                        document: org.scalajs.dom.html.Document,
-                      ): Resource[IO, FiberIO[Unit]] =
+  private def startMap(): Resource[IO, FiberIO[Unit]] =
     def mapUpdateStream(duckView: MapLibreDuckView) =
       Stream.fixedRateStartImmediately[IO](1.seconds, dampen = true)
-        .evalMap(_ => redrawMap(eventStore, duckView))
+        .evalMap(_ => redrawMap(duckView))
         .compile.drain.start
         .toResource
 
@@ -48,7 +46,6 @@ case class DuckMapUpdater(client: DuckUpdateService[IO], eventStore: EventStore[
       fiber
 
   private def redrawMap(
-                         eventStore: EventStore[IO],
                          duckView: MapLibreDuckView,
                        ): IO[Unit] =
     val p: IO[Unit] = for
@@ -64,23 +61,13 @@ case class DuckMapUpdater(client: DuckUpdateService[IO], eventStore: EventStore[
         x.printStackTrace() //todo remove when you haven't trapped a problem in a while
     }
     
-  private def startPinger(
-                           geoIO: GeoIO,
-                           client: DuckUpdateService[IO],
-                           eventStore: EventStore[IO],
-                           duckId: DuckId,
-                         ): Resource[IO, FiberIO[Unit]] =
+  private def startPinger(): Resource[IO, FiberIO[Unit]] =
     Stream.fixedRateStartImmediately[IO](10.seconds, dampen = true) //todo change to every 30 seconds -  or even variable control with some feedback
-      .evalMap(_ => ping(geoIO, client, eventStore, duckId))
+      .evalMap(_ => ping())
       .compile.drain.start
       .toResource
 
-  private def ping(
-                    geoIO: GeoIO,
-                    client: DuckUpdateService[IO],
-                    eventStore: EventStore[IO],
-                    duckId: DuckId,
-                  ): IO[Unit] =
+  private def ping(): IO[Unit] =
     val p: IO[Unit] = for
       position: GeoPoint <- geoIO.position()
       _ <- IO.println(s"Ping from ${position.latitude},${position.longitude}!")

@@ -5,6 +5,7 @@ import cats.effect.{IO, Resource}
 import fs2.dom.{HtmlDivElement, HtmlElement}
 import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
 import org.http4s.Uri
+import org.scalajs.dom.html.Document
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -16,30 +17,38 @@ object Main extends IOWebApp:
   def altMain(): Unit =
     println("in atlMain()")
     main(Array.empty)
-  
+
   def render: Resource[IO, HtmlElement[IO]] =
-    //todo try delaying creating the map - do it from a UI widget - todo then add the div("map") here
     for
       client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
       eventStore <- EventStore.create[IO]()
-      document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
+      document: Document = org.scalajs.dom.document
+      //      document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
       geoIO = GeoIO(document)
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
-      duckMapUpdater = DuckMapUpdater(client,eventStore,duckId)
-      appDiv <- callDucks(duckMapUpdater)//div("") //todo eventually make this a control overlay
+      duckMapUpdater = DuckMapUpdater(client,eventStore,document,geoIO,duckId)
+      appDiv <- callDucks(duckMapUpdater, document)
     yield
       println("See ducks!")
       appDiv
-  
-  private def callDucks(duckMapUpdater:DuckMapUpdater): Resource[IO, HtmlDivElement[IO]] =
+
+  private def callDucks(duckMapUpdater:DuckMapUpdater, document: Document): Resource[IO, HtmlDivElement[IO]] =
     import calico.html.io.{*, given}
     import calico.syntax.*
 
-    val startMapButton = button(onClick(duckMapUpdater.updateForever()), "Click me")
+    def emptyAppDiv: IO[Unit] =
+      IO(document.getElementById("app")).map {
+        case el: org.scalajs.dom.HTMLDivElement => el.innerHTML = ""
+        case _ => // handle case where element is not found
+      }
+
+    def switchToDuckMapUpdater = emptyAppDiv *> duckMapUpdater.updateForever()
+
+    val startMapButton = button(onClick(switchToDuckMapUpdater), "Click me")
 
     div(
-/*
+/*   //todo how to do style
       div(
         idAttr := "map",
         styleAttr := "min-height: 90%;",
@@ -50,6 +59,7 @@ object Main extends IOWebApp:
       startMapButton
     )
     /*
+    //todo fill in an app with behavior
     SignallingRef[IO].of("world").toResource.flatMap { name =>
       div(
         label("Your name: "),
