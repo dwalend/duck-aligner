@@ -15,8 +15,8 @@ object StaticRoutes {
     val dsl = new Http4sDsl[F]{}
     import dsl.*
     HttpRoutes.of[F] {
-      case request@GET -> Root / "static" / "hello.html" =>
-        StaticFile.fromResource("hello.html", Option(request))
+      case request@GET -> Root / "static" / "map.html" =>
+        StaticFile.fromResource("map.html", Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
       case request@GET -> Root / "static" / "main.js" =>
         //./.bleep/builds/normal/.bloop/DuckUpdateBrowser/

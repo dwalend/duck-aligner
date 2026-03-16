@@ -169,10 +169,10 @@ object MapLibreGL:
       }
 
     def waitToLoad[F[_] : Async : Console](mapLibreMap: MapLibreMap):F[Unit] = {
-      Async[F].blocking(mapLibreMap.loaded())
+      Async[F].blocking(mapLibreMap.loaded()) //todo is there a way to be signaled?
         .flatMap{ loaded =>
           if(loaded) Async[F].unit
-          else Console[F].println(s"Map not yet loaded.") *> Temporal[F].sleep(200.milliseconds) *> waitToLoad(mapLibreMap)
+          else Console[F].println(s"Map not yet loaded.") *> Temporal[F].sleep(1.second) *> waitToLoad(mapLibreMap)
         }
     }
 
