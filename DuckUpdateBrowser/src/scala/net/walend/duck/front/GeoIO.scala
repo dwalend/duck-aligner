@@ -2,7 +2,7 @@ package net.walend.duck.front
 
 import org.scalajs.dom.html.Document
 import org.scalajs.dom.Position
-import cats.effect.{IO, Resource}
+import cats.effect.IO
 import net.walend.duckaligner.duckupdates.v0.GeoPoint
 
 /**

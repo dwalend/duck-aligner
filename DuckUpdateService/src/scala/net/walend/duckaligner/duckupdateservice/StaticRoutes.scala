@@ -18,6 +18,9 @@ object StaticRoutes {
       case request@GET -> Root / "static" / "map.html" =>
         StaticFile.fromResource("map.html", Option(request))
           .getOrElseF(NotFound()) // In case the file doesn't exist
+      case request@GET -> Root / "static" / "duckcall.html" =>
+        StaticFile.fromResource("duckcall.html", Option(request))
+          .getOrElseF(NotFound()) // In case the file doesn't exist
       case request@GET -> Root / "static" / "main.js" =>
         //./.bleep/builds/normal/.bloop/DuckUpdateBrowser/
         StaticFile.fromResource("main.js", Option(request))
