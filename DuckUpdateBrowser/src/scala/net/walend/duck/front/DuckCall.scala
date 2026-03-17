@@ -3,7 +3,6 @@ package net.walend.duck.front
 import calico.IOWebApp
 import cats.effect.{IO, Resource}
 import fs2.dom.{HtmlDivElement, HtmlElement}
-import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
 import org.http4s.Uri
 import org.scalajs.dom.html.Document
 
@@ -18,34 +17,38 @@ object DuckCall extends IOWebApp:
     println("in atlMain()")
     main(Array.empty)
 
-  def render: Resource[IO, HtmlElement[IO]] =
+  def render: Resource[IO, HtmlElement[IO]] = {
+    val document: Document = org.scalajs.dom.document
+    val duckName = duckNameFromUriQuery(document) //todo send via proposing an event
+
     for
-      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
-      eventStore <- EventStore.create[IO]()
-      document: Document = org.scalajs.dom.document
-      //      document = window.document.asInstanceOf[org.scalajs.dom.html.Document] //todo should not need to cast
-      geoIO = GeoIO(document)
-      duckName = duckNameFromUriQuery(document) //todo send via proposing an event
-      duckId <- eventStore.sendDuckInfo(duckName,client).toResource
-      duckMapUpdater = DuckMapUpdater(client,eventStore,document,geoIO,duckId)
-      appDiv <- callDucks(duckMapUpdater, document)
+//      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
+      appDiv <- callDucks()
     yield
       println("See ducks!")
       appDiv
+  }
 
-  private def callDucks(duckMapUpdater:DuckMapUpdater, document: Document): Resource[IO, HtmlDivElement[IO]] =
+  private def callDucks(): Resource[IO, HtmlDivElement[IO]] =
     import calico.html.io.{*, given}
     import calico.syntax.*
 
+    /*
     def emptyAppDiv: IO[Unit] =
       IO(document.getElementById("app")).map {
         case el: org.scalajs.dom.HTMLDivElement => el.innerHTML = ""
         case _ => // handle case where element is not found
       }
+    */
 
-    def switchToDuckMapUpdater = emptyAppDiv *> duckMapUpdater.updateForever()
+    val startMapButton = button(onClick --> (_.foreach { _ =>
+      for {
+        _ <- IO.println("Starting navigation...")
+        _ <- window.location.assign("map.html?duckName=David") //last switch the view to a server
+        _ <- IO.println("This might never run!") // Risky!
+      } yield ()
+    }), "Duck Call")
 
-    val startMapButton = button(onClick(switchToDuckMapUpdater), "Click me")
 
     div(
 /*   //todo how to do style

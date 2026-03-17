@@ -23,7 +23,7 @@ case class DuckMapUpdater(
                            duckId: DuckId
                          ):
 
-  private def startUpdates(): Resource[IO, Unit] =
+  def startUpdates(): Resource[IO, Unit] =
     for
       _ <- startMap()
       _ <- startPinger()
