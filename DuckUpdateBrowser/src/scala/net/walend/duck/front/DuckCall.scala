@@ -2,9 +2,9 @@ package net.walend.duck.front
 
 import calico.IOWebApp
 import cats.effect.{IO, Resource}
+import fs2.concurrent.SignallingRef
 import fs2.dom.{HtmlDivElement, HtmlElement}
-import org.http4s.Uri
-import org.scalajs.dom.html.Document
+//import org.scalajs.dom.html.Document
 
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -18,49 +18,63 @@ object DuckCall extends IOWebApp:
     main(Array.empty)
 
   def render: Resource[IO, HtmlElement[IO]] = {
-    val document: Document = org.scalajs.dom.document
-    val duckName = duckNameFromUriQuery(document) //todo send via proposing an event
+//    val document: Document = org.scalajs.dom.document
+    //val duckName = duckNameFromUriQuery(document) //todo send via proposing an event
 
     for
 //      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
       appDiv <- callDucks()
     yield
-      println("See ducks!")
+      println("Call ducks!")
       appDiv
   }
 
   private def callDucks(): Resource[IO, HtmlDivElement[IO]] =
     import calico.html.io.{*, given}
-    import calico.syntax.*
+    import calico.*
+    import fs2.*
+    import fs2.dom.*
+    
+    def captureInput(
+                      self: HtmlInputElement[IO],
+                      sink: String => IO[Unit]
+                    ): Pipe[IO, Event[IO], Nothing] =
+      _.evalMap(_ => self.value.get).foreach(sink)
 
-    /*
-    def emptyAppDiv: IO[Unit] =
-      IO(document.getElementById("app")).map {
-        case el: org.scalajs.dom.HTMLDivElement => el.innerHTML = ""
-        case _ => // handle case where element is not found
-      }
-    */
+    def inputText(placeholderText:String): Resource[IO, (SignallingRef[IO, String], HtmlInputElement[IO])] =
+      for
+        text <- SignallingRef[IO].of("").toResource
+        htmlInput <- input.withSelf { self =>
+          (
+            typ := "text",
+            placeholder := placeholderText,
+            //todo pattern for a duck name or an sms text number
+            onInput --> captureInput(self, text.set)
+          )
+        }
+      yield (text,htmlInput)
 
-    val startMapButton = button(onClick --> (_.foreach { _ =>
-      for {
-        _ <- IO.println("Starting navigation...")
-        _ <- window.location.assign("map.html?duckName=David") //last switch the view to a server
-        _ <- IO.println("This might never run!") // Risky!
-      } yield ()
-    }), "Duck Call")
+    def startMapButton(duckNameRef:SignallingRef[IO, String]): Resource[IO, HtmlButtonElement[IO]] =
+      button(onClick --> (_.foreach { _ =>
+        for
+          duckName <- duckNameRef.get
+          _ <- IO.println("About to load a new file")
+          _ <- window.location.assign(s"map.html?duckName=$duckName") //load a new file in the browser
+          _ <- IO.println("This might never run") // Doesn't seem to happen
+        yield ()
+      }),
+        "Call Ducks"
+      )
 
+    for
+      duckNameInput <- inputText("Duck Name")
+      button <- startMapButton(duckNameInput._1)
+      component <- div(
+        duckNameInput._2,
+        button
+      )
+    yield component
 
-    div(
-/*   //todo how to do style
-      div(
-        idAttr := "map",
-        styleAttr := "min-height: 90%;",
-        "map"
-      ),
-
- */
-      startMapButton
-    )
     /*
     //todo fill in an app with behavior
     SignallingRef[IO].of("world").toResource.flatMap { name =>
@@ -77,7 +91,29 @@ object DuckCall extends IOWebApp:
         span(" Hello, ", name.map(_.toUpperCase))
       )
     } */
-
+/*
   private def duckNameFromUriQuery(document:org.scalajs.dom.html.Document):String =
     val uri = Uri.unsafeFromString(document.documentURI)
     uri.query.pairs.toMap.apply("duckName").get
+
+ */
+
+/*   //todo how to do style
+      div(
+        idAttr := "map",
+        styleAttr := "min-height: 90%;",
+        "map"
+      ),
+
+ */
+
+
+/*
+def emptyAppDiv: IO[Unit] =
+  IO(document.getElementById("app")).map {
+    case el: org.scalajs.dom.HTMLDivElement => el.innerHTML = ""
+    case _ => // handle case where element is not found
+  }
+*/
+
+
