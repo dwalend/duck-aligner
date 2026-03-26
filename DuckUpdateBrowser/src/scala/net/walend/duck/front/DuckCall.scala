@@ -41,6 +41,7 @@ object DuckCall extends IOWebApp:
                     ): Pipe[IO, Event[IO], Nothing] =
       _.evalMap(_ => self.value.get).foreach(sink)
 
+    //todo pattern for a duck name or an sms text number
     def inputText(placeholderText:String): Resource[IO, (SignallingRef[IO, String], HtmlInputElement[IO])] =
       for
         text <- SignallingRef[IO].of("").toResource
@@ -48,11 +49,20 @@ object DuckCall extends IOWebApp:
           (
             typ := "text",
             placeholder := placeholderText,
-            //todo pattern for a duck name or an sms text number
             onInput --> captureInput(self, text.set)
           )
         }
       yield (text,htmlInput)
+
+    def sendTextButton(duckNameRef:SignallingRef[IO, String]) = button(
+      onClick --> (_.foreach { _ =>
+        for
+          duckName <- duckNameRef.get
+          _ <- window.location.assign(s"sms:+11234567890?body=Hello%20$duckName")
+        yield()
+      }),
+      "Call Duck"
+    )
 
     def startMapButton(duckNameRef:SignallingRef[IO, String]): Resource[IO, HtmlButtonElement[IO]] =
       button(onClick --> (_.foreach { _ =>
@@ -60,18 +70,22 @@ object DuckCall extends IOWebApp:
           duckName <- duckNameRef.get
           _ <- IO.println("About to load a new file")
           _ <- window.location.assign(s"map.html?duckName=$duckName") //load a new file in the browser
-          _ <- IO.println("This might never run") // Doesn't seem to happen
+          _ <- IO.println("This might not run") // Seems to happen
         yield ()
       }),
-        "Call Ducks"
+        "Join Ducks"
       )
 
     for
       duckNameInput <- inputText("Duck Name")
-      button <- startMapButton(duckNameInput._1)
+      //todo add an sms number input
+      //todo add a message text input with default text "Duck with me"
       component <- div(
         duckNameInput._2,
-        button
+        sendTextButton(duckNameInput._1),
+        div(
+          startMapButton(duckNameInput._1)
+        )
       )
     yield component
 
