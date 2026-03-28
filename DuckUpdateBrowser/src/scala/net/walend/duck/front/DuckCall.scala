@@ -23,7 +23,7 @@ object DuckCall extends IOWebApp:
 
     for
 //      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
-      appDiv <- callDucks()
+      appDiv <- AddDuckWidget(window).render //callDucks() //
     yield
       println("Call ducks!")
       appDiv
