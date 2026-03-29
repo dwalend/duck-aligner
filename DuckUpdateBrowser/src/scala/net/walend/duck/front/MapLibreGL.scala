@@ -152,7 +152,8 @@ object MapLibreDuckView:
     cell.map(c => MapLibreDuckView(mapLibreMap,c,document)).toResource
 
 object MapLibreGL:
-  def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO]): Resource[IO, MapLibreMap] =
+  //todo div could be an HtmlElement instead of a string
+  def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO], divId:String): Resource[IO, MapLibreMap] =
 
     def mapLibreF[F[_] : Async](apiKey: String, c: GeoPoint): F[MapLibreMap] =
       val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
@@ -162,14 +163,14 @@ object MapLibreGL:
       Async[F].blocking {
         new MapLibreMap(new MapOptions {
           style = styleUrl
-          var container = "app" //put it in the top-level app div
+          var container: HTMLElement|String = divId 
           center = (c.longitude, c.latitude)
           zoom = 7 //7 is about a 3-hour drive from the center
         }.setAttributionControlUndefined)
       }
 
     def waitToLoad[F[_] : Async : Console](mapLibreMap: MapLibreMap):F[Unit] = {
-      Async[F].blocking(mapLibreMap.loaded()) //todo is there a way to be signaled?
+      Async[F].blocking(mapLibreMap.loaded()) //todo is there a way to be signaled instead of polling?
         .flatMap{ loaded =>
           if(loaded) Async[F].unit
           else Console[F].println(s"Map not yet loaded.") *> Temporal[F].sleep(1.second) *> waitToLoad(mapLibreMap)

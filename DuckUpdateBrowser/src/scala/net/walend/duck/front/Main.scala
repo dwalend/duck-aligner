@@ -26,7 +26,7 @@ object Main extends IOWebApp:
       geoIO = GeoIO(document)
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName,client).toResource
-      duckMapUpdater <- DuckMapUpdater(client,eventStore,document,geoIO,duckId).startUpdates()
+      duckMapUpdater <- DuckMapUpdater(client,eventStore,document,"app",geoIO,duckId).startUpdates()
       appDiv <- frontUI()
     yield
       println("See ducks!")

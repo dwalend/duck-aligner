@@ -19,8 +19,9 @@ case class DuckMapUpdater(
                            client: DuckUpdateService[IO], 
                            eventStore: EventStore[IO], 
                            document: HTMLDocument,
-                           geoIO: GeoIO , 
-                           duckId: DuckId
+                           rootElementId: String, //todo could be a rootElement HTMLElement
+                           geoIO: GeoIO, 
+                           duckId: DuckId,
                          ):
 
   def startUpdates(): Resource[IO, Unit] =
@@ -39,7 +40,7 @@ case class DuckMapUpdater(
         .toResource
 
     for
-      mapLibre <- MapLibreGL.mapLibreResource(geoIO, client)
+      mapLibre <- MapLibreGL.mapLibreResource(geoIO, client, rootElementId)
       duckView <- MapLibreDuckView.create(mapLibre, document)
       fiber <- mapUpdateStream(duckView)
     yield
