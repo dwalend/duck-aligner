@@ -19,23 +19,4 @@ object DuckMapApp extends IOWebApp:
     main(Array.empty)
 
   def render: Resource[IO, HtmlElement[IO]] =
-    for
-      client: DuckUpdateService[IO] <- DuckUpdateClient.duckUpdateClient[IO]
-      eventStore <- EventStore.create[IO]()
-      document: Document = org.scalajs.dom.document
-      geoIO = GeoIO(document)
-      duckName = duckNameFromUriQuery(document) //todo send via proposing an event
-      duckId <- eventStore.sendDuckInfo(duckName,client).toResource
-      duckMapUpdater <- DuckMapUpdater(client,eventStore,document,"app",geoIO,duckId).startUpdates()
-      appDiv <- frontUI()
-    yield
-      println("See ducks!")
-      appDiv
-
-  private def frontUI(): Resource[IO, HtmlDivElement[IO]] =
-    import calico.html.io.{*, given}
-    div("")
-
-  private def duckNameFromUriQuery(document:org.scalajs.dom.html.Document):String =
-    val uri = Uri.unsafeFromString(document.documentURI)
-    uri.query.pairs.toMap.apply("duckName").get
+    DuckMap("app").render(window)
