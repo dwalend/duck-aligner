@@ -9,8 +9,8 @@ import fs2.dom.{HtmlDivElement, HtmlElement}
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-@JSExportTopLevel("DuckCall")
-object DuckCall extends IOWebApp:
+@JSExportTopLevel("DuckCallApp")
+object DuckCallApp extends IOWebApp:
   @JSExport("main")
   @unused
   def altMain(): Unit =
@@ -69,7 +69,7 @@ object DuckCall extends IOWebApp:
         for
           duckName <- duckNameRef.get
           _ <- IO.println("About to load a new file")
-          _ <- window.location.assign(s"map.html?duckName=$duckName") //load a new file in the browser
+          _ <- window.location.assign(s"duckmap.html?duckName=$duckName") //load a new file in the browser
           _ <- IO.println("This might not run") // Seems to happen
         yield ()
       }),

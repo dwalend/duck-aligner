@@ -145,7 +145,7 @@ object StartTestDuckUpdateService extends BleepScript("StartTestDuckUpdateServic
     val getStageResponse = CommonAws.apiGatewayClient.getStage(getStageRequest)
     println(getStageResponse)
 
-    val url = s"https://$restApiId.execute-api.${CommonAws.region.id()}.amazonaws.com/$stageName/static/map.html?duckName=David"
+    val url = s"https://$restApiId.execute-api.${CommonAws.region.id()}.amazonaws.com/$stageName/static/duckmap.html?duckName=David"
     println(url)
     url
 

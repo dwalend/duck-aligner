@@ -33,7 +33,7 @@ case class AddDuckWidget(window: Window[IO]):
                              duckMessageRef: SignallingRef[IO, String],
                            ): Resource[IO, HtmlButtonElement[IO]] = {
     def linkToMap(uriToCurrent:Uri,duckName:String):String = {
-      val path = Path(uriToCurrent.path.segments.dropRight(1),true,false) / "map.html"
+      val path = Path(uriToCurrent.path.segments.dropRight(1),true,false) / "duckmap.html"
       val uri = uriToCurrent.withPath(path).removeQueryParam("duckName").withQueryParam("duckName",duckName)
 
       uri.toString

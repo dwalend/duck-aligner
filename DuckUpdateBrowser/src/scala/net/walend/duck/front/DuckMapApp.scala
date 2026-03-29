@@ -10,8 +10,8 @@ import org.scalajs.dom.html.Document
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-@JSExportTopLevel("Main")
-object Main extends IOWebApp:
+@JSExportTopLevel("DuckMapApp")
+object DuckMapApp extends IOWebApp:
   @JSExport("main")
   @unused
   def altMain(): Unit =
