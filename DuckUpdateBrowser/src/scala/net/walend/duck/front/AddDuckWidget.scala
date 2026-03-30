@@ -9,16 +9,15 @@ import fs2.dom.*
 import org.http4s.Uri
 import org.http4s.Uri.Path
 
-case class AddDuckWidget(window: Window[IO]):
+class AddDuckWidget(window: Window[IO]):
   def render: Resource[IO, HtmlElement[IO]] = {
 
     for
       duckNameInput <- inputTextBox("Duck Name")
       smsTextNumber <- inputTextBox("Sms Number")
       duckMessageInput <- inputTextBox("Duck with me") //duck message - eventually a text spinner
-      //todo add an sms number input
-      //todo add a message text input with default text "Duck with me"
       widget <- div(
+        cls := "maplibregl-ctrl maplibregl-ctrl-group",
         duckNameInput._1,
         smsTextNumber._1,
         duckMessageInput._1,
@@ -58,7 +57,7 @@ case class AddDuckWidget(window: Window[IO]):
     )
   }
 
-  //todo pattern for a duck name or an sms text number
+  //todo pattern for a duck name or an sms text number - is that the type field?
 //todo maybe this is a case class
   private def inputTextBox(placeholderText: String): Resource[IO, (HtmlInputElement[IO], SignallingRef[IO, String])] =
     for

@@ -9,10 +9,11 @@ import org.scalablytyped.runtime.StringDictionary
 import org.scalajs.dom.HTMLElement
 import MapLibreGlScalablyTyped.geojson.mod.{Feature, FeatureCollection, GeoJSON, GeoJsonProperties, Geometry, LineString}
 import MapLibreGlScalablyTyped.maplibreGl.global.maplibregl.{GeoJSONSource, Marker, Map as MapLibreMap}
-import MapLibreGlScalablyTyped.maplibreGl.mod.{MapOptions, MarkerOptions}
+import MapLibreGlScalablyTyped.maplibreGl.mod.{ControlPosition, IControl, Map1, MapOptions, MarkerOptions}
 import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.anon.{Lineblur, Linecap}
 import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.maplibreMaplibreGlStyleSpecStrings
 import MapLibreGlScalablyTyped.maplibreMaplibreGlStyleSpec.mod.{GeoJSONSourceSpecification, LayerSpecification, SourceSpecification}
+import fs2.dom.HtmlElement
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
@@ -152,8 +153,12 @@ object MapLibreDuckView:
     cell.map(c => MapLibreDuckView(mapLibreMap,c,document)).toResource
 
 object MapLibreGL:
-  //todo div could be an HtmlElement instead of a string
-  def mapLibreResource(geoIO: GeoIO, client: DuckUpdateService[IO], divId:String): Resource[IO, MapLibreMap] =
+  def mapLibreResource(
+                        geoIO: GeoIO, 
+                        client: DuckUpdateService[IO], 
+                        divId:String,   //todo div could be an HtmlElement instead of a string
+                        addDuck: HtmlElement[IO],
+                      ): Resource[IO, MapLibreMap] =
 
     def mapLibreF[F[_] : Async](apiKey: String, c: GeoPoint): F[MapLibreMap] =
       val mapStyle = "Standard"; // e.g., Standard, Monochrome, Hybrid, Satellite
@@ -169,13 +174,14 @@ object MapLibreGL:
         }.setAttributionControlUndefined)
       }
 
-    def waitToLoad[F[_] : Async : Console](mapLibreMap: MapLibreMap):F[Unit] = {
-      Async[F].blocking(mapLibreMap.loaded()) //todo is there a way to be signaled instead of polling?
-        .flatMap{ loaded =>
-          if(loaded) Async[F].unit
-          else Console[F].println(s"Map not yet loaded.") *> Temporal[F].sleep(1.second) *> waitToLoad(mapLibreMap)
-        }
-    }
+    def waitToLoad[F[_] : Async : Console](mapLibreMap: MapLibreMap):F[Unit] = 
+      Async[F].blocking(mapLibreMap.loaded()) //todo figure out how to listen to a load event
+        .flatMap { loaded =>
+          if (loaded)
+            Async[F].delay(mapLibreMap.addControl(new MapLibreGLWrapper(addDuck), ControlPosition.`top-right`)).void
+          else
+            Console[F].println(s"Map not yet loaded.") *> Temporal[F].sleep(1.second) *> waitToLoad(mapLibreMap)
+        }  
 
     val ml: IO[MapLibreMap] = for {
       apiKey <- client.mapLibreGlKey().map(_.key)
@@ -184,3 +190,37 @@ object MapLibreGL:
       _ <- waitToLoad[IO](mapLibre)
     } yield mapLibre
     ml.toResource
+
+class MapLibreGLWrapper(e: HtmlElement[IO]) extends js.Object with IControl {
+  private var container: HTMLElement = _
+ /**
+   * Register a control on the map and give it a chance to register event listeners
+   * and resources. This method is called by {@link Map#addControl}
+   * internally.
+   *
+   * @param map - the Map this control will be added to
+   * @returns The control's container element. This should
+   *          be created by the control and returned by onAdd without being attached
+   *          to the DOM: the map will insert the control's element into the DOM
+   *          as necessary.
+   */
+  override def onAdd(map: Map1): HTMLElement = {
+    val element = e.asInstanceOf[HTMLElement]
+    container = element
+    element
+  }
+
+  /**
+   * Unregister a control on the map and give it a chance to detach event listeners
+   * and resources. This method is called by {@link Map#removeControl}
+   * internally.
+   *
+   * @param map - the Map this control will be removed from
+   */
+  override def onRemove(map: Map1): Unit = {
+    if (container != null && container.parentNode != null) {
+      container.parentNode.removeChild(container)
+    }
+    container = null
+  }
+}

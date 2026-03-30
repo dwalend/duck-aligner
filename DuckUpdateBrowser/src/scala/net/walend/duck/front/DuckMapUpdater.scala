@@ -3,6 +3,7 @@ package net.walend.duck.front
 import fs2.Stream
 import cats.implicits.*
 import cats.effect.{FiberIO, IO, Resource}
+import fs2.dom.HtmlElement
 import net.walend.duckaligner.duckupdates.v0.{DuckId, DuckUpdateService, GeoPoint}
 import org.scalajs.dom.HTMLDocument
 import smithy4s.http.UnknownErrorResponse
@@ -22,6 +23,7 @@ case class DuckMapUpdater(
                            rootElementId: String, //todo could be a rootElement HTMLElement
                            geoIO: GeoIO, 
                            duckId: DuckId,
+                           addDuck: HtmlElement[IO],
                          ):
 
   def startUpdates(): Resource[IO, Unit] =
@@ -40,7 +42,7 @@ case class DuckMapUpdater(
         .toResource
 
     for
-      mapLibre <- MapLibreGL.mapLibreResource(geoIO, client, rootElementId)
+      mapLibre <- MapLibreGL.mapLibreResource(geoIO, client, rootElementId, addDuck)
       duckView <- MapLibreDuckView.create(mapLibre, document)
       fiber <- mapUpdateStream(duckView)
     yield

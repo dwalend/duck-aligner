@@ -10,7 +10,7 @@ import org.scalajs.dom.html.Document
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-case class DuckMap(divId:String):
+case class DuckMap(divId:String, addDuck:HtmlElement[IO]):
 
   def render(window: Window[IO]): Resource[IO, HtmlElement[IO]] =
     for
@@ -20,7 +20,7 @@ case class DuckMap(divId:String):
       geoIO = GeoIO(document)
       duckName = duckNameFromUriQuery(document) //todo send via proposing an event
       duckId <- eventStore.sendDuckInfo(duckName, client).toResource
-      duckMapUpdater <- DuckMapUpdater(client, eventStore, document, divId, geoIO, duckId).startUpdates()
+      duckMapUpdater <- DuckMapUpdater(client, eventStore, document, divId, geoIO, duckId, addDuck).startUpdates()
       appDiv <- frontUI(window)
     yield
       println("See ducks!")
