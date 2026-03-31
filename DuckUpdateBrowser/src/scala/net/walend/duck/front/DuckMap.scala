@@ -1,14 +1,10 @@
 package net.walend.duck.front
 
-import calico.IOWebApp
 import cats.effect.{IO, Resource}
-import fs2.dom.{HtmlDivElement, HtmlElement, Window}
+import fs2.dom.{HtmlElement, Window}
 import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
 import org.http4s.Uri
 import org.scalajs.dom.html.Document
-
-import scala.annotation.unused
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 case class DuckMap(divId:String, addDuck:HtmlElement[IO]):
 

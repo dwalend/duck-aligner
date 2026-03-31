@@ -5,10 +5,6 @@ import calico.html.io.{*, given}
 import cats.effect.{IO, Resource}
 import cats.implicits.catsSyntaxApplicativeError
 import fs2.dom.{HtmlDivElement, HtmlElement}
-import net.walend.duckaligner.duckupdates.v0.DuckUpdateService
-import org.http4s.Uri
-import org.scalajs.dom.html.Document
-
 import scala.annotation.unused
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 

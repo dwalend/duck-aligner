@@ -199,7 +199,7 @@ class MapLibreGLWrapper(e: HtmlElement[IO]) extends js.Object with IControl {
    * internally.
    *
    * @param map - the Map this control will be added to
-   * @returns The control's container element. This should
+   * @return The control's container element. This should
    *          be created by the control and returned by onAdd without being attached
    *          to the DOM: the map will insert the control's element into the DOM
    *          as necessary.
