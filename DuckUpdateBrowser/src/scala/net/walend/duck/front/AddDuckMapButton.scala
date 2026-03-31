@@ -24,21 +24,21 @@ case class AddDuckMapButton(window: Window[IO])://addDuckWidget: AddDuckWidget):
     for
       showPopup <- SignallingRef[IO].of(false).toResource
       popup <- div(
-        styleAttr := "display: none; position: absolute; z-index: 100; background: white; padding: 10px;",
-        // override display based on signal
-        styleAttr <-- showPopup.map(shown => if shown then "display: block; ..." else "display: none;"),
+        styleAttr <-- showPopup.map(shown => if shown then "display: block; z-index: 100; background: white; position: absolute;  padding: 10px; width: max-content; right: 0;" else "display: none;"),
         AddDuckWidget(window).render,
         button(
           onClick --> (_.foreach(_ => showPopup.set(false))),
           "Done"
         )
       )
+      callDucksButton <- button(
+        styleAttr <-- showPopup.map(shown => if shown then "display: none;" else "display: block;"),
+        onClick --> (_.foreach(_ => showPopup.set(true))),
+        "Call Ducks"
+      )
       widget <- div(
         cls := "maplibregl-ctrl maplibregl-ctrl-group",
-        button(
-          onClick --> (_.foreach(_ => showPopup.set(true))),
-          "Call Ducks"
-        ),
+        callDucksButton,
         popup
       )
     yield widget
