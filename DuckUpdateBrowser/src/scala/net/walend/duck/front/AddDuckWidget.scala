@@ -9,7 +9,7 @@ import fs2.dom.*
 import org.http4s.Uri
 import org.http4s.Uri.Path
 
-class AddDuckWidget(window: Window[IO]):
+case class AddDuckWidget(window: Window[IO]):
   def render: Resource[IO, HtmlElement[IO]] = {
 
     for
@@ -17,7 +17,7 @@ class AddDuckWidget(window: Window[IO]):
       smsTextNumber <- inputTextBox("Sms Number")
       duckMessageInput <- inputTextBox("Duck with me") //duck message - eventually a text spinner
       widget <- div(
-        cls := "maplibregl-ctrl maplibregl-ctrl-group",
+//        cls := "maplibregl-ctrl maplibregl-ctrl-group",
         duckNameInput._1,
         smsTextNumber._1,
         duckMessageInput._1,
@@ -137,3 +137,17 @@ map.addControl(myButton.asInstanceOf[js.Any], "top-right")
 
  */
 
+
+/*
+    A calico element anchored to the map (!)
+
+    for
+  popupElement <- myPopupWidget.render  // your calico popup content
+  _ <- Resource.eval(IO {
+    val popup = new maplibregl.Popup()
+      .setDOMContent(popupElement.asInstanceOf[HTMLElement])
+      .setLngLat((longitude, latitude))
+    popup.addTo(map)
+  })
+yield ()
+*/
