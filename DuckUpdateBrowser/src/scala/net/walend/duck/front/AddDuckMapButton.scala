@@ -8,17 +8,6 @@ import fs2.concurrent.*
 import fs2.dom.*
 
 case class AddDuckMapButton(window: Window[IO])://addDuckWidget: AddDuckWidget):
-  private def openAddDuckButton(
-                           ): Resource[IO, HtmlButtonElement[IO]] = {
-    button(
-      onClick --> (_.foreach { _ =>
-        for
-          _ <- IO.println("button pushed")
-        yield ()
-      }),
-      "Call Duck via SMS"
-    )
-  }
 
   def render: Resource[IO, HtmlElement[IO]] =
     for
