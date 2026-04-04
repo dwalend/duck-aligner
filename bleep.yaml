@@ -7,13 +7,13 @@ projects:
     dependencies:
     - build.bleep::bleep-core:${BLEEP_VERSION}
     - build.bleep::bleep-model:${BLEEP_VERSION}
-    - com.github.mwiede:jsch:2.27.8
-    - org.apache.ant:ant-jsch:1.10.15
+    - com.github.mwiede:jsch:2.28.0
+    - org.apache.ant:ant-jsch:1.10.16
     - org.scalablytyped.converter::cli:1.0.0-beta45
     - org.slf4j:slf4j-simple:2.0.17
-    - software.amazon.awssdk:apigateway:2.42.4
-    - software.amazon.awssdk:ec2:2.42.4
-    - software.amazon.awssdk:s3:2.42.4
+    - software.amazon.awssdk:apigateway:2.42.28
+    - software.amazon.awssdk:ec2:2.42.28
+    - software.amazon.awssdk:s3:2.42.28
     extends: template-jvm
   DuckStudio:
     dependencies: org.creativescala::doodle:0.34.0
@@ -36,9 +36,9 @@ projects:
     - org.http4s::http4s-ember-client:0.23.33
     - org.http4s::http4s-ember-server:0.23.33
     - org.slf4j:slf4j-simple:2.0.17
-    - org.typelevel::log4cats-core:2.7.1
-    - org.typelevel::log4cats-slf4j:2.7.1
-    - software.amazon.awssdk:geomaps:2.42.4
+    - org.typelevel::log4cats-core:2.8.0
+    - org.typelevel::log4cats-slf4j:2.8.0
+    - software.amazon.awssdk:geomaps:2.42.28
     dependsOn: DuckUpdateSmithy
     extends: template-jvm
     platform:
@@ -46,8 +46,8 @@ projects:
     resources: ../.bleep/builds/normal/.bloop/DuckUpdateBrowser/DuckUpdateBrowser-js
   DuckUpdateServiceTest:
     dependencies:
-    - org.scalameta::munit:1.2.3
-    - org.typelevel::munit-cats-effect:2.1.0
+    - org.scalameta::munit:1.2.4
+    - org.typelevel::munit-cats-effect:2.2.0
     dependsOn: DuckUpdateService
     extends: template-jvm
     isTestProject: true
@@ -56,8 +56,8 @@ projects:
       js: {}
       jvm: {}
     dependencies:
-    - com.disneystreaming.alloy:alloy-core:0.3.36
-    - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.48
+    - com.disneystreaming.alloy:alloy-core:0.3.38
+    - com.disneystreaming.smithy4s::smithy4s-http4s:0.18.50
     extends: template-cross
     sourcegen:
       main: bleep.scripts.smithy4s.GenerateSmithyScala
@@ -66,7 +66,7 @@ projects:
     dependencies:
     - build.bleep::bleep-core:${BLEEP_VERSION}
     - build.bleep::bleep-model:${BLEEP_VERSION}
-    - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.48
+    - com.disneystreaming.smithy4s:smithy4s-codegen_2.13:0.18.50
     extends: template-jvm
   MapLibreGlScalablyTyped:
     dependencies:
@@ -79,7 +79,7 @@ projects:
       main: bleep.scripts.scalablytyped.ScalablyTypedGenerator
       project: BleepScripts
   TestFatJar:
-    dependencies: org.typelevel::cats-effect:3.6.3
+    dependencies: org.typelevel::cats-effect:3.7.0
     extends: template-jvm
     platform:
       mainClass: net.walend.fatjar.Main

@@ -38,7 +38,8 @@ Here's the sketch of a plan:
 * - [ ] (5) Bleep plugin to create an AMI with the jar
 * - [ ] (6) Bleep plugin to start the AMI with the jar on EC2
 * - [ ] (7) Start it from an AWS Lambda
-* - [ ] (1) Duck Call - send SMS text messages to invite other people to the location sharing service 
+* - [x] (1) Duck Call - send SMS text messages to invite other people to the location sharing service 
+* Save and have a one-touch option for frequent calls
 * handle user login and authentication
 * * Command-line app/bleep script to start
 * * * Send SMS text message
