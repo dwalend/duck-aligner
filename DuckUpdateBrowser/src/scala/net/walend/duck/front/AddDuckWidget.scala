@@ -78,13 +78,6 @@ case class AddDuckWidget(window: Window[IO]):
     _.evalMap(_ => self.value.get).foreach(sink)
 
 
-/*
-def emptyAppDiv: IO[Unit] =
-  IO(document.getElementById("app")).map {
-    case el: org.scalajs.dom.HTMLDivElement => el.innerHTML = ""
-    case _ => // handle case where element is not found
-  }
-*/
 
 
 /*
